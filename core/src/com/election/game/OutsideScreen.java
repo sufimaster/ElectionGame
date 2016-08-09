@@ -1,7 +1,6 @@
 package com.election.game;
 
 import java.util.ArrayList;
-import java.util.List;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Keys;
@@ -19,20 +18,11 @@ import com.badlogic.gdx.maps.objects.RectangleMapObject;
 import com.badlogic.gdx.maps.objects.TextureMapObject;
 import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.maps.tiled.TmxMapLoader;
-import com.badlogic.gdx.math.Circle;
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Polygon;
 import com.badlogic.gdx.math.Polyline;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
-import com.badlogic.gdx.physics.box2d.Body;
-import com.badlogic.gdx.physics.box2d.BodyDef;
-import com.badlogic.gdx.physics.box2d.BodyDef.BodyType;
-import com.badlogic.gdx.physics.box2d.ChainShape;
-import com.badlogic.gdx.physics.box2d.CircleShape;
-import com.badlogic.gdx.physics.box2d.PolygonShape;
-import com.badlogic.gdx.physics.box2d.Shape;
-import com.badlogic.gdx.utils.Array;
 import com.election.game.camera.OrthographicCameraMovementWrapper;
 import com.election.game.render.DebugRenderer;
 import com.election.game.render.SpriteAndTiledRenderer;
@@ -55,7 +45,6 @@ public class OutsideScreen implements Screen, InputProcessor {
 	//boolean for switching between camera and character movement
 	private boolean moveCamera = false;
 
-	private boolean candidateInBoundaryRegion = false;
 	private boolean cameraAtMapEdge = false;
 	
 	private OrthographicCameraMovementWrapper camera;	
@@ -72,8 +61,7 @@ public class OutsideScreen implements Screen, InputProcessor {
 	
 	
 	public Rectangle gameSpace;
-	private boolean isCandOutofBoundary = false;
-	private int prevKeyCode;
+
 	
 	
 	public OutsideScreen(final ElectionGame gameObj) {
@@ -563,8 +551,6 @@ public class OutsideScreen implements Screen, InputProcessor {
 				break;
 		}
 		
-		
-		prevKeyCode = keycode;
 		
 		//moveCamera = false;
 
