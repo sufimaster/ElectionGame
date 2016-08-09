@@ -2,7 +2,10 @@ package com.election.game.camera;
 
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.math.Rectangle;
+import com.badlogic.gdx.math.Vector2;
 import com.election.game.Constants;
+import com.election.game.ElectionGame;
+import com.election.game.sprites.Candidate;
 
 public class OrthographicCameraMovementWrapper {
 	
@@ -15,6 +18,9 @@ public class OrthographicCameraMovementWrapper {
 	public boolean moveDown= false;
 	public boolean moveLeft= false;
 	public boolean moveRight= false;
+
+	//length of time it takes camera to snap to player position in seconds
+	private int timeToSnap = 2;
 	
 	
 		
@@ -33,6 +39,12 @@ public class OrthographicCameraMovementWrapper {
 		
 	}
 	
+	public void update(float delta, Candidate candidate){
+		Vector2 camSpeed = getSpeed(delta, candidate);
+		
+		source.translate(camSpeed.x*delta, camSpeed.y*delta);
+		syncRects();
+	}
 	
 	public void update(float delta){
 		
@@ -77,38 +89,17 @@ public class OrthographicCameraMovementWrapper {
 		
 	}
 
-	public void setMoveUp(boolean b) {
-		if( moveDown && b) moveDown = false;
+	
+	private Vector2 getSpeed(float delta, Candidate candidate){
+		Vector2 camCenter = new Vector2();
+		camCenter = this.cameraRect.getCenter(camCenter);
 		
-		moveUp = b;
-		
-	}
-
-	public void setMoveDown(boolean b) {
-		if( moveUp && b) moveUp = false;
-		moveDown = b;
-		
-		
-	}
-
-	public void setMoveRight(boolean b) {
-		if( moveLeft && b) moveLeft = false;
-		moveRight = b;
+		float xSpeed = ((Constants.CHAR_XSPEED * delta) + candidate.sprite.getX() - camCenter.x)/timeToSnap ;		
+		float ySpeed = ((Constants.CHAR_YSPEED * delta) + candidate.sprite.getY() - camCenter.y)/timeToSnap;
+						
+		return new Vector2(xSpeed, ySpeed);
 		
 		
 	}
 
-	public void setMoveLeft(boolean b) {
-		if( moveRight && b) moveRight = false;
-		moveLeft = b;
-				
-	}
-
-
-	//the camera is movable if one or more of the move flags is set
-	//otherwise, the camera has hit a boundary, or char isnt moving
-	public boolean isMovable() {
-
-		return moveUp || moveDown || moveLeft || moveRight;
-	}
 }

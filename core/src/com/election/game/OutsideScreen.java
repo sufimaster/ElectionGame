@@ -51,7 +51,6 @@ public class OutsideScreen implements Screen, InputProcessor {
 	private SpriteAndTiledRenderer mapRenderer;
 	
 	private TiledMap townMap;
-	private Matrix4 spriteBatchProjMatrix;
 	
 	private int mapPixelWidth;
 	private int mapPixelHeight;
@@ -69,9 +68,6 @@ public class OutsideScreen implements Screen, InputProcessor {
 		float w = Gdx.graphics.getWidth();
 		float h = Gdx.graphics.getHeight();
 
-		spriteBatchProjMatrix = ElectionGame.GAME_OBJ.batch.getProjectionMatrix();
-
-		//this.gameObj = gameObj;
 		
 		camera = new OrthographicCameraMovementWrapper(false, w, h);
 		//camera.source.setToOrtho(false, w, h);
@@ -311,7 +307,8 @@ public class OutsideScreen implements Screen, InputProcessor {
 	private void updateCamera(float delta){
 		
 		if(moveCamera){
-			camera.update(delta);
+			//send camera an update on candidates position so it can move faster to catchup
+			camera.update(delta, candidate);
 			mapRenderer.setView(camera.source);	
 		}
 		
@@ -470,26 +467,22 @@ public class OutsideScreen implements Screen, InputProcessor {
 		switch (keycode) {
 			case CANDIDATE_MOVE_W_KEY:
 				//candidate.moveY(-Gdx.graphics.getDeltaTime() );				
-				camera.setMoveUp(true);
 				candidate.setMoveUp(true);
 				break;
 				
 				
 			case CANDIDATE_MOVE_S_KEY:
 				//candidate.moveX(-Gdx.graphics.getDeltaTime() );
-				camera.setMoveDown(true);
 				candidate.setMoveDown(true);
 				break;
 			
 			case CANDIDATE_MOVE_A_KEY:
 				//candidate.moveX(Gdx.graphics.getDeltaTime() );
-				camera.setMoveLeft(true);
 				candidate.setMoveLeft(true);
 				break;	
 			
 			case CANDIDATE_MOVE_D_KEY:
 				//candidate.moveX(-Gdx.graphics.getDeltaTime() );
-				camera.setMoveRight(true);
 				candidate.setMoveRight(true);
 				break;	
 			case Keys.NUM_0:
@@ -524,23 +517,19 @@ public class OutsideScreen implements Screen, InputProcessor {
 
 		switch (keycode) {
 			case CANDIDATE_MOVE_W_KEY:
-				camera.setMoveUp( false );
 				candidate.setMoveUp(false);
 				break;
 				
 				
 			case CANDIDATE_MOVE_S_KEY:
-				camera.setMoveDown( false );
 				candidate.setMoveDown(false);
 				break;
 			
 			case CANDIDATE_MOVE_A_KEY:
-				camera.setMoveLeft( false );
 				candidate.setMoveLeft(false);
 				break;	
 			
 			case CANDIDATE_MOVE_D_KEY:
-				camera.setMoveRight( false );
 				candidate.setMoveRight(false);
 				break;	
 			case Keys.ESCAPE:
