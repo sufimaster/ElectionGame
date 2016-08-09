@@ -93,7 +93,7 @@ public class OrthographicCameraMovementWrapper {
 	private Vector2 getSpeed(float delta, Candidate candidate){
 		Vector2 camCenter = new Vector2();
 		camCenter = this.cameraRect.getCenter(camCenter);
-		
+				
 		float xSpeed = ((Constants.CHAR_XSPEED * delta) + candidate.sprite.getX() - camCenter.x)/timeToSnap ;		
 		float ySpeed = ((Constants.CHAR_YSPEED * delta) + candidate.sprite.getY() - camCenter.y)/timeToSnap;
 						
