@@ -178,7 +178,7 @@ public class OutsideScreen implements Screen, InputProcessor {
 	private void checkCameraBounds(float delta) {
 		
 		Rectangle candBound =  candidate.sprite.getBoundingRectangle();
-		/*
+		
 		Rectangle movementRegion = camera.boundsRect;
 		
 		
@@ -187,14 +187,27 @@ public class OutsideScreen implements Screen, InputProcessor {
 			if( !cameraAtMapEdge ){			
 				moveCamera = true;			
 				
-				Gdx.app.log(this.getClass().getName(), "Candidate is outside boundary region");
+				//Gdx.app.log(this.getClass().getName(), "Candidate is outside boundary region");
+			}else{
+				moveCamera = false;
 			}
 			
 		}else{
+			moveCamera = false;
 			cameraAtMapEdge = false;
-		}*/
+		}
 		
+		if(!gameSpace.contains(candBound)){
+			candidate.resetPosition();
+			moveCamera = false;
+		}
 		
+		if( !gameSpace.contains(camera.cameraRect)){
+			cameraAtMapEdge= true;
+			camera.resetCamera();
+		}
+		
+		/*
 			
 		//if candidate has gone into boundary region, start moving the camera and the character
 		
@@ -236,26 +249,7 @@ public class OutsideScreen implements Screen, InputProcessor {
 		}
 		
 		
-		
-		//TODO: this is the alternative check to see whether camera is within the game world
-		/*
-		Rectangle camRect = camera.cameraRect;
-		if( !gameSpace.contains(camRect)){
-			cameraAtMapEdge =true;
-			camera.source.position.set( camera.source.viewportWidth/2 , camera.source.position.y, 0);
-			
-			
-			//if at or passed left edge of gameworld - set camera center to viewport center
-			
-			//if at/passed right edge of gameworld - set camera so that right edge is along right border
-			
-			//if at/passed top edge - set camera so top edge is along top border
-			
-			//if at/passed bottom edge - set camera so bottom edge is along bottom border
-			
-		}*/
-		
-	
+
 		
 		//check to see if camera is within the game world
 		if( camera.source.position.x - camera.source.viewportWidth/2 <  0 ){
@@ -281,7 +275,7 @@ public class OutsideScreen implements Screen, InputProcessor {
 			//Gdx.app.log(this.getClass().getSimpleName(), "Camera has moved low");
 		}
 		
-		
+		*/
 		
 	}
 

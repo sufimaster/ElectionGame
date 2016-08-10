@@ -19,6 +19,8 @@ public class OrthographicCameraMovementWrapper {
 	public boolean moveLeft= false;
 	public boolean moveRight= false;
 
+	private Vector2 prevPosition;
+	
 	//length of time it takes camera to snap to player position in seconds
 	private int timeToSnap = 2;
 	
@@ -37,12 +39,22 @@ public class OrthographicCameraMovementWrapper {
 		boundsRect = new Rectangle(0, h*2, w*Constants.CAM_MOVE_SCREEN_PERCENTAGE, h*Constants.CAM_MOVE_SCREEN_PERCENTAGE);
 		boundsRect.setCenter(w/2,h/2);
 		
+		prevPosition = new Vector2(w/2, h/2);
+		
+	}
+	
+	
+	public void resetCamera(){
+		cameraRect.setCenter(prevPosition);
 	}
 	
 	public void update(float delta, Candidate candidate){
+		
+		prevPosition.set(source.position.x, source.position.y);
+		
 		Vector2 camSpeed = getSpeed(delta, candidate);
 		
-		source.translate(camSpeed.x*delta, camSpeed.y*delta);
+		source.translate((int)camSpeed.x*delta, (int)camSpeed.y*delta);
 		syncRects();
 	}
 	
@@ -91,11 +103,10 @@ public class OrthographicCameraMovementWrapper {
 
 	
 	private Vector2 getSpeed(float delta, Candidate candidate){
-		Vector2 camCenter = new Vector2();
-		camCenter = this.cameraRect.getCenter(camCenter);
+		Vector2 camCenter = new Vector2(source.position.x, source.position.y);
 				
-		float xSpeed = ((Constants.CHAR_XSPEED * delta) + candidate.sprite.getX() - camCenter.x)/timeToSnap ;		
-		float ySpeed = ((Constants.CHAR_YSPEED * delta) + candidate.sprite.getY() - camCenter.y)/timeToSnap;
+		float xSpeed = ((Constants.CHAR_XSPEED * delta) + candidate.sprite.getBoundingRectangle().getX() - camCenter.x)/timeToSnap ;		
+		float ySpeed = ((Constants.CHAR_YSPEED * delta) + candidate.sprite.getBoundingRectangle().getY() - camCenter.y)/timeToSnap;
 						
 		return new Vector2(xSpeed, ySpeed);
 		

@@ -2,6 +2,7 @@ package com.election.game.sprites;
 
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Sprite;
+import com.badlogic.gdx.math.Vector2;
 import com.election.game.Constants;
 import com.election.game.ElectionGame;
 
@@ -11,6 +12,7 @@ public class Candidate {
 	private boolean moveLeft= false;
 	private boolean moveRight= false;
 	
+	private Vector2 prevPosition;
 	
 	private enum Direction{
 		NONE,
@@ -30,6 +32,7 @@ public class Candidate {
 	
 	public Candidate(Texture texture) {
 		sprite = new Sprite(texture);
+		prevPosition = new Vector2();
 	}
 
 	
@@ -42,6 +45,7 @@ public class Candidate {
 	
 	public void update(float delta){
 		
+		prevPosition.set(sprite.getX(), sprite.getY());
 		
 		if( direction == Direction.UP && !(direction == Direction.LEFT || direction == Direction.RIGHT)){
 			moveY(delta);
@@ -59,43 +63,26 @@ public class Candidate {
 		if( direction == Direction.LEFT && !(direction == Direction.UP || direction == Direction.DOWN)){
 			moveX(-delta);
 		}
-			
-		
-		/*
-		if( moveUp && !(moveLeft || moveRight)){
-			moveY(delta);
-		}
-		
 
-		if( moveDown && !(moveLeft || moveRight)){
-			moveY(-delta);
-		}
-
-		if( moveRight  && !(moveUp || moveDown)){
 			
-			moveX(delta);
-		}
-		
-		
-	
-		if( moveLeft  && !(moveUp || moveDown)){
-			
-			moveX(-delta);
-		}
-		
-		*/
 	}
+	
+	public void resetPosition(){
+		
+		sprite.setPosition(prevPosition.x, prevPosition.y);
+	}
+	
 
 	public void moveY(float delta){
-		sprite.translate(0, Constants.CHAR_YSPEED * delta);
+		sprite.translate(0, (int)Constants.CHAR_YSPEED * delta);
 	}
 	
 	public void moveX(float delta){
-		sprite.translate(Constants.CHAR_XSPEED * delta, 0);
+		sprite.translate((int)Constants.CHAR_XSPEED * delta, 0);
 	}
 	
 	public void moveSprite(float delta){
-		sprite.translate(Constants.CHAR_XSPEED  * delta, Constants.CHAR_YSPEED  * delta);
+		sprite.translate((int)Constants.CHAR_XSPEED  * delta, (int)Constants.CHAR_YSPEED  * delta);
 	}
 
 
