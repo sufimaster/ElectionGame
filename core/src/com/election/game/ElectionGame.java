@@ -11,7 +11,6 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 public class ElectionGame extends Game {
 	
 	public static  ElectionGame  GAME_OBJ= null;
-	//private OrthographicCamera camera;
 	public BitmapFont font;
 	public SpriteBatch batch;
 	public boolean isdebug = true;
@@ -21,6 +20,11 @@ public class ElectionGame extends Game {
 	public static Random randGen = new Random(System.currentTimeMillis());
 
 
+	
+	public enum GameState { READY, RUNNING, DIALOG, PAUSED, GAMEOVER } 
+	public GameState state = GameState.READY;
+	private boolean isPaused = false;
+	
 	
 	public void create () {
 		
@@ -38,7 +42,10 @@ public class ElectionGame extends Game {
 
 	
 	public void render () {
+		
+		
 		super.render();
+
 
 	}
 	
@@ -59,6 +66,21 @@ public class ElectionGame extends Game {
 			Gdx.graphics.setFullscreenMode(currentMode);			
 		else 	
 			Gdx.graphics.setWindowedMode(Constants.WINDOWS_GAME_WIDTH, Constants.WINDOWS_GAME_HEIGHT);
+		
+	}
+
+
+	public void togglePause() {
+
+		isPaused  = !isPaused;
+		
+		if( isPaused){
+			ElectionGame.GAME_OBJ.state = GameState.PAUSED;
+		}else{
+			ElectionGame.GAME_OBJ.state = GameState.RUNNING;
+		}
+		
+		
 		
 	}
 	

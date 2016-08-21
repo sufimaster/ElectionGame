@@ -23,6 +23,7 @@ import com.badlogic.gdx.math.Polygon;
 import com.badlogic.gdx.math.Polyline;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
+import com.election.game.ElectionGame.GameState;
 import com.election.game.camera.OrthographicCameraMovementWrapper;
 import com.election.game.render.DebugRenderer;
 import com.election.game.render.SpriteAndTiledRenderer;
@@ -54,12 +55,19 @@ public class OutsideScreen implements Screen, InputProcessor {
 	
 	private int mapPixelWidth;
 	private int mapPixelHeight;
+	
+	
+	//giggle
+	private Region [][] regions;
+	
 	private Vector2 prevPosition;
 	
 	public static float BOUNDARY_PERCENTAGE = 0.2f;
 	
 	
 	public Rectangle gameSpace;
+	private boolean interactBtn;
+	private Electorate interactedElector;
 
 	
 	
@@ -98,14 +106,52 @@ public class OutsideScreen implements Screen, InputProcessor {
 		gameSpace = new Rectangle(0,0, mapPixelWidth, mapPixelHeight);
 		
 		//people that candidate can convince to vote for him
-		initElectorate();
-
+		initRegions(mapPixelWidth, mapPixelHeight);
+		initElectorate();		
 		//render these using the mapRenderer
 		mapRenderer.setSprites(electorate);
 		mapRenderer.setCandidate(candidate);
 
 		
 	}
+
+	private void initRegions(int mapWidth, int mapHeight) {
+		
+		int numTilesX = mapWidth/Constants.TILE_SIZE;
+		int numTilesY = mapHeight/Constants.TILE_SIZE;
+		
+		
+		regions = new Region[numTilesX][numTilesY];
+		
+		for (int i = 0; i < numTilesX; i++) {
+
+			for (int j = 0; j < numTilesY; j++) {
+				
+				
+				regions[i][j] = new Region(i*Constants.TILE_SIZE, j*Constants.TILE_SIZE);
+				
+				
+			}
+			
+		}
+		
+				
+	}
+	
+	
+	private Region getRegion(int xLoc, int yLoc){
+		
+		int xIdx= xLoc/Constants.TILE_SIZE;
+		int yIdx= yLoc/Constants.TILE_SIZE;
+		
+		
+		Region region = regions[xIdx][yIdx];
+		
+		return region;
+		
+		
+	}
+	
 
 	private void initElectorate() {
 		
@@ -115,20 +161,26 @@ public class OutsideScreen implements Screen, InputProcessor {
 			int personType = 1 + ElectionGame.randGen.nextInt(NUM_TYPES_PEOPLE);
 					
 				 
-			float randX = ElectionGame.randGen.nextFloat() * mapPixelWidth;				
-			float randY = ElectionGame.randGen.nextFloat() * mapPixelHeight;
+			int xLoc = (int)(ElectionGame.randGen.nextFloat() * mapPixelWidth);				
+			int yLoc = (int)(ElectionGame.randGen.nextFloat() * mapPixelHeight);
 			
-			while( !TiledMapUtility.isElectorateSpace(townMap, randX, randY) ){
+			while( !TiledMapUtility.isElectorateSpace(townMap, xLoc, yLoc) ){
 				
-				randX = ElectionGame.randGen.nextFloat() * mapPixelWidth;				
-				randY = ElectionGame.randGen.nextFloat() * mapPixelHeight;
+				xLoc = (int)(ElectionGame.randGen.nextFloat() * mapPixelWidth);				
+				yLoc = (int)(ElectionGame.randGen.nextFloat() * mapPixelHeight);
 				
 			}
 			
 			
+			
+			
+			
 			Electorate elector = new Electorate( new Texture( Gdx.files.internal("person" + personType + ".png")) );
-			elector.sprite.setPosition(randX, randY);			
+			elector.sprite.setPosition(xLoc, yLoc);			
 			electorate.add(elector);
+			
+			Region region = regions[xLoc/Constants.TILE_SIZE][yLoc/Constants.TILE_SIZE];
+			region.addElectors(elector);
 			
 		
 			
@@ -146,35 +198,84 @@ public class OutsideScreen implements Screen, InputProcessor {
 	@Override
 	public void render(float delta) {
 
-		updateCandidate(delta);
 		
-		checkCollisions(delta);
+		switch( ElectionGame.GAME_OBJ.state) {
 		
-
-		
-		
-		updateCamera(delta);
-
-
-		renderSprites(delta);		
-		
+		case RUNNING:		
+			updateRunning(delta);		
+			break;
+		case PAUSED:
+			updatePaused(delta);
+			break;
+		case DIALOG:
+			updateDialog(delta);
+			break;
+		default:
+			break;
+		}
+			
 	}
 	
+	private void updateRunning(float delta){
+		updateCandidate(delta);
+		checkCollisions(delta);		
+		updateCamera(delta);	
+		renderSprites(delta);
+	}
+
+	private void updatePaused(float delta){
+		Gdx.gl.glClearColor(.3f, .2f, .4f, 1);
+        Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
+
+		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
+		 
+
+		//camera.source.update();
+	}
 	
+	private void updateDialog(float delta) {
+		
+	}
 
 	private void checkCollisions(float delta) {
 
-		
+						
 		checkMapCollisions(delta);
-
 		
 		checkCameraBounds(delta );
 		
-		
-		
-		
+		checkElectorCollisions(delta);
+	
 	}
 	
+	//see if candidate is intersecting any of the electors
+	private void checkElectorCollisions(float delta) {
+
+		Region region = getRegion((int)candidate.sprite.getX(), (int)candidate.sprite.getY());
+		
+		for (Electorate elector : region.electorsInRegion) {
+			
+			if( candidate.sprite.getBoundingRectangle().overlaps(elector.sprite.getBoundingRectangle())){
+						
+				elector.hit= true;
+				Gdx.app.log(System.class.getName(), "Candidate intersects " + elector.id);
+				
+				if(interactBtn){
+					
+					interactedElector = elector;
+					
+				}else{
+					interactedElector = null;
+				}
+
+			}else{
+				elector.hit = false;
+			}
+	
+		}
+		
+	}
+
 	private void checkCameraBounds(float delta) {
 		
 		Rectangle candBound =  candidate.sprite.getBoundingRectangle();
@@ -184,7 +285,7 @@ public class OutsideScreen implements Screen, InputProcessor {
 		
 		if( ! movementRegion.contains(candBound)){
 									
-			if( !cameraAtMapEdge ){			
+			if( !cameraAtMapEdge ){ 			
 				moveCamera = true;			
 				
 				//Gdx.app.log(this.getClass().getName(), "Candidate is outside boundary region");
@@ -197,17 +298,21 @@ public class OutsideScreen implements Screen, InputProcessor {
 			cameraAtMapEdge = false;
 		}
 		
+	
+	
 		if(!gameSpace.contains(candBound)){
 			candidate.resetPosition();
 			moveCamera = false;
 		}
 		
-		if( !gameSpace.contains(camera.cameraRect)){
+		//TODO: this not working, or causes camera to try to catch up even if within the vertical bounds (but outside of horizontal bounds)
+		//solution is to check if candidate is within x bounds and check x bounds seperately. 
+		/*if( !gameSpace.contains(camera.cameraRect)){
 			cameraAtMapEdge= true;
 			camera.resetCamera();
 		}
 		
-		/*
+		
 			
 		//if candidate has gone into boundary region, start moving the camera and the character
 		
@@ -526,8 +631,14 @@ public class OutsideScreen implements Screen, InputProcessor {
 			case CANDIDATE_MOVE_D_KEY:
 				candidate.setMoveRight(false);
 				break;	
+			case Constants.CANDIDATE_INTERACT_KEY:
+				interactBtn = true;
+				break;	
 			case Keys.ESCAPE:
 				Gdx.app.exit();
+				break;
+			case Keys.BACKSPACE:
+				ElectionGame.GAME_OBJ.togglePause();		
 				break;
 			case Keys.ENTER:
 				ElectionGame.toggleFullScreen();				

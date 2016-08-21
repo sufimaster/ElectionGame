@@ -1,5 +1,7 @@
 package com.election.game;
 
+import com.badlogic.gdx.Input.Keys;
+
 public class Constants {
 
 	public static final int WINDOWS_GAME_WIDTH = 1024;
@@ -16,9 +18,11 @@ public class Constants {
 	public static final float CAM_YSPEED = 100;
 	public static final float CAM_XSPEED = 100;
 	
-	public static final float CAM_MOVE_SCREEN_PERCENTAGE = .4f;
+	public static final float CAM_MOVE_SCREEN_PERCENTAGE = .1f;
 	
-	
+	public static final int TILE_NUMBER = 32;
+	public static final int TILE_SIZE = WINDOWS_GAME_WIDTH/TILE_NUMBER;
+	public static final int CANDIDATE_INTERACT_KEY = Keys.E;
 	
 	
 	

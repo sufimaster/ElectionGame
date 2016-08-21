@@ -7,6 +7,7 @@ import com.badlogic.gdx.graphics.g2d.Sprite;
 
 public class Electorate {
 	
+	private static int ID = 0;
 	private static final int INFLUENCE_MAX = 10;
 
 	/*
@@ -22,11 +23,21 @@ public class Electorate {
 	
 	public Sprite sprite;
 
+	public boolean hit=false;
+
+	public int id;
+
 	public Electorate(Texture texture) {
 		sprite = new Sprite(texture);
 		this.influenceLevel = ElectionGame.randGen.nextInt(INFLUENCE_MAX);
+		this.id = Electorate.getNewId();
 	}
 	
+	private static int getNewId() {
+		// TODO Auto-generated method stub
+		return ID++;
+	}
+
 	public Electorate(Texture texture, int influence) {
 		sprite = new Sprite(texture);
 		this.influenceLevel = influence;

@@ -6,6 +6,7 @@ import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
+import com.election.game.ElectionGame.GameState;
 
 public class MenuScreen implements Screen, InputProcessor {
 
@@ -112,6 +113,7 @@ public class MenuScreen implements Screen, InputProcessor {
 	public boolean keyUp(int keycode) {
 		
 		gameObj.setScreen(new OutsideScreen(gameObj));
+		gameObj.state = GameState.RUNNING;
 		dispose();
 	
 		return false;
