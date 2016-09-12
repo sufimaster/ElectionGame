@@ -8,6 +8,7 @@ import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.maps.MapObject;
 import com.badlogic.gdx.maps.MapObjects;
 import com.badlogic.gdx.maps.MapProperties;
@@ -23,7 +24,6 @@ import com.badlogic.gdx.math.Polygon;
 import com.badlogic.gdx.math.Polyline;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
-import com.election.game.ElectionGame.GameState;
 import com.election.game.camera.OrthographicCameraMovementWrapper;
 import com.election.game.render.DebugRenderer;
 import com.election.game.render.SpriteAndTiledRenderer;
@@ -38,7 +38,7 @@ public class OutsideScreen implements Screen, InputProcessor {
 	private static final int NUM_TYPES_PEOPLE = 3;
 
 	private Candidate candidate;
-	
+	BitmapFont font = new BitmapFont();
 	private ArrayList<Electorate> electorate;
 	
 	
@@ -66,11 +66,9 @@ public class OutsideScreen implements Screen, InputProcessor {
 	
 	
 	public Rectangle gameSpace;
-	private boolean interactBtn;
+	private boolean interactBtn=false;
 	private Electorate interactedElector;
 
-	
-	
 	public OutsideScreen(final ElectionGame gameObj) {
 
 		float w = Gdx.graphics.getWidth();
@@ -85,8 +83,7 @@ public class OutsideScreen implements Screen, InputProcessor {
 		candidate.sprite.setPosition(w/2, h/2);
 		prevPosition = new Vector2(candidate.sprite.getX(), candidate.sprite.getY());
 		
-		//anotherDude = new Texture(Gdx.files.internal("man.png"));
-		
+	
 				
 		//float unitScale = 1 / 1f;
 		//townMap = new TownMap("town.tmx");
@@ -197,21 +194,23 @@ public class OutsideScreen implements Screen, InputProcessor {
 
 	@Override
 	public void render(float delta) {
-
+		
+		
+		
 		
 		switch( ElectionGame.GAME_OBJ.state) {
 		
-		case RUNNING:		
-			updateRunning(delta);		
-			break;
-		case PAUSED:
-			updatePaused(delta);
-			break;
-		case DIALOG:
-			updateDialog(delta);
-			break;
-		default:
-			break;
+			case RUNNING:		
+				updateRunning(delta);		
+				break;
+			case PAUSED:
+				updatePaused(delta);
+				break;
+			/*case DIALOG:
+				updateDialog(delta);
+				break;*/
+			default:
+				break;
 		}
 			
 	}
@@ -221,6 +220,30 @@ public class OutsideScreen implements Screen, InputProcessor {
 		checkCollisions(delta);		
 		updateCamera(delta);	
 		renderSprites(delta);
+		renderHud(delta);
+		//if( interactBtn && interactedElector != null){
+			//updateDialog(delta);
+		//}
+	}
+
+	private void renderHud(float delta) {
+		Matrix4 uiMatrix = camera.source.combined.cpy();
+		uiMatrix.setToOrtho2D(0, 0, Constants.WINDOWS_GAME_WIDTH, Constants.WINDOWS_GAME_HEIGHT);
+		ElectionGame.GAME_OBJ.hudBatch.setProjectionMatrix(uiMatrix);
+		ElectionGame.GAME_OBJ.hudBatch.begin();
+		//DRAW FPS
+		font.setColor(1f,1f,1f, 1f);
+		font.draw(ElectionGame.GAME_OBJ.hudBatch, "FPS:" + Gdx.graphics.getFramesPerSecond(), 10, Constants.WINDOWS_GAME_HEIGHT - 100 );
+		
+		//DRAW DIALOG
+		if( interactBtn && interactedElector != null){
+			updateDialog(delta);
+			Gdx.input.setInputProcessor(ElectionGame.GAME_OBJ.dialogHandler);
+			
+			
+			//dialogObj.draw(ElectionGame.GAME_OBJ.hudBatch, delta);
+		}
+		ElectionGame.GAME_OBJ.hudBatch.end();		
 	}
 
 	private void updatePaused(float delta){
@@ -234,7 +257,18 @@ public class OutsideScreen implements Screen, InputProcessor {
 	}
 	
 	private void updateDialog(float delta) {
+
+
+		//draw dialog box
+		ElectionGame.GAME_OBJ.dialogHandler.startDialog(interactedElector);
+		ElectionGame.GAME_OBJ.dialogHandler.draw(ElectionGame.GAME_OBJ.hudBatch, delta);
 		
+		//get the line of dialog for the interacted elector
+		//DialogTree dialogTree = ElectionGame.GAME_OBJ.dialogHandler.getDialogTrees().get(interactedElector.id+"");
+		//TODO: for testing, just get the lines for elector id 0
+		//TODO: this should all be done in dialogObj, not here
+		
+        
 	}
 
 	private void checkCollisions(float delta) {
@@ -246,6 +280,8 @@ public class OutsideScreen implements Screen, InputProcessor {
 		
 		checkElectorCollisions(delta);
 	
+		
+		
 	}
 	
 	//see if candidate is intersecting any of the electors
@@ -258,11 +294,13 @@ public class OutsideScreen implements Screen, InputProcessor {
 			if( candidate.sprite.getBoundingRectangle().overlaps(elector.sprite.getBoundingRectangle())){
 						
 				elector.hit= true;
-				Gdx.app.log(System.class.getName(), "Candidate intersects " + elector.id);
+				//Gdx.app.log(System.class.getName(), "Candidate intersects " + elector.id);
 				
 				if(interactBtn){
 					
 					interactedElector = elector;
+					
+					//ElectionGame.GAME_OBJ.state = GameState.DIALOG;
 					
 				}else{
 					interactedElector = null;
@@ -270,6 +308,7 @@ public class OutsideScreen implements Screen, InputProcessor {
 
 			}else{
 				elector.hit = false;
+				//toggleInteract();
 			}
 	
 		}
@@ -307,80 +346,7 @@ public class OutsideScreen implements Screen, InputProcessor {
 		
 		//TODO: this not working, or causes camera to try to catch up even if within the vertical bounds (but outside of horizontal bounds)
 		//solution is to check if candidate is within x bounds and check x bounds seperately. 
-		/*if( !gameSpace.contains(camera.cameraRect)){
-			cameraAtMapEdge= true;
-			camera.resetCamera();
-		}
 		
-		
-			
-		//if candidate has gone into boundary region, start moving the camera and the character
-		
-		//if candidate's bounding rect top left point has gone above candidate boundary line (i.e., upper 80th percentile of viewport)
-		if( candBound.getY()+candBound.height >= camera.source.position.y + (Constants.CAM_MOVE_SCREEN_PERCENTAGE * camera.source.viewportHeight)/2 ){
-			
-			if( !cameraAtMapEdge ){			
-				moveCamera = true;
-				//camera.setMoveUp( true );
-			}
-			
-		}else if( candBound.getY() <= camera.source.position.y - (Constants.CAM_MOVE_SCREEN_PERCENTAGE * camera.source.viewportHeight)/2 ){
-			
-			if( !cameraAtMapEdge ){
-				moveCamera = true;
-				//camera.setMoveDown(true);
-			}
-			
-			
-		}else if( candBound.getX() +candBound.width >= camera.source.position.x + (Constants.CAM_MOVE_SCREEN_PERCENTAGE*camera.source.viewportWidth)/2  ){
-				
-			if( !cameraAtMapEdge ){
-				moveCamera = true;
-				//camera.setMoveRight(true);
-			}
-				
-			
-		}else if(   candBound.getX() <= camera.source.position.x - (Constants.CAM_MOVE_SCREEN_PERCENTAGE*camera.source.viewportWidth)/2 ){
-			
-			if( !cameraAtMapEdge ){
-				moveCamera = true;
-				//camera.setMoveLeft( true);
-			}
-
-
-		} else{
-			cameraAtMapEdge = false;
-			moveCamera = false;
-		}
-		
-		
-
-		
-		//check to see if camera is within the game world
-		if( camera.source.position.x - camera.source.viewportWidth/2 <  0 ){
-			
-			cameraAtMapEdge =true;
-			camera.source.position.set( camera.source.viewportWidth/2 , camera.source.position.y, 0);
-			//moveCamera=false;
-			//Gdx.app.log(this.getClass().getSimpleName(), "Camera has moved too left");
-		}else if( camera.source.position.x + camera.source.viewportWidth/2 > mapPixelWidth ){
-			cameraAtMapEdge =true;
-			camera.source.position.set(mapPixelWidth - camera.source.viewportWidth/2 , camera.source.position.y , 0);
-			//moveCamera=false;
-			//Gdx.app.log(this.getClass().getSimpleName(), "Camera has moved too right");
-		}else if( camera.source.position.y + camera.source.viewportHeight/2 >  mapPixelHeight ){
-			cameraAtMapEdge =true;
-			camera.source.position.set(camera.source.position.x, mapPixelHeight - camera.source.viewportHeight/2, 0);
-			//moveCamera=false;
-			//Gdx.app.log(this.getClass().getSimpleName(), "Camera has moved too high");
-		}else if( camera.source.position.y  - camera.source.viewportHeight/2 <  0){
-			cameraAtMapEdge =true;
-			camera.source.position.set(camera.source.position.x, camera.source.viewportHeight/2, 0);
-			//moveCamera=false;
-			//Gdx.app.log(this.getClass().getSimpleName(), "Camera has moved low");
-		}
-		
-		*/
 		
 	}
 
@@ -389,18 +355,9 @@ public class OutsideScreen implements Screen, InputProcessor {
 	private void updateCandidate(float delta) {
         
 	
+		candidate.update(delta);
 		
-		//if the candidate has reached edge boundary of viewport, 
-		//allow camera to move up/left/right/down to move viewport by calling its update method
-		//otherwise only candidate should move position, so call candidate update method
-		//if(camera.isMovable()){
-		/*if(moveCamera){
-			camera.update(delta);
-			mapRenderer.setView(camera.source);		
-			candidate.update(delta);
-		}else{*/
-			candidate.update(delta);
-		//}
+				
 	}
 	
 	private void updateCamera(float delta){
@@ -592,16 +549,7 @@ public class OutsideScreen implements Screen, InputProcessor {
 				break;		
 		}
 		
-		//after you keydown to move in any direction, 
-		//first set the camera movement to false, 
-		//so the character can move around without the camera moving around (in the opposite direction)
-		//each render cycle will call the border check to determine if the 
-		//character has moved to a particular point in the screen to scroll the map
-		/*if( prevKeyCode == keycode){
-			moveCamera = true;
-		}else{*/
-			//moveCamera = false;
-		//}
+		
 		
 		return true;
 	}
@@ -632,7 +580,7 @@ public class OutsideScreen implements Screen, InputProcessor {
 				candidate.setMoveRight(false);
 				break;	
 			case Constants.CANDIDATE_INTERACT_KEY:
-				interactBtn = true;
+				toggleInteract();
 				break;	
 			case Keys.ESCAPE:
 				Gdx.app.exit();
@@ -646,9 +594,19 @@ public class OutsideScreen implements Screen, InputProcessor {
 		}
 		
 		
-		//moveCamera = false;
 
 		return true;
+	}
+
+	private void toggleInteract() {
+		interactBtn = !interactBtn;
+
+		/*if(interactBtn){
+			ElectionGame.GAME_OBJ.state = GameState.DIALOG;
+		}else{
+			ElectionGame.GAME_OBJ.state = GameState.RUNNING;
+		}*/
+		
 	}
 
 	@Override

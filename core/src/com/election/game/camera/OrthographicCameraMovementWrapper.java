@@ -54,7 +54,10 @@ public class OrthographicCameraMovementWrapper {
 		
 		Vector2 camSpeed = getSpeed(delta, candidate);
 		
-		source.translate((int)camSpeed.x*delta, (int)camSpeed.y*delta);
+		//TODO: if this line is used instead of the uncommented line, the camera follows candidate closer, but introduces jitter in the screen/characters
+		//source.translate((int)camSpeed.x*delta, (int)camSpeed.y*delta);
+		
+		source.translate((int)(camSpeed.x*delta), (int)(camSpeed.y*delta));
 		syncRects();
 	}
 	

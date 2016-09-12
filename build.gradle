@@ -20,7 +20,7 @@ buildscript {
 allprojects {
     apply plugin: "eclipse"
     apply plugin: "idea"
-
+	
     version = "0.1-build-" + getDate()
 	
     ext {
@@ -37,6 +37,11 @@ allprojects {
         maven { url "https://oss.sonatype.org/content/repositories/snapshots/" }
         maven { url "https://oss.sonatype.org/content/repositories/releases/" }
     }
+	
+	dependencies{
+		compile 'com.google.code.gson:gson:2.2.4'
+	}
+	
 }
 
 project(":desktop") {

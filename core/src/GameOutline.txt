@@ -1,0 +1,39 @@
+Title Screen: Election Day
+Start New game
+Starting area: Indian(ish) semi-agro town - eastern setting
+
+
+The game starts with an animation of various activities in your village: fishing, farming, trading. 
+The intro shows how the mayor recently retired to pursue corruption (temporary - maybe game hunting or something like that)
+and the town is now seeking a new leader.
+
+As a recently successful aquaponics farmer, you've gained some popularity in town and some have suggested that you might 
+be a young rising political star with your charm and ease in talkign to people.  However, most don't know you, and you have to 
+gain enough public exposure to win the general election through marketing, face to face meetings, canvassing, creating a team for your campaign
+and engaging the other candidates via debates.
+
+In order to win the election, you must know alot about your town, what issues are important to them, how many care about those issues, 
+where they congregate, and what news sources they read. You can learn by reading the news, talking to people, spying on conversations
+
+Activities:
+
+walking
+talking
+buying 
+selling
+planting signs - cost resources
+holding rallies - cost resources - pick times that might appeal to your base
+holding debates  - cost resources - pick times that might appeal to your base
+deal with municipal bureaucracy - getting a permit for holding rally/debate invovles significant time and planning and scheduling.  
+You can also bribe an official to cancel another event. You risk this getting leaked to the public.  You can run a corrupt campaign,
+but you may have to pay off news papers or journalists to be on your side. Or convince them that you are good for the town.
+
+talking to journalists
+  
+  
+Priorities of Implementation:
+
+1) Dialog
+   Each elector can be assigned a dialog object.  This dialog object contains text of their interaction. 
+   	XML file with the dialog the candidate can say to this person, and responses from the elector to the candidate#
+   	  

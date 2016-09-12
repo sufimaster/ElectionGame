@@ -46,12 +46,10 @@ public class SpriteAndTiledRenderer extends OrthogonalTiledMapRenderer {
 					
 					if(currentLayer == drawSpritesAfterLayer){
 						
-						//DebugRenderer.DrawDebugRect(candidate.sprite.getBoundingRectangle(), this.cam );
-						//draw sprites
 						for (Electorate elector : sprites) {
 							
 							elector.sprite.draw(this.getBatch());
-							//DebugRenderer.DrawDebugRect(elector.sprite.getBoundingRectangle(), this.cam );
+
 						}
 						
 						//draw candidate						

@@ -1,6 +1,7 @@
 package com.election.game.sprites;
 
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.Texture.TextureFilter;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.math.Vector2;
 import com.election.game.Constants;
@@ -31,6 +32,8 @@ public class Candidate {
 	
 	
 	public Candidate(Texture texture) {
+		
+		texture.setFilter(TextureFilter.Linear, TextureFilter.Linear);
 		sprite = new Sprite(texture);
 		prevPosition = new Vector2();
 	}

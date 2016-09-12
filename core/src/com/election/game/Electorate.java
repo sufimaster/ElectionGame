@@ -3,39 +3,39 @@ package com.election.game;
 import java.util.ArrayList;
 
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.Texture.TextureFilter;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 
 public class Electorate {
-	
-	private static int ID = 0;
+
+	private static int ID_NUM = 0;
 	private static final int INFLUENCE_MAX = 10;
 
 	/*
-	 * TODO: ad some variables or a matrix for attributes relating to
-	 * each person's voting reasons
+	 * TODO: ad some variables or a matrix for attributes relating to each
+	 * person's voting reasons
 	 */
 	public int influenceLevel;
-	
-	//List of terrain types the electorate can occupy
+
+	// List of terrain types the electorate can occupy
 	public ArrayList<String> occupiableTiles;
-	
-	
-	
+
 	public Sprite sprite;
 
-	public boolean hit=false;
+	public boolean hit = false;
 
 	public int id;
 
 	public Electorate(Texture texture) {
+		texture.setFilter(TextureFilter.Linear, TextureFilter.Linear);
+
 		sprite = new Sprite(texture);
 		this.influenceLevel = ElectionGame.randGen.nextInt(INFLUENCE_MAX);
 		this.id = Electorate.getNewId();
 	}
-	
+
 	private static int getNewId() {
-		// TODO Auto-generated method stub
-		return ID++;
+		return ID_NUM++;
 	}
 
 	public Electorate(Texture texture, int influence) {
@@ -43,18 +43,13 @@ public class Electorate {
 		this.influenceLevel = influence;
 	}
 
-	
-	public void draw(){
-		
+	public void draw() {
+
 		sprite.draw(ElectionGame.GAME_OBJ.batch);
 	}
-	
-	
-	
-	public void update(float delta){
-	
-	
+
+	public void update(float delta) {
+
 	}
-	
-	
+
 }

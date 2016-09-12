@@ -25,6 +25,10 @@ public class Constants {
 	public static final int CANDIDATE_INTERACT_KEY = Keys.E;
 	
 	
+	//DIALOG CONSTANTS
+	public static final int CAND_NAME =0;
+	public static final String DIALOG_TREES_PATH="dialog/dialog_trees.json";
+	public static final String DIALOG_LINES_PATH="dialog/dialog_lines.json";
 	
 	
 }

@@ -112,7 +112,9 @@ public class MenuScreen implements Screen, InputProcessor {
 	@Override
 	public boolean keyUp(int keycode) {
 		
-		gameObj.setScreen(new OutsideScreen(gameObj));
+		OutsideScreen screen = new OutsideScreen(gameObj);
+		
+		gameObj.setScreen(screen);
 		gameObj.state = GameState.RUNNING;
 		dispose();
 	
