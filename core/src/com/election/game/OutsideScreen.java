@@ -24,6 +24,7 @@ import com.badlogic.gdx.math.Polygon;
 import com.badlogic.gdx.math.Polyline;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
+import com.election.game.ElectionGame.GameState;
 import com.election.game.camera.OrthographicCameraMovementWrapper;
 import com.election.game.render.DebugRenderer;
 import com.election.game.render.SpriteAndTiledRenderer;
@@ -75,20 +76,19 @@ public class OutsideScreen implements Screen, InputProcessor {
 		float h = Gdx.graphics.getHeight();
 
 		
-		camera = new OrthographicCameraMovementWrapper(false, w, h);
+		camera = new OrthographicCameraMovementWrapper(false, w/2, h/2);
 		//camera.source.setToOrtho(false, w, h);
 		
 		//main character
 		candidate = new Candidate( new Texture(Gdx.files.internal("man.png")) );
 		candidate.sprite.setPosition(w/2, h/2);
 		prevPosition = new Vector2(candidate.sprite.getX(), candidate.sprite.getY());
+		camera.source.position.set(candidate.sprite.getX(), candidate.sprite.getY(),0);
 		
-	
 				
-		//float unitScale = 1 / 1f;
-		//townMap = new TownMap("town.tmx");
+		float unitScale = 1 / 1f;
 		townMap = 	new TmxMapLoader().load("town.tmx");
-		mapRenderer = new SpriteAndTiledRenderer(townMap, camera.source);
+		mapRenderer = new SpriteAndTiledRenderer(townMap, camera, unitScale);
 		
 		MapProperties prop = townMap.getProperties();
 
@@ -206,9 +206,9 @@ public class OutsideScreen implements Screen, InputProcessor {
 			case PAUSED:
 				updatePaused(delta);
 				break;
-			/*case DIALOG:
-				updateDialog(delta);
-				break;*/
+			case DIALOG:
+				updateRunning(delta);
+				break;
 			default:
 				break;
 		}
@@ -221,9 +221,7 @@ public class OutsideScreen implements Screen, InputProcessor {
 		updateCamera(delta);	
 		renderSprites(delta);
 		renderHud(delta);
-		//if( interactBtn && interactedElector != null){
-			//updateDialog(delta);
-		//}
+
 	}
 
 	private void renderHud(float delta) {
@@ -231,18 +229,15 @@ public class OutsideScreen implements Screen, InputProcessor {
 		uiMatrix.setToOrtho2D(0, 0, Constants.WINDOWS_GAME_WIDTH, Constants.WINDOWS_GAME_HEIGHT);
 		ElectionGame.GAME_OBJ.hudBatch.setProjectionMatrix(uiMatrix);
 		ElectionGame.GAME_OBJ.hudBatch.begin();
-		//DRAW FPS
-		font.setColor(1f,1f,1f, 1f);
-		font.draw(ElectionGame.GAME_OBJ.hudBatch, "FPS:" + Gdx.graphics.getFramesPerSecond(), 10, Constants.WINDOWS_GAME_HEIGHT - 100 );
+			//DRAW FPS
+			//font.setColor(1f,1f,1f, 1f);
+			ElectionGame.GAME_OBJ.debugFont.draw(ElectionGame.GAME_OBJ.hudBatch, "FPS:" + Gdx.graphics.getFramesPerSecond(), 10, Constants.WINDOWS_GAME_HEIGHT - 100 );
 		
-		//DRAW DIALOG
-		if( interactBtn && interactedElector != null){
-			updateDialog(delta);
-			Gdx.input.setInputProcessor(ElectionGame.GAME_OBJ.dialogHandler);
+			//draw dialog box
+			if( ElectionGame.GAME_OBJ.state == GameState.DIALOG){
+				updateDialog(delta);
+			}
 			
-			
-			//dialogObj.draw(ElectionGame.GAME_OBJ.hudBatch, delta);
-		}
 		ElectionGame.GAME_OBJ.hudBatch.end();		
 	}
 
@@ -257,10 +252,14 @@ public class OutsideScreen implements Screen, InputProcessor {
 	}
 	
 	private void updateDialog(float delta) {
-
+		
 
 		//draw dialog box
-		ElectionGame.GAME_OBJ.dialogHandler.startDialog(interactedElector);
+		if( interactBtn){
+			//should only call this method once.
+			ElectionGame.GAME_OBJ.dialogHandler.startDialog(interactedElector);
+			interactBtn = false;
+		}
 		ElectionGame.GAME_OBJ.dialogHandler.draw(ElectionGame.GAME_OBJ.hudBatch, delta);
 		
 		//get the line of dialog for the interacted elector
@@ -295,17 +294,9 @@ public class OutsideScreen implements Screen, InputProcessor {
 						
 				elector.hit= true;
 				//Gdx.app.log(System.class.getName(), "Candidate intersects " + elector.id);
+			
+				interactedElector = elector;
 				
-				if(interactBtn){
-					
-					interactedElector = elector;
-					
-					//ElectionGame.GAME_OBJ.state = GameState.DIALOG;
-					
-				}else{
-					interactedElector = null;
-				}
-
 			}else{
 				elector.hit = false;
 				//toggleInteract();
@@ -599,13 +590,21 @@ public class OutsideScreen implements Screen, InputProcessor {
 	}
 
 	private void toggleInteract() {
+		
+		if( interactedElector == null){
+			return;
+		}
+		
 		interactBtn = !interactBtn;
-
-		/*if(interactBtn){
-			ElectionGame.GAME_OBJ.state = GameState.DIALOG;
+		
+		if(interactBtn ){
+			
+			ElectionGame.GAME_OBJ.state = GameState.DIALOG;			
+			Gdx.input.setInputProcessor(ElectionGame.GAME_OBJ.dialogHandler);
+			
 		}else{
 			ElectionGame.GAME_OBJ.state = GameState.RUNNING;
-		}*/
+		}
 		
 	}
 

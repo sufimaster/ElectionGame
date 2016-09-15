@@ -9,6 +9,7 @@ import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
 import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer;
 import com.election.game.Electorate;
+import com.election.game.camera.OrthographicCameraMovementWrapper;
 import com.election.game.sprites.Candidate;
 
 public class SpriteAndTiledRenderer extends OrthogonalTiledMapRenderer {
@@ -19,10 +20,11 @@ public class SpriteAndTiledRenderer extends OrthogonalTiledMapRenderer {
 	private Candidate candidate;
 	private ArrayList<Electorate> sprites;
 	
-	public SpriteAndTiledRenderer(TiledMap map, OrthographicCamera cam) {
-		super(map);
+	public SpriteAndTiledRenderer(TiledMap map, OrthographicCameraMovementWrapper cam, float unitScale) {
+		super(map, unitScale);
 		this.map = map;
-		this.cam = cam;
+		this.cam = cam.source;
+		
 
 	}
 	

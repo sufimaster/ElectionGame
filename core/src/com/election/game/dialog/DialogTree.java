@@ -14,7 +14,7 @@ public class DialogTree {
 	
 	
 	//Map<String, String> input;
-	Map<String, List<String>> output;
+	Map<String, String> output;
 	
 	
 	public int getId() {
@@ -34,11 +34,11 @@ public class DialogTree {
 		this.input = input;
 	}
 	
-	public Map<String, List<String>> getOutput() {
+	public Map<String, String> getOutput() {
 		return output;
 	}
 	
-	public void setOutput(Map<String, List<String>> output) {
+	public void setOutput(Map<String, String> output) {
 		this.output = output;
 	}
 	

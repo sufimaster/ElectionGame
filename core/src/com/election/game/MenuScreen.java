@@ -58,11 +58,9 @@ public class MenuScreen implements Screen, InputProcessor {
 		gameObj.batch.setProjectionMatrix(camera.combined);
 		gameObj.batch.begin();
 			
-			gameObj.font.setColor(Color.CORAL);
-			gameObj.font.draw(gameObj.batch, "Welcome to " + Constants.GAME_TITLE, 200, 300);
-			gameObj.font.draw(gameObj.batch, "Press any key to get started", 200, 250);
-			
-			
+			gameObj.menuFont.draw(gameObj.batch, "Welcome to " + Constants.GAME_TITLE, 200, 600);
+			gameObj.menuFont.draw(gameObj.batch, "Press any key to get started", 200, 550);
+		
 		gameObj.batch.end();
 		
 		
