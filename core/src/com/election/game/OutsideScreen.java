@@ -24,7 +24,7 @@ import com.badlogic.gdx.math.Polygon;
 import com.badlogic.gdx.math.Polyline;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
-import com.election.game.ElectionGame.GameState;
+import com.election.game.States.GameState;
 import com.election.game.camera.OrthographicCameraMovementWrapper;
 import com.election.game.render.DebugRenderer;
 import com.election.game.render.SpriteAndTiledRenderer;
@@ -224,21 +224,52 @@ public class OutsideScreen implements Screen, InputProcessor {
 
 	}
 
+	private void renderSprites(float delta) {
+		Gdx.gl.glClearColor(0, 0, 0, 1);
+        Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
+
+		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
+		 
+
+		camera.source.update();
+		mapRenderer.setView(camera.source);		
+		mapRenderer.render();
+
+		
+		DebugRenderer.DrawDebugCameraScrollBounds( camera);
+		
+	}
+	
 	private void renderHud(float delta) {
 		Matrix4 uiMatrix = camera.source.combined.cpy();
 		uiMatrix.setToOrtho2D(0, 0, Constants.WINDOWS_GAME_WIDTH, Constants.WINDOWS_GAME_HEIGHT);
 		ElectionGame.GAME_OBJ.hudBatch.setProjectionMatrix(uiMatrix);
 		ElectionGame.GAME_OBJ.hudBatch.begin();
-			//DRAW FPS
-			//font.setColor(1f,1f,1f, 1f);
-			ElectionGame.GAME_OBJ.debugFont.draw(ElectionGame.GAME_OBJ.hudBatch, "FPS:" + Gdx.graphics.getFramesPerSecond(), 10, Constants.WINDOWS_GAME_HEIGHT - 100 );
 		
+			
+			renderDebugInfo();
+						
 			//draw dialog box
 			if( ElectionGame.GAME_OBJ.state == GameState.DIALOG){
 				updateDialog(delta);
 			}
 			
 		ElectionGame.GAME_OBJ.hudBatch.end();		
+	}
+
+	private void renderDebugInfo() {
+
+		if(!ElectionGame.GAME_OBJ.isdebug){
+			return;
+		}
+		
+		
+		ElectionGame.GAME_OBJ.debugFont.draw(ElectionGame.GAME_OBJ.hudBatch, "FPS:" + Gdx.graphics.getFramesPerSecond(), 10, Constants.WINDOWS_GAME_HEIGHT - 60 );
+		ElectionGame.GAME_OBJ.debugFont.draw(ElectionGame.GAME_OBJ.hudBatch, "STATE:" + ElectionGame.GAME_OBJ.state, 10, Constants.WINDOWS_GAME_HEIGHT - 76 );
+		ElectionGame.GAME_OBJ.debugFont.draw(ElectionGame.GAME_OBJ.hudBatch, "Candidate Pos: [" + candidate.sprite.getBoundingRectangle().getX() + ", " + candidate.sprite.getBoundingRectangle().getY() + "]", 10, Constants.WINDOWS_GAME_HEIGHT - 92 );
+		ElectionGame.GAME_OBJ.debugFont.draw(ElectionGame.GAME_OBJ.hudBatch, "Camera Position: [" + camera.source.position.x + ", " + camera.source.position.y + "]", 10, Constants.WINDOWS_GAME_HEIGHT - 108 );
+		
+		
 	}
 
 	private void updatePaused(float delta){
@@ -259,6 +290,7 @@ public class OutsideScreen implements Screen, InputProcessor {
 			//should only call this method once.
 			ElectionGame.GAME_OBJ.dialogHandler.startDialog(interactedElector);
 			interactBtn = false;
+			interactedElector = null;
 		}
 		ElectionGame.GAME_OBJ.dialogHandler.draw(ElectionGame.GAME_OBJ.hudBatch, delta);
 		
@@ -288,6 +320,12 @@ public class OutsideScreen implements Screen, InputProcessor {
 
 		Region region = getRegion((int)candidate.sprite.getX(), (int)candidate.sprite.getY());
 		
+		if( region.electorsInRegion.size() == 0){
+			interactedElector = null;
+			return;
+		}
+		
+		
 		for (Electorate elector : region.electorsInRegion) {
 			
 			if( candidate.sprite.getBoundingRectangle().overlaps(elector.sprite.getBoundingRectangle())){
@@ -299,6 +337,7 @@ public class OutsideScreen implements Screen, InputProcessor {
 				
 			}else{
 				elector.hit = false;
+				interactedElector = null;
 				//toggleInteract();
 			}
 	
@@ -313,7 +352,7 @@ public class OutsideScreen implements Screen, InputProcessor {
 		Rectangle movementRegion = camera.boundsRect;
 		
 		
-		if( ! movementRegion.contains(candBound)){
+		if( ! movementRegion.overlaps(candBound)){
 									
 			if( !cameraAtMapEdge ){ 			
 				moveCamera = true;			
@@ -432,24 +471,6 @@ public class OutsideScreen implements Screen, InputProcessor {
 		
 	}
 
-	
-	
-	private void renderSprites(float delta) {
-		Gdx.gl.glClearColor(0, 0, 0, 1);
-        Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
-
-		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
-		 
-
-		camera.source.update();
-		mapRenderer.setView(camera.source);		
-		mapRenderer.render();
-
-		
-		DebugRenderer.DrawDebugCameraScrollBounds( camera);
-		
-	}
-
 
 
 
@@ -534,8 +555,6 @@ public class OutsideScreen implements Screen, InputProcessor {
 				break;	
 			case Keys.NUM_0:
 				//candidate.moveX(-Gdx.graphics.getDeltaTime() );
-				Gdx.app.log(Class.class.getName(), "Candidate Box Position: [" + candidate.sprite.getBoundingRectangle().getX() + ", " + candidate.sprite.getBoundingRectangle().getY() + "]");
-				Gdx.app.log(Class.class.getName(), "Camera Position: [" + camera.source.position.x + ", " + camera.source.position.y + "]");
 				ElectionGame.GAME_OBJ.isdebug = !ElectionGame.GAME_OBJ.isdebug;
 				break;		
 		}
@@ -591,16 +610,20 @@ public class OutsideScreen implements Screen, InputProcessor {
 
 	private void toggleInteract() {
 		
-		if( interactedElector == null){
-			return;
-		}
+
 		
 		interactBtn = !interactBtn;
 		
+		
+		
+		
+		
 		if(interactBtn ){
-			
-			ElectionGame.GAME_OBJ.state = GameState.DIALOG;			
-			Gdx.input.setInputProcessor(ElectionGame.GAME_OBJ.dialogHandler);
+
+			if( interactedElector != null){
+				ElectionGame.GAME_OBJ.state = GameState.DIALOG;			
+				Gdx.input.setInputProcessor(ElectionGame.GAME_OBJ.dialogHandler);
+			}
 			
 		}else{
 			ElectionGame.GAME_OBJ.state = GameState.RUNNING;

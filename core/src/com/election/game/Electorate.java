@@ -31,7 +31,8 @@ public class Electorate {
 
 		sprite = new Sprite(texture);
 		this.influenceLevel = ElectionGame.randGen.nextInt(INFLUENCE_MAX);
-		this.id = Electorate.getNewId();
+		this.id = 0;//for testing purposes 
+		//this.id = Electorate.getNewId();
 	}
 
 	private static int getNewId() {

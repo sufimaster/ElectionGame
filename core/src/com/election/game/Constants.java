@@ -9,7 +9,7 @@ public class Constants {
 	
 	
 	public static final String NPC_LOCATION_LAYER = "npc_locations";
-	public static final int ELECTORATE_COUNT_MAX = 50;
+	public static final int ELECTORATE_COUNT_MAX = 5;
 	
 	public static final String GAME_TITLE = "ELection Game";
 
@@ -18,7 +18,7 @@ public class Constants {
 	public static final float CAM_YSPEED = 100;
 	public static final float CAM_XSPEED = 100;
 	
-	public static final float CAM_MOVE_SCREEN_PERCENTAGE = .01f;
+	public static final float CAM_MOVE_SCREEN_PERCENTAGE = .04f;
 	
 	public static final int TILE_NUMBER = 32;
 	public static final int TILE_SIZE = WINDOWS_GAME_WIDTH/TILE_NUMBER;
@@ -30,6 +30,7 @@ public class Constants {
 	public static final String DIALOG_TREES_PATH="dialog/dialog_trees.json";
 	public static final String DIALOG_LINES_PATH="dialog/dialog_lines.json";
 	public static final int UNSELECTED = -128929;
+	public static final int NO_MORE_DIALOG = -12123;
 
 	
 }

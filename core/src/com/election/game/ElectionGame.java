@@ -10,6 +10,7 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator.FreeTypeFontParameter;
+import com.election.game.States.GameState;
 import com.election.game.dialog.DialogHandler;
 import com.election.game.dialog.DialogParser;
 
@@ -26,7 +27,7 @@ public class ElectionGame extends Game {
 	
 	public static Random randGen = new Random(System.currentTimeMillis());
 	
-	public enum GameState { READY, RUNNING, DIALOG, PAUSED, GAMEOVER } 
+	
 	public GameState state = GameState.READY;
 	private boolean isPaused = false;
 	

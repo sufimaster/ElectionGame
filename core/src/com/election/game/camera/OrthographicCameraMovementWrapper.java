@@ -22,7 +22,7 @@ public class OrthographicCameraMovementWrapper {
 	private Vector2 prevPosition;
 	
 	//length of time it takes camera to snap to player position in seconds
-	private int timeToSnap = 2;
+	private int timeToSnap = 1;
 	
 	
 		
@@ -59,7 +59,7 @@ public class OrthographicCameraMovementWrapper {
 		//TODO: if this line is used instead of the uncommented line, the camera follows candidate closer, but introduces jitter in the screen/characters
 		//source.translate((int)camSpeed.x*delta, (int)camSpeed.y*delta);
 		
-		source.translate((int)(camSpeed.x*delta), (int)(camSpeed.y*delta));
+		source.translate((camSpeed.x*delta),(camSpeed.y*delta));
 		syncRects();
 	}
 	

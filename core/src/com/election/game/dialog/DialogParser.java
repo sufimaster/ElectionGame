@@ -1,11 +1,13 @@
 package com.election.game.dialog;
 
 import java.io.IOException;
+import java.io.Writer;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -55,7 +57,7 @@ public class DialogParser {
 	private Map <String, DialogTree> parseDialogTrees(String dialogTrees) {
 		
 		
-		Map <String, DialogTree> dialogTree = gson.fromJson( dialogTrees, new TypeToken<Map<String, DialogTree>>(){}.getType() );
+		Map <String, DialogTree> dialogTree = gson.fromJson( dialogTrees, new TypeToken<LinkedHashMap<String, DialogTree>>(){}.getType() );
 		
 		return dialogTree;
 	}
@@ -64,12 +66,21 @@ public class DialogParser {
 	private Map<String, Dialog> parseDialogs(String dialogLines) {
 
 		
-		Map<String, Dialog>  lines = gson.fromJson( dialogLines, new TypeToken<Map<String, Dialog>>(){}.getType() );
+		Map<String, Dialog>  lines = gson.fromJson( dialogLines, new TypeToken<LinkedHashMap<String, Dialog>>(){}.getType() );
 		
 		return lines;
 	}
 
 
+	private void marshalDialog(DialogContainer holder, Writer writer){
+		
+		
+		gson.toJson(holder, writer);
+		
+		
+	}
+	
+	
 	//test
 	public static void main(String []args){
 		

@@ -3,27 +3,33 @@ package com.election.game.dialog;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.InputProcessor;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.Texture.TextureFilter;
+import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.utils.Align;
 import com.election.game.Constants;
 import com.election.game.ElectionGame;
-import com.election.game.ElectionGame.GameState;
 import com.election.game.Electorate;
+import com.election.game.States.*;
+
 
 public class DialogHandler implements InputProcessor {
 	
-	private static final float WIDTH = 10;
-	public Sprite sprite;
+	private static final float BUFFER_WIDTH = 20;
+	public Sprite dialogBox;
+	public Sprite choiceBox;
 	public Vector2 position;
 	
 	public Rectangle rect;
@@ -32,9 +38,10 @@ public class DialogHandler implements InputProcessor {
 	Electorate elector;
 
 	DialogContainer dialogObj;
-	DialogTree dialogTree;
+	DialogTree candidateDialogTree;
 	Map<String, String> currentDialogOptions;
-	Dialog currentElectorDialog;
+	//Dialog currentElectorDialog;
+	Dialog displayingDialog;
 	
 	BitmapFont font;
 	BitmapFont selectedFont;
@@ -48,25 +55,43 @@ public class DialogHandler implements InputProcessor {
 	int selectedDialogOption= Constants.UNSELECTED;
 	//private int dialogOptionCount;
 	
-	private boolean selectDialogTransition = false;
-	private float transitionTime = 10f;
+
 	
 	float accum = 0f;
-	private boolean endDialog = false;;
+	//private boolean endDialog = false;;
+	
+
+	
+	public DialogState dialogState=DialogState.DISPLAYING;
+	
+	public Animation prompt;
+	
+	public GlyphLayout layout1;
+	public GlyphLayout layout2;
 	
 	public DialogHandler(DialogContainer dialogContainer, BitmapFont font, BitmapFont selectedFont){
 		init();
 		
-		Texture texture = new Texture(Gdx.files.internal("dialog_box.png"));
+		Texture texture = new Texture(Gdx.files.internal("dialog_box2.png"));
 		texture.setFilter(TextureFilter.Linear, TextureFilter.Linear);
 		
-		sprite = new Sprite(texture);
+		dialogBox = new Sprite(texture);		
+		dialogBox.setSize(dialogBox.getWidth()*0.2f, dialogBox.getHeight()* 0.2f);
+		dialogBox.setOriginCenter();
 		
-		sprite.setOrigin(0, 0);
-		sprite.setScale(0.3f);
 		
-		sprite.translateY(-20);
-		sprite.translateX(-20);
+		layout1 = new GlyphLayout(); 
+		layout1.width = dialogBox.getWidth() - BUFFER_WIDTH;
+		
+		
+		choiceBox = new Sprite(texture);
+		choiceBox.setSize(choiceBox.getWidth()*0.2f, choiceBox.getHeight()* 0.1f);
+		choiceBox.setOriginCenter();
+		
+		layout2= new GlyphLayout(); 
+		layout2.width = choiceBox.getWidth() - BUFFER_WIDTH;
+		
+		
 		
 		//shapeRenderer = new ShapeRenderer();
 		rect = new Rectangle(Gdx.graphics.getWidth()/6, Gdx.graphics.getHeight()/2, Gdx.graphics.getWidth()/2, Gdx.graphics.getHeight()/2 );
@@ -75,6 +100,8 @@ public class DialogHandler implements InputProcessor {
 		this.selectedFont = selectedFont;
 		
 		dialogObj = dialogContainer;
+		
+		//prompt = new Animation(10, );
 		
 	}
 
@@ -85,57 +112,43 @@ public class DialogHandler implements InputProcessor {
 		highlightedDialogOption=0;
 		selectedDialogOption= Constants.UNSELECTED;
 		
-		selectDialogTransition = false;
 		accum = 0f;
-		endDialog = false;
 		
+		elector = null;
+		displayingDialog = null;
 		currentDialogOptions = null;
-		currentElectorDialog = null;
-		dialogTree = null;
+		candidateDialogTree = null;
 	}
 	
 	
 	public void draw(SpriteBatch batch, float delta){
 		
-		accum +=delta;
+		//Gdx.app.log(this.getClass().getName(), "Dialog State:" + dialogState);
 		
 		if(!dialogEnabled){
 			return;
 		}
 		
 		
-		/*TODO: 
-		 * can't use shaperenderer inside of spritebatch begin/end, 
-		 * because they both alter GL state. Figure out another way!
-		 * 
-		 * 
-		shapeRenderer.setProjectionMatrix(batch.getProjectionMatrix());
-		shapeRenderer.setTransformMatrix(batch.getTransformMatrix());
-		
-		shapeRenderer.begin(ShapeType.Line);		
-		shapeRenderer.setColor(1, 1, 0, 1);
-		shapeRenderer.rect(rect.x-WIDTH, 0, rect.width + WIDTH, rect.height + WIDTH);
-		shapeRenderer.end();
-
-		shapeRenderer.begin(ShapeType.Filled);
-		shapeRenderer.setColor(.3f, .5f, .6f, 1);
-		shapeRenderer.rect(rect.x, WIDTH, rect.width , rect.height );
-		shapeRenderer.end();
-		 */
-		
-		drawCandidateDialog(batch);
-		
-		if( currentElectorDialog !=null ){
-		
-			drawElectorateDialog(batch);
+		if( dialogState == DialogState.DISPLAYING){
 			
-		}
+			if( displayingDialog != null){
+				drawDialog(batch);
+			}
+			
+		}else if( dialogState == DialogState.WAITING_TO_DISMISS){
+			
+			drawDialog(batch);
+			drawPrompt( batch);
+			
+		}else if( dialogState == DialogState.MAKING_SELECTION){
 		
-		//but this means that the last elector response will be drawn, but not seen since the dialog is ended immediate. 
-		//need to introduce some lag here.
-		if( endDialog && accum >=transitionTime){
+			drawDialog(batch);
+			drawCandidateOptions(batch);
+						
+		}else if( dialogState == DialogState.ENDING){
+			
 			endDialog();
-			accum = 0;
 		}
 		
 		
@@ -145,15 +158,51 @@ public class DialogHandler implements InputProcessor {
 
 
 
-	private void drawCandidateDialog(SpriteBatch batch) {
+	private void drawPrompt(SpriteBatch batch) {
+
+		
+		//Gdx.app.log(this.getClass().getName(), "Press Enter to proceed");
+		selectedFont.draw(batch, "Press enter to continue", dialogBox.getX()+ dialogBox.getWidth()/2 - BUFFER_WIDTH, dialogBox.getY()/2 - BUFFER_WIDTH);
+		
+	}
+
+
+	private void drawDialog(SpriteBatch batch) {
+		
+		if( displayingDialog !=null){
+			
+			layout1.setText(font, displayingDialog.id + ": " + displayingDialog.value, Color.RED, dialogBox.getWidth() , Align.topLeft, true );
+			//float width = layout.width;
+			//float height = layout.height;
+			
+			
+			dialogBox.draw(batch);
+			font.draw(batch, layout1, dialogBox.getX()+ BUFFER_WIDTH, dialogBox.getY() + dialogBox.getHeight()/1.6f - BUFFER_WIDTH);
+		}
+		
+		if( candidateDialogIdx == Constants.NO_MORE_DIALOG){
+			dialogState = DialogState.WAITING_TO_DISMISS;
+		}	else{
+			dialogState = DialogState.MAKING_SELECTION;
+		}
+		
+		
+		
+		
+	}
+
+	private void drawCandidateOptions(SpriteBatch batch) {
 		
 		//get the list of dialogs available for candidate to say
-		List<Map<String, String>> list  = dialogTree.getInput();				
+		List<Map<String, String>> list  = candidateDialogTree.getInput();				
 
-		//get the dialogs the candidate says to elector (depending on where the conversation is)
+		//get the dialogs the candidate says to elector 
+		//if the first time, candidateDialogIdx shold be 0
+		//if its later in the conversation, candidateIdx should be the index for the particular
+		//tree that is in response to the elector's response
 		currentDialogOptions = list.get(candidateDialogIdx);		
 		
-		sprite.draw(batch);
+		choiceBox.draw(batch);
 		
 		
 		//iterate through each of the dialog line options for the candidate and print them
@@ -166,36 +215,21 @@ public class DialogHandler implements InputProcessor {
 			Dialog text = dialogObj.getDialogs().get(key);
 			
 			if( count==highlightedDialogOption){
-				selectedFont.draw(batch, text.id + ": " + text.value, rect.x + WIDTH, rect.height - 10 - yOffset);
+				layout2.setText(selectedFont,  text.id + ": " + text.value, Color.RED, choiceBox.getWidth(), Align.topLeft, true );
+				
+				selectedFont.draw(batch, layout2, 10, choiceBox.getY() + choiceBox.getHeight()/1.7f - yOffset);
 			}else{			
-				font.draw(batch, text.id + ": " + text.value, rect.x + WIDTH, rect.height - 10 - yOffset);
+				
+				layout2.setText(font,  text.id + ": " + text.value, Color.RED, choiceBox.getWidth(), Align.topLeft, true );
+				font.draw(batch, layout2, 10, choiceBox.getY() + choiceBox.getHeight()/1.7f- yOffset);
 			}
 			
-			yOffset+=16;
+			yOffset+=layout2.height + 3;
 			count++;
 		}		
 	}
 
 
-
-
-
-	private void drawElectorateDialog(SpriteBatch batch) {
-
-		Dialog text = dialogObj.getDialogs().get(currentElectorDialog.id);
-		
-		
-		font.draw(batch, text.id + ": " + text.value, rect.width, rect.height/2);
-		
-		
-		//selectedDialogOption = Constants.UNSELECTED;
-	}
-
-
-
-	
-	
-	
 
 	private void resetDialog() {
 		init();
@@ -206,7 +240,7 @@ public class DialogHandler implements InputProcessor {
 
 	public void startDialog(Electorate interactedElector) {
 		
-		Gdx.app.log(this.getClass().getName(), "Starting Dialog");
+		Gdx.app.log(this.getClass().getName(), "Starting Dialog with "+ interactedElector.id);
 
 		resetDialog();
 		
@@ -214,7 +248,19 @@ public class DialogHandler implements InputProcessor {
 		dialogEnabled = true;
 		elector = interactedElector;		
 		//dialogTree = dialogObj.getDialogTrees().get("" + interactedElector.id);
-		dialogTree = dialogObj.getDialogTrees().get("" + 0);
+		
+		
+		candidateDialogTree = dialogObj.getDialogTrees().get("" + interactedElector.id);
+		
+		if( candidateDialogTree == null){
+			endDialog();
+			return;
+		}
+		
+		if( candidateDialogTree.input.size() > 0){
+			dialogState = DialogState.MAKING_SELECTION;
+		}
+		
 		
 		
 	}
@@ -222,14 +268,141 @@ public class DialogHandler implements InputProcessor {
 
 	public void endDialog(){
 		Gdx.app.log(this.getClass().getName(), "Ending Dialog");
-
 		dialogEnabled = false;
+		resetDialog();
+
+		
 		ElectionGame.GAME_OBJ.state = GameState.RUNNING;
 		Gdx.input.setInputProcessor((InputProcessor) ElectionGame.GAME_OBJ.getScreen());
 		
 	}
 
 
+
+
+	
+
+	
+	private void continueDialog() {
+		// TODO Auto-generated method stub
+
+
+		if( candidateDialogIdx == Constants.NO_MORE_DIALOG ){
+			dialogState= DialogState.ENDING;
+		}else{
+			
+			String idx = candidateDialogTree.getOutput().get(displayingDialog.id);
+
+			if( idx != null && !idx.isEmpty()){
+				candidateDialogIdx = Integer.parseInt(idx);
+				dialogState = DialogState.MAKING_SELECTION;
+			}else{
+				candidateDialogIdx = Constants.NO_MORE_DIALOG;
+				dialogState = DialogState.WAITING_TO_DISMISS;
+			}
+	
+			
+		}
+	}
+
+
+	/*
+	 * Once a player selects the dialog they want their candidate to say, 
+	 * it will call this method, lock in that dialog, and choose the elector's response
+	 * 
+	 */
+	private void selectLine() {
+		
+		
+		if( dialogState != DialogState.MAKING_SELECTION){
+			return;
+		}
+		
+
+		//lock in the highlighted dialog line
+		selectedDialogOption = highlightedDialogOption;
+		
+		
+		/*
+		 * selectedDialogOption will be from 0 to # of dialog options
+		but the ids for the dialog options could start at 0, or 1 or 2 etc - e.g., "C3", "C4", "C5" could be options
+		so we need to find which id matches up with the selectedDialogOptions
+		*
+		*/		
+		int count =0;
+		String selectedCandidateKey = null;		
+		Set<String> keys = currentDialogOptions.keySet();
+		
+		Iterator<String> itr = keys.iterator();		
+		while (itr.hasNext()) {		
+			selectedCandidateKey= (String) itr.next();	
+
+			if( count == selectedDialogOption ){
+				break;
+			}else{			
+				count++;
+			}
+		}
+		
+		//get the elector response KEY (like R1, R2 etc) mapped to the selected Candidate dialog line C1, C2, etc...
+		//if this is null, that means you display the final response, and end the dialog
+		String electorDialogKey = currentDialogOptions.get(selectedCandidateKey);
+		Gdx.app.log(this.getClass().getName(), "Candidate key: " + selectedCandidateKey + ", NPC key:" + electorDialogKey);
+		
+		
+		//if the elector has nothing else to say, then end the dialog
+		//else, get the candidate's array of responses available 
+		if( electorDialogKey != null && !electorDialogKey.isEmpty()){
+		
+			//get the index for the candidate dialog tree associated with the elector response
+			String temp = candidateDialogTree.output.get( electorDialogKey );
+			
+			if( temp != null && !temp.isEmpty()){
+				candidateDialogIdx = Integer.parseInt( temp );	
+			}else{
+				candidateDialogIdx = Constants.NO_MORE_DIALOG;
+			}
+			
+			//get the actual elector response object mapped to the key
+			//currentElectorDialog = dialogObj.getDialogs().get(electorDialogKey);
+			displayingDialog = dialogObj.getDialogs().get(electorDialogKey);
+			dialogState = DialogState.DISPLAYING;	
+			
+			//reset which dialog line is highlighted
+			selectedDialogOption = 0;
+		}
+		
+		
+		dialogState = DialogState.DISPLAYING;
+
+		
+	}
+
+
+
+
+	/*
+	 * highlight option when user presses up/down key
+	 */
+	private void highlightNextOption(int incrementSelection) {
+
+		int dialogOptionCount = currentDialogOptions.size();
+
+		if( highlightedDialogOption + incrementSelection>= dialogOptionCount ){
+			//if you press down at last dialog option, loop back to beginning			
+			highlightedDialogOption = 0;
+			
+		}else if( highlightedDialogOption + incrementSelection < 0){
+			//if you press up at first dialog option, loop back to end
+			highlightedDialogOption = dialogOptionCount-1;
+			
+		}else{
+			
+			//otherwise, just move down or up.
+			highlightedDialogOption+= incrementSelection;
+			
+		}
+	}
 
 
 	@Override
@@ -252,13 +425,33 @@ public class DialogHandler implements InputProcessor {
 			break;
 		case Keys.UP:
 		case Keys.W:
-			selectNextOption(-1);		
+			highlightNextOption(-1);		
 			break;
 		case Keys.DOWN:
 		case Keys.S:
-			selectNextOption(1);
+			highlightNextOption(1);
 			break;			
 		case Keys.ENTER:
+			if( dialogState == DialogState.DISPLAYING){
+				break;
+			}
+			
+			if( dialogState == DialogState.MAKING_SELECTION){				
+				selectLine();
+				break;
+			}
+			
+			if( dialogState == DialogState.WAITING_TO_DISMISS){
+				continueDialog();
+				break;
+			}
+			
+			if( dialogState == DialogState.ENDING){
+				endDialog();
+				break;
+			}
+			
+			break;
 		case Keys.E:
 			selectLine();
 			break;
@@ -268,70 +461,6 @@ public class DialogHandler implements InputProcessor {
 		return false;
 		
 	}
-
-
-
-
-
-	private void selectLine() {
-		
-		
-		selectDialogTransition = true;
-
-		//lock in the highlighted dialog line
-		selectedDialogOption = highlightedDialogOption;
-		
-		//get the elector response KEY (like R1, R2 etc) mapped to the selected Candidate dialog line
-		//if this is null, that means you display the final response, and end the dialog
-		String electorDialogKey = currentDialogOptions.get("C" + selectedDialogOption);
-		Gdx.app.log(this.getClass().getName(), "Elector Respose Dialog ID:" + electorDialogKey);
-		
-		
-		//if the elector has nothing else to say, then end the dialog
-		//else, get the candidate's array of responses available, and 
-		if( electorDialogKey == null){
-			endDialog = true;
-		}else{
-		
-			//get the index for the candidate dialog tree associated with the elector response
-			candidateDialogIdx = Integer.parseInt(dialogTree.output.get( electorDialogKey ) );
-			
-			//get the actual elector response object mapped to the key
-			currentElectorDialog = dialogObj.getDialogs().get(electorDialogKey);
-			
-			//reset which dialog line is highlighted
-			selectedDialogOption = 0;
-		}
-		
-		
-	}
-
-
-
-
-
-	private void selectNextOption(int incrementSelection) {
-
-		int dialogOptionCount = currentDialogOptions.size();
-
-		if( highlightedDialogOption + incrementSelection>= dialogOptionCount ){
-			//if you press down at last dialog option, loop back to beginning			
-			highlightedDialogOption = 0;
-			
-		}else if( highlightedDialogOption + incrementSelection < 0){
-			//if you press up at first dialog option, loop back to end
-			highlightedDialogOption = dialogOptionCount-1;
-			
-		}else{
-			
-			//otherwise, just move down or up.
-			highlightedDialogOption+= incrementSelection;
-			
-		}
-	}
-
-
-
 
 
 	@Override

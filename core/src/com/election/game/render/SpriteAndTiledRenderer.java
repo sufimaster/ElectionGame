@@ -8,6 +8,7 @@ import com.badlogic.gdx.maps.MapObject;
 import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
 import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer;
+import com.election.game.ElectionGame;
 import com.election.game.Electorate;
 import com.election.game.camera.OrthographicCameraMovementWrapper;
 import com.election.game.sprites.Candidate;
@@ -50,6 +51,7 @@ public class SpriteAndTiledRenderer extends OrthogonalTiledMapRenderer {
 						
 						for (Electorate elector : sprites) {
 							
+							ElectionGame.GAME_OBJ.debugFont.draw(this.getBatch(), "id" + elector.id, elector.sprite.getX(), elector.sprite.getY() );
 							elector.sprite.draw(this.getBatch());
 
 						}
