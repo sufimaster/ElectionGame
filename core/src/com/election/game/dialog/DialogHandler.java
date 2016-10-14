@@ -41,7 +41,7 @@ public class DialogHandler implements InputProcessor {
 	DialogTree candidateDialogTree;
 	Map<String, String> currentDialogOptions;
 	//Dialog currentElectorDialog;
-	Dialog displayingDialog;
+	DialogModel displayingDialog;
 	
 	BitmapFont font;
 	BitmapFont selectedFont;
@@ -212,7 +212,7 @@ public class DialogHandler implements InputProcessor {
 		while(itr.hasNext()){
 			
 			String key = itr.next();				
-			Dialog text = dialogObj.getDialogs().get(key);
+			DialogModel text = dialogObj.getDialogs().get(key);
 			
 			if( count==highlightedDialogOption){
 				layout2.setText(selectedFont,  text.id + ": " + text.value, Color.RED, choiceBox.getWidth(), Align.topLeft, true );

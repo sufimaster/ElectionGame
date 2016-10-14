@@ -42,7 +42,7 @@ public class DialogParser {
 		
 		
 		Map <String, DialogTree> dialogTrees = parseDialogTrees(dialogTreesText);
-		Map<String,Dialog> dialogLines = parseDialogs(dialogLinesText);
+		Map<String,DialogModel> dialogLines = parseDialogs(dialogLinesText);
 		
 		
 		holder.setDialogTrees(dialogTrees);
@@ -63,10 +63,10 @@ public class DialogParser {
 	}
 
 
-	private Map<String, Dialog> parseDialogs(String dialogLines) {
+	private Map<String, DialogModel> parseDialogs(String dialogLines) {
 
 		
-		Map<String, Dialog>  lines = gson.fromJson( dialogLines, new TypeToken<LinkedHashMap<String, Dialog>>(){}.getType() );
+		Map<String, DialogModel>  lines = gson.fromJson( dialogLines, new TypeToken<LinkedHashMap<String, DialogModel>>(){}.getType() );
 		
 		return lines;
 	}
@@ -95,7 +95,7 @@ public class DialogParser {
 		
 			
 		Map <String, DialogTree> dialogTree = parser.parseDialogTrees(dialogTreesContent);
-		Map<String, Dialog>  dialogLines = parser.parseDialogs(dialogLinesContent);
+		Map<String, DialogModel>  dialogLines = parser.parseDialogs(dialogLinesContent);
 
 		System.out.println(dialogTree);
 		

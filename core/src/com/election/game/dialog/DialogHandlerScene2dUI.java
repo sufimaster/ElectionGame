@@ -3,12 +3,24 @@ package com.election.game.dialog;
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.GL20;
+import com.badlogic.gdx.scenes.scene2d.Actor;
+import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.ui.Button;
+import com.badlogic.gdx.scenes.scene2d.ui.Dialog;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.ScrollPane;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
+import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
+import com.badlogic.gdx.scenes.scene2d.ui.TextField;
+import com.badlogic.gdx.scenes.scene2d.ui.Window;
+import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
+import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
+import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener.ChangeEvent;
 import com.badlogic.gdx.utils.Align;
+import com.badlogic.gdx.utils.Timer;
+import com.badlogic.gdx.utils.viewport.StretchViewport;
 
 public class DialogHandlerScene2dUI extends Game{
 
@@ -25,9 +37,9 @@ public class DialogHandlerScene2dUI extends Game{
 	
 	
 	private Stage stage;
-	private Table dialogDisplay;
+	private Window dialogDisplay;
 	
-	private Table dialogSelection;
+	private Window dialogSelection;
 	Skin skin;
 	
 	float timeToDrawLetter = .3f;
@@ -39,6 +51,10 @@ public class DialogHandlerScene2dUI extends Game{
 
 
 	private Label label;
+
+
+
+	private Dialog dialog;
 	
 	//public DialogHandlerScene2dUI(){
 		
@@ -61,7 +77,7 @@ public class DialogHandlerScene2dUI extends Game{
 	}
 
 	private void createDialogDisplay() {
-		dialogDisplay = new Table();
+		dialogDisplay = new Window("Dialog", skin);
 		dialogDisplay.setSize(Gdx.graphics.getWidth()/2, Gdx.graphics.getHeight()/2);
 		//dialogDisplay.setDebug(true);
 		dialogDisplay.setPosition(100, 100);
@@ -74,34 +90,69 @@ public class DialogHandlerScene2dUI extends Game{
 		
 		final ScrollPane scroll = new ScrollPane(table, skin);
 		scroll.setFadeScrollBars(false);
-		scroll.setDebug(true);
+		//scroll.setDebug(true);
+		
+		
 		label = new Label(longText, skin);	
-
 		label.setWrap(true);
 		label.setFillParent(true);
-		
 		
 		table.row();
 		table.add( label);
 		
+		TextButton closeButton = new TextButton("X", skin);
+		closeButton.addListener(new ChangeListener() {
+			
+			@Override
+			public void changed(ChangeEvent event, Actor actor) {
+				closeDialog();
+				
+			}
+
+			
+		});
+		
+		dialogDisplay.getTitleTable().add(closeButton);
+		
 		
 		dialogDisplay.add(scroll).expand().fill().colspan(4);
 		dialogDisplay.row().space(10).padBottom(10);
+		TextButton continueButton = new TextButton("Ok", skin);
+		continueButton.addListener(new ChangeListener() {
+			
+			@Override
+			public void changed(ChangeEvent event, Actor actor) {
+				// change state to DIALOG_MAKING_SELECTION
+				
+			}
+		});
+		
+		dialogDisplay.add(continueButton);
+		
+		
 	}
 	
+	
+	private void closeDialog() {
+		dialogDisplay.remove();
+		dialogSelection.remove();
+		
+	}
+	
+	
 	public void createDialogSelection(){
-		dialogSelection = new Table();
+		
+		dialogSelection = new Window("Choices", skin);
 		dialogSelection.setSize(Gdx.graphics.getWidth()/3, Gdx.graphics.getHeight()/2);
-		dialogSelection.setDebug(true);
+		dialogSelection.setDebug(false);
 		dialogSelection.setPosition( 20 + dialogDisplay.getX() + dialogDisplay.getWidth(), 100);
 		
 		stage.addActor(dialogSelection);
 				
 		Table table = new Table();
 		table.debug();
-		table.left().top();		
-		//table.setFillParent(true);
-		table.align(Align.left);
+		//table.top().left();		
+		//table.setHeight(stage.getHeight());
 
 		final ScrollPane scroll = new ScrollPane(table, skin);		
 		scroll.setFadeScrollBars(false);
@@ -109,34 +160,39 @@ public class DialogHandlerScene2dUI extends Game{
 		
 		Label choice1 = new Label("First Choice. dfhusfiuwheiorisguergiuhserguhergiuhueghetyr5eh5475h 766ruig6b75yvctq3 tw43qwt35 yt46y654 ye567h546 gh546rg", skin);			
 		choice1.setWrap(true);
-		choice1.setFillParent(true);
+		choice1.setAlignment(Align.left);
+		//choice1.setFillParent(true);
 		
 		Label choice2 = new Label("Second Choice.dfhusfiuwheiorisguergiuhserguhergiuhueghetyr5eh5475hdfhusfiuwheiorisguergiuhserguhergiuhueghetyr5eh5475hdfhusfiuwheiorisguergiuhserguhergiuhueghetyr5eh5475h", skin);			
 		choice2.setWrap(true);
-		choice2.setFillParent(true);
+		choice2.setAlignment(Align.left);
+		//choice2.setFillParent(true);
 		
 		Label choice3 = new Label("Third Choice. 98h9f8494j90q23j 98 q394fh3q94 th23943qgh46h37894tr3j809r  0394rj 0q394rj 0q394 j093q4 jr0934jr 0q394 jr", skin);			
 		choice3.setWrap(true);
-		choice3.setFillParent(true);
+		choice3.setAlignment(Align.left);
+		//choice3.setFillParent(true);
 		
 		Label choice4 = new Label("Fourth Choice.29	y0r9 4powkj[qK {PK 02P34W JR0T934 JT349JT0943WJ P0j  	-09pjpoj- j-e3p50j39t309", skin);			
 		choice4.setWrap(true);
-		choice4.setFillParent(true);
+		choice4.setAlignment(Align.left);
+		//choice4.setFillParent(true);
 		
 		
 		
 		//table.padTop(100);
-
-		table.add( choice1);//.expandY();
-		table.row();
-		table.add( choice2);//.fill();
-		table.row();
-		table.add( choice3);//.fill();
-		table.row();
-		table.add( choice4);//.fill();
+		table.add( choice1).expandY().growX().top().left();
+		table.row().pad(15);
+		table.add( choice2).expandY().growX().top().left();
+		table.row().pad(15);
+		table.add( choice3).expandY().growX().top().left();
+		table.row().pad(15);
+		table.add( choice4).expandY().growX().top().left();
 		
-		dialogSelection.add(scroll).expand().fill().colspan(4);
-		dialogSelection.row().space(10).padBottom(10);
+		dialogSelection.add(scroll).expand().fill().colspan(1);
+
+
+	
 	}
 	
 	public void render () {

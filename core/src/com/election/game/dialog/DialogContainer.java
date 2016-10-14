@@ -7,7 +7,7 @@ public class DialogContainer {
 	
 	private Map<String, DialogTree> dialogTrees;
 	
-	private Map<String, Dialog> dialogs;
+	private Map<String, DialogModel> dialogs;
 
 	public Map<String, DialogTree> getDialogTrees() {
 		return dialogTrees;
@@ -17,11 +17,11 @@ public class DialogContainer {
 		this.dialogTrees = dialogTrees;
 	}
 
-	public Map<String, Dialog> getDialogs() {
+	public Map<String, DialogModel> getDialogs() {
 		return dialogs;
 	}
 
-	public void setDialogs( Map<String,Dialog> dialogs) {
+	public void setDialogs( Map<String,DialogModel> dialogs) {
 		this.dialogs = dialogs;
 	}
 	
