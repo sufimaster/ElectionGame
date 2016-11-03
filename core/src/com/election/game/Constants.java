@@ -1,14 +1,16 @@
 package com.election.game;
 
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.TreeMap;
+
 import com.badlogic.gdx.Input.Keys;
 
 public class Constants {
 
 	public static final int WINDOWS_GAME_WIDTH = 1024;
 	public static final int WINDOWS_GAME_HEIGHT = 800;
-	
-	
-	public static final String NPC_LOCATION_LAYER = "npc_locations";
+
 	public static final int ELECTORATE_COUNT_MAX = 5;
 	
 	public static final String GAME_TITLE = "ELection Game";
@@ -31,6 +33,29 @@ public class Constants {
 	public static final String DIALOG_LINES_PATH="dialog/dialog_lines.json";
 	public static final int UNSELECTED = -128929;
 	public static final int NO_MORE_DIALOG = -12123;
+	
+	public static final String MAP_OBJ_PHYSICS_LAYER = "physics";
+	public static final String MAP_OBJ_NPC_LOCATION_LAYER = "npc_locations";
+	public static final String MAP_OBJ_OBJECT_TYPE = "type";
+	public static final String MAP_OBJ_DOOR = "door";
+	public static final String MAP_OBJ_DOOR_ID = "id";
 
+	
+	public static final TreeMap<Integer, TownMap> tiledMaps = new TreeMap<Integer, TownMap>();
+	public static final int MAP_OBJ_DOOR_NONE = -1;
+
+	static
+	    {
+	        tiledMaps.put(new Integer(1), new TownMap("maps/town.tmx"));
+	        tiledMaps.put(new Integer(2), new TownMap("maps/house1.tmx"));
+	        tiledMaps.put(new Integer(3), new TownMap("maps/house1.tmx"));
+	        tiledMaps.put(new Integer(4), new TownMap("maps/house1.tmx"));
+	        tiledMaps.put(new Integer(5), new TownMap("maps/house1.tmx"));
+	        tiledMaps.put(new Integer(6), new TownMap("maps/house1.tmx"));
+	        tiledMaps.put(new Integer(7), new TownMap("maps/house1.tmx"));
+	    }
+	
+	
+	
 	
 }

@@ -24,9 +24,6 @@ public class Candidate {
 	}
 	
 	private Direction direction;
-	
-	
-	
 	public Sprite sprite;
 
 	

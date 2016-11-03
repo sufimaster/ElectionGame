@@ -20,4 +20,11 @@ public class DialogModel {
 	}
 
 		
+	@Override
+	public String toString(){
+		
+		return "\t" + id + ": " + value;
+		
+	}
+	
 }

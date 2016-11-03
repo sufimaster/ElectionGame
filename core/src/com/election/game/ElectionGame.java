@@ -10,8 +10,10 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator.FreeTypeFontParameter;
+import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.election.game.States.GameState;
 import com.election.game.dialog.DialogHandler;
+import com.election.game.dialog.DialogHandler2;
 import com.election.game.dialog.DialogParser;
 
 public class ElectionGame extends Game {
@@ -21,10 +23,9 @@ public class ElectionGame extends Game {
 	public SpriteBatch batch;
 	public SpriteBatch hudBatch;
 	public boolean isdebug = true;
-	public DialogHandler dialogHandler;
+	public DialogHandler2 dialogHandler;
 	
-	public static boolean isFullScreen = false;
-	
+	public static boolean isFullScreen = false;	
 	public static Random randGen = new Random(System.currentTimeMillis());
 	
 	
@@ -33,38 +34,48 @@ public class ElectionGame extends Game {
 	
 	public BitmapFont dialogFont;
 	public BitmapFont selectedDialogFont;
-	public BitmapFont debugFont;
-	
+	public BitmapFont debugFont;	
 	public BitmapFont  menuFont;
+	public Skin dialogSkin;
 	
 	
 	
 
 	public void create () {
-		
-		
+		GAME_OBJ = this;
 		
 		Gdx.graphics.setWindowedMode(Constants.WINDOWS_GAME_WIDTH, Constants.WINDOWS_GAME_HEIGHT);
 		
-		hudBatch = new SpriteBatch();
-		batch = new SpriteBatch();
-		font = new BitmapFont();
-		
+		createBatches();
+		createSkins();
 		createFonts();
-		
-		DialogParser dialogParser = new DialogParser();				
-		dialogHandler = new DialogHandler (dialogParser.parseDialog(Constants.DIALOG_TREES_PATH, Constants.DIALOG_LINES_PATH), dialogFont, selectedDialogFont);
-		
-		
-		
-		
+		createDialogObjects();
+				
 		this.setScreen(new MenuScreen(this));
 		
-		GAME_OBJ = this;
 	}
 	
 	
+	
+
+
+	private void createBatches() {
+		hudBatch = new SpriteBatch();
+		batch = new SpriteBatch();		
+	}
+
+
+	private void createSkins() {
+		dialogSkin = new Skin(Gdx.files.internal("data/uiskin.json"));
+		
+	}
+
+
 	public void createFonts(){
+		
+		font = new BitmapFont();
+
+		
 		FreeTypeFontGenerator generator = new FreeTypeFontGenerator(Gdx.files.internal("font/arial.ttf"));
 		FreeTypeFontParameter param = new FreeTypeFontParameter();
 		
@@ -97,6 +108,14 @@ public class ElectionGame extends Game {
 		
 	}
 
+	private void createDialogObjects() {
+
+		DialogParser dialogParser = new DialogParser();				
+		dialogHandler = new DialogHandler2 (dialogParser.parseDialog(Constants.DIALOG_TREES_PATH, Constants.DIALOG_LINES_PATH), dialogFont, selectedDialogFont);
+				
+	}
+	
+	
 	
 	public void render () {
 		
@@ -130,15 +149,15 @@ public class ElectionGame extends Game {
 
 	public void togglePause() {
 
-		isPaused  = !isPaused;
-		
-		if( isPaused){
-			ElectionGame.GAME_OBJ.state = GameState.PAUSED;
-		}else{
-			ElectionGame.GAME_OBJ.state = GameState.RUNNING;
+		if( state == GameState.PAUSED){
+			
+			state = GameState.RUNNING;
+			
+		}else {
+			
+			state = GameState.PAUSED;
+			
 		}
-		
-		
 		
 	}
 	

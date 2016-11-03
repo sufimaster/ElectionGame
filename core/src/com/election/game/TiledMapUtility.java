@@ -56,10 +56,10 @@ public class TiledMapUtility {
 		
 	}
 
-	public static boolean isElectorateSpace(TiledMap townMap, int x, int y) {
+	public static boolean isElectorateSpace(TownMap townMap, int x, int y) {
 
 
-		MapLayer layer  = townMap.getLayers().get(Constants.NPC_LOCATION_LAYER);
+		MapLayer layer  = townMap.tiledMap.getLayers().get(Constants.MAP_OBJ_NPC_LOCATION_LAYER);
 		
 		if( layer == null )		
 			return false;

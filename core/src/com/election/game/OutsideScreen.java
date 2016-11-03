@@ -9,6 +9,7 @@ import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.maps.MapObject;
 import com.badlogic.gdx.maps.MapObjects;
 import com.badlogic.gdx.maps.MapProperties;
@@ -52,10 +53,10 @@ public class OutsideScreen implements Screen, InputProcessor {
 	private OrthographicCameraMovementWrapper camera;	
 	private SpriteAndTiledRenderer mapRenderer;
 	
-	private TiledMap townMap;
+	private TownMap tileMap;
 	
-	private int mapPixelWidth;
-	private int mapPixelHeight;
+	//private int mapPixelWidth;
+	//private int mapPixelHeight;
 	
 	
 	//giggle
@@ -69,6 +70,8 @@ public class OutsideScreen implements Screen, InputProcessor {
 	public Rectangle gameSpace;
 	private boolean interactBtn=false;
 	private Electorate interactedElector;
+	private DebugInfo debugInfo;
+	private int interactedDoor;
 
 	public OutsideScreen(final ElectionGame gameObj) {
 
@@ -87,30 +90,28 @@ public class OutsideScreen implements Screen, InputProcessor {
 		
 				
 		float unitScale = 1 / 1f;
-		townMap = 	new TmxMapLoader().load("town.tmx");
-		mapRenderer = new SpriteAndTiledRenderer(townMap, camera, unitScale);
+		tileMap = 	Constants.tiledMaps.get(1);//new TownMap("town.tmx");//new TmxMapLoader().load("town.tmx");
+		mapRenderer = new SpriteAndTiledRenderer(tileMap, camera, unitScale);
 		
-		MapProperties prop = townMap.getProperties();
-
-		int mapWidth = prop.get("width", Integer.class);
-		int mapHeight = prop.get("height", Integer.class);
-		int tilePixelWidth = prop.get("tilewidth", Integer.class);
-		int tilePixelHeight = prop.get("tileheight", Integer.class);
-
-		mapPixelWidth = mapWidth * tilePixelWidth;
-		mapPixelHeight = mapHeight * tilePixelHeight;
-
-		gameSpace = new Rectangle(0,0, mapPixelWidth, mapPixelHeight);
+		gameSpace = new Rectangle(0,0, tileMap.mapPixelWidth, tileMap.mapPixelHeight);
 		
 		//people that candidate can convince to vote for him
-		initRegions(mapPixelWidth, mapPixelHeight);
+		initRegions(tileMap.mapPixelWidth, tileMap.mapPixelHeight);
 		initElectorate();		
 		//render these using the mapRenderer
 		mapRenderer.setSprites(electorate);
 		mapRenderer.setCandidate(candidate);
 
+		debugInfo = new DebugInfo();
+	}
+	
+	private void loadMap(int mapId, float unitScale){
+		
+		tileMap = Constants.tiledMaps.get(mapId);
+		mapRenderer.resetMap(tileMap, unitScale);
 		
 	}
+	
 
 	private void initRegions(int mapWidth, int mapHeight) {
 		
@@ -158,13 +159,13 @@ public class OutsideScreen implements Screen, InputProcessor {
 			int personType = 1 + ElectionGame.randGen.nextInt(NUM_TYPES_PEOPLE);
 					
 				 
-			int xLoc = (int)(ElectionGame.randGen.nextFloat() * mapPixelWidth);				
-			int yLoc = (int)(ElectionGame.randGen.nextFloat() * mapPixelHeight);
+			int xLoc = (int)(ElectionGame.randGen.nextFloat() * tileMap.mapPixelWidth);				
+			int yLoc = (int)(ElectionGame.randGen.nextFloat() * tileMap.mapPixelHeight);
 			
-			while( !TiledMapUtility.isElectorateSpace(townMap, xLoc, yLoc) ){
+			while( !TiledMapUtility.isElectorateSpace(tileMap, xLoc, yLoc) ){
 				
-				xLoc = (int)(ElectionGame.randGen.nextFloat() * mapPixelWidth);				
-				yLoc = (int)(ElectionGame.randGen.nextFloat() * mapPixelHeight);
+				xLoc = (int)(ElectionGame.randGen.nextFloat() * tileMap.mapPixelWidth);				
+				yLoc = (int)(ElectionGame.randGen.nextFloat() * tileMap.mapPixelHeight);
 				
 			}
 			
@@ -221,6 +222,11 @@ public class OutsideScreen implements Screen, InputProcessor {
 		updateCamera(delta);	
 		renderSprites(delta);
 		renderHud(delta);
+		
+		//draw dialog box
+		if( ElectionGame.GAME_OBJ.state == GameState.DIALOG){
+			updateDialog(delta);
+		}
 
 	}
 
@@ -243,32 +249,16 @@ public class OutsideScreen implements Screen, InputProcessor {
 	private void renderHud(float delta) {
 		Matrix4 uiMatrix = camera.source.combined.cpy();
 		uiMatrix.setToOrtho2D(0, 0, Constants.WINDOWS_GAME_WIDTH, Constants.WINDOWS_GAME_HEIGHT);
+		
 		ElectionGame.GAME_OBJ.hudBatch.setProjectionMatrix(uiMatrix);
 		ElectionGame.GAME_OBJ.hudBatch.begin();
-		
-			
 			renderDebugInfo();
-						
-			//draw dialog box
-			if( ElectionGame.GAME_OBJ.state == GameState.DIALOG){
-				updateDialog(delta);
-			}
-			
 		ElectionGame.GAME_OBJ.hudBatch.end();		
 	}
 
 	private void renderDebugInfo() {
-
-		if(!ElectionGame.GAME_OBJ.isdebug){
-			return;
-		}
 		
-		
-		ElectionGame.GAME_OBJ.debugFont.draw(ElectionGame.GAME_OBJ.hudBatch, "FPS:" + Gdx.graphics.getFramesPerSecond(), 10, Constants.WINDOWS_GAME_HEIGHT - 60 );
-		ElectionGame.GAME_OBJ.debugFont.draw(ElectionGame.GAME_OBJ.hudBatch, "STATE:" + ElectionGame.GAME_OBJ.state, 10, Constants.WINDOWS_GAME_HEIGHT - 76 );
-		ElectionGame.GAME_OBJ.debugFont.draw(ElectionGame.GAME_OBJ.hudBatch, "Candidate Pos: [" + candidate.sprite.getBoundingRectangle().getX() + ", " + candidate.sprite.getBoundingRectangle().getY() + "]", 10, Constants.WINDOWS_GAME_HEIGHT - 92 );
-		ElectionGame.GAME_OBJ.debugFont.draw(ElectionGame.GAME_OBJ.hudBatch, "Camera Position: [" + camera.source.position.x + ", " + camera.source.position.y + "]", 10, Constants.WINDOWS_GAME_HEIGHT - 108 );
-		
+		debugInfo.draw(candidate, camera);
 		
 	}
 
@@ -406,7 +396,7 @@ public class OutsideScreen implements Screen, InputProcessor {
 
 
 		
-		MapObjects mapObjects = townMap.getLayers().get("physics").getObjects();
+		MapObjects mapObjects = tileMap.tiledMap.getLayers().get("physics").getObjects();
  
 		
 		for (MapObject object : mapObjects){
@@ -418,14 +408,26 @@ public class OutsideScreen implements Screen, InputProcessor {
 			
             if (object instanceof RectangleMapObject) {
 
-            	Rectangle rect = ((RectangleMapObject)object).getRectangle();
             	
+            	RectangleMapObject mapObj = (RectangleMapObject)object;
+            	
+            	String type = (String) mapObj.getProperties().get(Constants.MAP_OBJ_OBJECT_TYPE);
+            	        	
+            	Rectangle rect = mapObj.getRectangle();
+            	
+            	          	
             	if( rect.overlaps(candidate.sprite.getBoundingRectangle())){
             		
-            		candidate.sprite.setPosition(prevPosition.x, prevPosition.y);
-            		moveCamera= false;
-            		/*String type = (String) object.getProperties().get("type");
-        			System.out.println("Object type: " + type);*/	
+            		//If its a door, and you are overlapping, let candidate move through, and set the ID for the interactedDoor
+            		if( type.equals(Constants.MAP_OBJ_DOOR)){
+                		interactedDoor = Integer.parseInt( (String) mapObj.getProperties().get(Constants.MAP_OBJ_DOOR_ID) ); 
+                	}else{
+                		interactedDoor = Constants.MAP_OBJ_DOOR_NONE;
+                		candidate.sprite.setPosition(prevPosition.x, prevPosition.y);
+                		moveCamera= false;
+
+                	}
+                	
             	}
             	
             	
@@ -471,17 +473,6 @@ public class OutsideScreen implements Screen, InputProcessor {
 		
 	}
 
-
-
-
-	private void transitionToInsideScreen() {
-		ElectionGame.GAME_OBJ.setScreen(new InsideScreen(candidate));
-		dispose();
-	}
-
-
-	
-	
 	
 	
 	@Override
@@ -516,7 +507,7 @@ public class OutsideScreen implements Screen, InputProcessor {
 		}
 		*/
 		
-		townMap.dispose();
+		tileMap.tiledMap.dispose();
 	}
 
 	
@@ -608,6 +599,7 @@ public class OutsideScreen implements Screen, InputProcessor {
 		return true;
 	}
 
+	
 	private void toggleInteract() {
 		
 
@@ -620,6 +612,12 @@ public class OutsideScreen implements Screen, InputProcessor {
 		
 		if(interactBtn ){
 
+			
+			if( interactedDoor != Constants.MAP_OBJ_DOOR_NONE){
+				loadMap(interactedDoor, 1);
+				return;
+			}
+			
 			if( interactedElector != null){
 				ElectionGame.GAME_OBJ.state = GameState.DIALOG;			
 				Gdx.input.setInputProcessor(ElectionGame.GAME_OBJ.dialogHandler);
