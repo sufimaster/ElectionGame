@@ -20,7 +20,9 @@ public class Electorate {
 	// List of terrain types the electorate can occupy
 	public ArrayList<String> occupiableTiles;
 
-	public Sprite sprite;
+	
+	public MapSprite sprite;
+	//public Sprite sprite;
 
 	public boolean hit = false;
 
@@ -29,7 +31,7 @@ public class Electorate {
 	public Electorate(Texture texture) {
 		texture.setFilter(TextureFilter.Linear, TextureFilter.Linear);
 
-		sprite = new Sprite(texture);
+		sprite = new MapSprite(texture);
 		this.influenceLevel = ElectionGame.randGen.nextInt(INFLUENCE_MAX);
 		this.id = 0;//for testing purposes 
 		//this.id = Electorate.getNewId();
@@ -40,13 +42,13 @@ public class Electorate {
 	}
 
 	public Electorate(Texture texture, int influence) {
-		sprite = new Sprite(texture);
+		sprite = new MapSprite(texture);
 		this.influenceLevel = influence;
 	}
 
 	public void draw() {
 
-		sprite.draw(ElectionGame.GAME_OBJ.batch);
+		sprite.draw();
 	}
 
 	public void update(float delta) {

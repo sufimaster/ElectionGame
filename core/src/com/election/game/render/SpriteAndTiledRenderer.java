@@ -2,12 +2,19 @@ package com.election.game.render;
 
 import java.util.ArrayList;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.OrthographicCamera;
+import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.maps.MapLayer;
 import com.badlogic.gdx.maps.MapObject;
+import com.badlogic.gdx.maps.objects.RectangleMapObject;
+import com.badlogic.gdx.maps.objects.TextureMapObject;
 import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
 import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer;
-import com.election.game.ElectionGame;
+import com.election.game.Constants;
+
 import com.election.game.Electorate;
 import com.election.game.TownMap;
 import com.election.game.camera.OrthographicCameraMovementWrapper;
@@ -15,6 +22,7 @@ import com.election.game.sprites.Candidate;
 
 public class SpriteAndTiledRenderer extends OrthogonalTiledMapRenderer {
 
+	private Texture debugTex;
 	private OrthographicCamera cam;
 	public int drawBoundsafterLayer = 5;
 	public int drawSpritesAfterLayer = 5;
@@ -26,7 +34,10 @@ public class SpriteAndTiledRenderer extends OrthogonalTiledMapRenderer {
 		this.map = map.tiledMap;
 		this.cam = cam.source;
 		
-
+		sprites = new ArrayList<Electorate>();
+		
+		debugTex = new Texture(Gdx.files.internal("debughash.png"));
+		
 	}
 	
 	public void setCandidate(Candidate c){
@@ -52,29 +63,32 @@ public class SpriteAndTiledRenderer extends OrthogonalTiledMapRenderer {
 					
 					renderTileLayer((TiledMapTileLayer) layer);
 					currentLayer++;
-					
-					if(currentLayer == drawSpritesAfterLayer){
-						
-						for (Electorate elector : sprites) {
-							
-							ElectionGame.GAME_OBJ.debugFont.draw(this.getBatch(), "id" + elector.id, elector.sprite.getX(), elector.sprite.getY() );
-							elector.sprite.draw(this.getBatch());
-
-						}
-						
-						//draw candidate						
-						candidate.sprite.draw(this.getBatch());
-					}
-					
-					
-					
-					
 				}else {
-					
+					currentLayer++;
+
 					for(MapObject object: layer.getObjects()){
 						renderObject(object);
 					}
 				}
+				
+				
+				if(currentLayer == drawSpritesAfterLayer ||
+						(currentLayer == map.getLayers().getCount()-1)   ){
+					
+					/*	for (Electorate elector : sprites) {
+						
+						ElectionGame.GAME_OBJ.debugFont.draw(this.getBatch(), "id" + elector.id, elector.sprite.getX(), elector.sprite.getY() );
+						
+						elector.sprite.draw(this.getBatch());
+
+					}*/
+					
+					//draw candidate						
+					candidate.sprite.draw(this.getBatch());
+				}
+				
+				
+
 			}
 				
 			
@@ -86,6 +100,25 @@ public class SpriteAndTiledRenderer extends OrthogonalTiledMapRenderer {
 		endRender();
 				
 	}
+	
+	@Override
+	public void renderObject(MapObject object){
+		 
+		if(object instanceof TextureMapObject) {
+			TextureMapObject textureObj = (TextureMapObject) object;
+	        //batch.draw(textureObj.getTextureRegion(), textureObj.getX(), textureObj.getY());
+	        
+	         batch.draw(textureObj.getTextureRegion(), textureObj.getX(), textureObj.getY(), 
+	        		    textureObj.getX()/2, textureObj.getY()/2, 
+	        		    textureObj.getTextureRegion().getRegionWidth(), 
+	        		    textureObj.getTextureRegion().getRegionHeight(),
+	        		    unitScale, unitScale, 0);
+	        		    
+	         
+		 }
+		 		 
+	}
+	
 
 	public void setSprites(ArrayList<Electorate> electorate) {
 		sprites = electorate;

@@ -7,20 +7,17 @@ import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.GL20;
+import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
-import com.badlogic.gdx.graphics.g2d.Sprite;
+import com.badlogic.gdx.maps.MapLayer;
 import com.badlogic.gdx.maps.MapObject;
 import com.badlogic.gdx.maps.MapObjects;
-import com.badlogic.gdx.maps.MapProperties;
 import com.badlogic.gdx.maps.objects.CircleMapObject;
 import com.badlogic.gdx.maps.objects.PolygonMapObject;
 import com.badlogic.gdx.maps.objects.PolylineMapObject;
 import com.badlogic.gdx.maps.objects.RectangleMapObject;
 import com.badlogic.gdx.maps.objects.TextureMapObject;
-import com.badlogic.gdx.maps.tiled.TiledMap;
-import com.badlogic.gdx.maps.tiled.TmxMapLoader;
-import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Polygon;
 import com.badlogic.gdx.math.Polyline;
 import com.badlogic.gdx.math.Rectangle;
@@ -50,10 +47,12 @@ public class OutsideScreen implements Screen, InputProcessor {
 
 	private boolean cameraAtMapEdge = false;
 	
-	private OrthographicCameraMovementWrapper camera;	
+	private OrthographicCamera hudCam;
+	
+	private OrthographicCameraMovementWrapper worldCam;	
 	private SpriteAndTiledRenderer mapRenderer;
 	
-	private TownMap tileMap;
+	public TownMap tileMap;
 	
 	//private int mapPixelWidth;
 	//private int mapPixelHeight;
@@ -72,51 +71,81 @@ public class OutsideScreen implements Screen, InputProcessor {
 	private Electorate interactedElector;
 	private DebugInfo debugInfo;
 	private int interactedDoor;
+	private Rectangle prevDoor;
 
 	public OutsideScreen(final ElectionGame gameObj) {
 
-		float w = Gdx.graphics.getWidth();
-		float h = Gdx.graphics.getHeight();
 
 		
-		camera = new OrthographicCameraMovementWrapper(false, w/2, h/2);
-		//camera.source.setToOrtho(false, w, h);
+		//create main character and position in middle of map
+		candidate = new Candidate( new Texture(Gdx.files.internal("man.png")));
+		candidate.setPosition(5,5);
+		candidate.sprite.setSize(1f, 1f);		
 		
-		//main character
-		candidate = new Candidate( new Texture(Gdx.files.internal("man.png")) );
-		candidate.sprite.setPosition(w/2, h/2);
-		prevPosition = new Vector2(candidate.sprite.getX(), candidate.sprite.getY());
-		camera.source.position.set(candidate.sprite.getX(), candidate.sprite.getY(),0);
+		prevPosition = new Vector2(Constants.VIRTUAL_HEIGHT/2, Constants.VIRTUAL_HEIGHT/2);
 		
-				
-		float unitScale = 1 / 1f;
-		tileMap = 	Constants.tiledMaps.get(1);//new TownMap("town.tmx");//new TmxMapLoader().load("town.tmx");
-		mapRenderer = new SpriteAndTiledRenderer(tileMap, camera, unitScale);
+		//Create new orthographic camera and look at candidate location
+		worldCam = new OrthographicCameraMovementWrapper();
+		//camera = new OrthographicCameraMovementWrapper(false, w/2, h/2);
+		//camera.source.position.set(candidate.getX(), candidate.getY(),0);
 		
-		gameSpace = new Rectangle(0,0, tileMap.mapPixelWidth, tileMap.mapPixelHeight);
+		hudCam = new OrthographicCamera();
 		
+		
+		
+		//create new town map by loading map of town from static file
+		//add the sprite to the map so it is rendered with it
+		//TODO: should be 1/128f since my tile size will be 128f and I want one unit in my game to equal 1 tile size		
+		//right now tile size is 32pixels for town map. Need to fix that.
+		float unitScale = 1f / 32f;
+		tileMap = 	Constants.tiledMaps.get(1);
+		//tileMap.addSprite(candidate);
+
+		//create a new map renderer
+		mapRenderer = new SpriteAndTiledRenderer(tileMap, worldCam, unitScale);
+	
+		//rectangle for the entire game space
+		gameSpace = new Rectangle(0,0, tileMap.mapWidth, tileMap.mapHeight);
+		
+		//blocks of the world space, so we can easily calculate intersections
+		initRegions(tileMap.mapWidth, tileMap.mapHeight);
+
 		//people that candidate can convince to vote for him
-		initRegions(tileMap.mapPixelWidth, tileMap.mapPixelHeight);
-		initElectorate();		
+		initElectorate();
+		tileMap.addSprites(electorate);
+		
 		//render these using the mapRenderer
-		mapRenderer.setSprites(electorate);
+		//mapRenderer.setSprites(electorate);
 		mapRenderer.setCandidate(candidate);
 
 		debugInfo = new DebugInfo();
 	}
 	
+	@Override
+	public void resize(int width, int height){
+		
+		worldCam.setToOrtho(false, Constants.VIRTUAL_HEIGHT *width/(float)height, Constants.VIRTUAL_HEIGHT);
+		hudCam.setToOrtho(false, width, height);
+	}
+	
 	private void loadMap(int mapId, float unitScale){
 		
 		tileMap = Constants.tiledMaps.get(mapId);
+		//tileMap.addSprite(candidate);
 		mapRenderer.resetMap(tileMap, unitScale);
+		
+		RectangleMapObject obj =  (RectangleMapObject) tileMap.getMapObjects(Constants.MAP_OBJ_OBJECT_LAYER).get("door");
+		
+		candidate.setPosition(obj.getRectangle().x, obj.getRectangle().y+obj.getRectangle().height);
+		
 		
 	}
 	
 
 	private void initRegions(int mapWidth, int mapHeight) {
 		
-		int numTilesX = mapWidth/Constants.TILE_SIZE;
-		int numTilesY = mapHeight/Constants.TILE_SIZE;
+		int numTilesX = mapWidth;//Constants.TILE_SIZE;
+		int numTilesY = mapHeight;///Constants.TILE_SIZE;
 		
 		
 		regions = new Region[numTilesX][numTilesY];
@@ -126,7 +155,7 @@ public class OutsideScreen implements Screen, InputProcessor {
 			for (int j = 0; j < numTilesY; j++) {
 				
 				
-				regions[i][j] = new Region(i*Constants.TILE_SIZE, j*Constants.TILE_SIZE);
+				regions[i][j] = new Region(i, j);
 				
 				
 			}
@@ -139,8 +168,8 @@ public class OutsideScreen implements Screen, InputProcessor {
 	
 	private Region getRegion(int xLoc, int yLoc){
 		
-		int xIdx= xLoc/Constants.TILE_SIZE;
-		int yIdx= yLoc/Constants.TILE_SIZE;
+		int xIdx= xLoc; ///Constants.TILE_SIZE;
+		int yIdx= yLoc; ///Constants.TILE_SIZE;
 		
 		
 		Region region = regions[xIdx][yIdx];
@@ -153,34 +182,66 @@ public class OutsideScreen implements Screen, InputProcessor {
 
 	private void initElectorate() {
 		
+		
+		MapLayer layer  = tileMap.tiledMap.getLayers().get(Constants.MAP_OBJ_NPC_LOCATION_LAYER);
+		
+		if( layer == null )		
+			return;
+		
+		MapObjects mapObjects = layer.getObjects();
+		
+		
+		
+		
+		
+		
 		electorate = new ArrayList<Electorate>();
 		for (int i=0; i<Constants.ELECTORATE_COUNT_MAX; i++ ) {
+		
+			int randomIdx = ElectionGame.randGen.nextInt(mapObjects.getCount());		
+			MapObject mapObject = mapObjects.get(randomIdx);
 			
-			int personType = 1 + ElectionGame.randGen.nextInt(NUM_TYPES_PEOPLE);
-					
-				 
-			int xLoc = (int)(ElectionGame.randGen.nextFloat() * tileMap.mapPixelWidth);				
-			int yLoc = (int)(ElectionGame.randGen.nextFloat() * tileMap.mapPixelHeight);
+						
+			if( mapObject instanceof RectangleMapObject ){
 			
-			while( !TiledMapUtility.isElectorateSpace(tileMap, xLoc, yLoc) ){
+				RectangleMapObject obj = (RectangleMapObject) mapObject;
 				
-				xLoc = (int)(ElectionGame.randGen.nextFloat() * tileMap.mapPixelWidth);				
-				yLoc = (int)(ElectionGame.randGen.nextFloat() * tileMap.mapPixelHeight);
+				int personType = 1 + ElectionGame.randGen.nextInt(NUM_TYPES_PEOPLE);
+						
+					 
+				//int xLoc = (int)(ElectionGame.randGen.nextFloat() * tileMap.mapWidth);				
+				//int yLoc = (int)(ElectionGame.randGen.nextFloat() * tileMap.mapHeight);
 				
-			}
-			
-			
-			
-			
-			
-			Electorate elector = new Electorate( new Texture( Gdx.files.internal("person" + personType + ".png")) );
-			elector.sprite.setPosition(xLoc, yLoc);			
-			electorate.add(elector);
-			
-			Region region = regions[xLoc/Constants.TILE_SIZE][yLoc/Constants.TILE_SIZE];
-			region.addElectors(elector);
+				Rectangle rect = obj.getRectangle();//Utilities.scaleRectangle(obj.getRectangle(),  mapRenderer.getUnitScale());	
+				
+				float xLoc = rect.x + (ElectionGame.randGen.nextFloat() *  rect.width);
+				float yLoc = rect.y + (ElectionGame.randGen.nextFloat() * rect.height);
+				
+				
+				Electorate elector = new Electorate( new Texture( Gdx.files.internal("person" + personType + ".png")) );
+				
+				/*Gdx.app.log(this.getClass().getName(), "Creating Elector at: (" + xLoc + ", " + yLoc + ")" );
+				
+				elector.sprite.setPosition(xLoc, yLoc);			
+				electorate.add(elector);
+				*/
+				
+				float regionX = xLoc;				
+				float regionY = yLoc;
+				Gdx.app.log(this.getClass().getName(), "Creating Elector at screen position: (" + regionX + ", " + regionY + ")" );
+
+				elector.sprite.setPosition(regionX, regionY);
+				electorate.add(elector);
+				
+				Gdx.app.log(this.getClass().getName(), "Region: (" + (int)regionX + ", " + (int)regionY + " )" );
+				
+				Region region = regions[(int)regionX ][(int)regionY];
+				region.addElectors(elector);
 			
 		
+			
+			}
+			
 			
 		}
 	}
@@ -237,29 +298,46 @@ public class OutsideScreen implements Screen, InputProcessor {
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 		 
 
-		camera.source.update();
-		mapRenderer.setView(camera.source);		
+		worldCam.source.update();
+		mapRenderer.setView(worldCam.source);		
 		mapRenderer.render();
 
 		
-		DebugRenderer.DrawDebugCameraScrollBounds( camera);
 		
 	}
 	
 	private void renderHud(float delta) {
-		Matrix4 uiMatrix = camera.source.combined.cpy();
+		/*Matrix4 uiMatrix = hudCam.combined.cpy();
 		uiMatrix.setToOrtho2D(0, 0, Constants.WINDOWS_GAME_WIDTH, Constants.WINDOWS_GAME_HEIGHT);
+		*/
 		
-		ElectionGame.GAME_OBJ.hudBatch.setProjectionMatrix(uiMatrix);
-		ElectionGame.GAME_OBJ.hudBatch.begin();
-			renderDebugInfo();
-		ElectionGame.GAME_OBJ.hudBatch.end();		
+		renderDebugInfo();
+		
 	}
 
 	private void renderDebugInfo() {
+		ElectionGame.GAME_OBJ.hudBatch.setProjectionMatrix(hudCam.combined);
+		ElectionGame.GAME_OBJ.hudBatch.begin();		
+		debugInfo.draw(candidate, worldCam, hudCam, this);
+		ElectionGame.GAME_OBJ.hudBatch.end();
 		
-		debugInfo.draw(candidate, camera);
 		
+		renderCollisionObjects();
+		
+		DebugRenderer.DrawDebugCameraScrollBounds( worldCam);
+
+		
+	}
+
+	
+	
+	private void renderCollisionObjects() {
+		//MapObjects mapObjs = tileMap.getMapObjects(Constants.MAP_OBJ_PHYSICS_LAYER);
+		//debugInfo.drawMapObjectNames(tileMap.getAllMapObjects(), mapRenderer.getUnitScale(), worldCam);
+
+		debugInfo.drawMapObjects(tileMap.getAllMapObjects(), mapRenderer.getUnitScale(), worldCam);
+		
+
 	}
 
 	private void updatePaused(float delta){
@@ -308,7 +386,7 @@ public class OutsideScreen implements Screen, InputProcessor {
 	//see if candidate is intersecting any of the electors
 	private void checkElectorCollisions(float delta) {
 
-		Region region = getRegion((int)candidate.sprite.getX(), (int)candidate.sprite.getY());
+		Region region = getRegion((int)candidate.getX(), (int)candidate.getY());
 		
 		if( region.electorsInRegion.size() == 0){
 			interactedElector = null;
@@ -318,7 +396,7 @@ public class OutsideScreen implements Screen, InputProcessor {
 		
 		for (Electorate elector : region.electorsInRegion) {
 			
-			if( candidate.sprite.getBoundingRectangle().overlaps(elector.sprite.getBoundingRectangle())){
+			if( candidate.overlaps(elector.sprite.getBoundingRectangle())){
 						
 				elector.hit= true;
 				//Gdx.app.log(System.class.getName(), "Candidate intersects " + elector.id);
@@ -337,9 +415,9 @@ public class OutsideScreen implements Screen, InputProcessor {
 
 	private void checkCameraBounds(float delta) {
 		
-		Rectangle candBound =  candidate.sprite.getBoundingRectangle();
+		Rectangle candBound =  candidate.getBoundingRectangle();
 		
-		Rectangle movementRegion = camera.boundsRect;
+		Rectangle movementRegion = worldCam.boundsRect;
 		
 		
 		if( ! movementRegion.overlaps(candBound)){
@@ -384,8 +462,8 @@ public class OutsideScreen implements Screen, InputProcessor {
 		
 		if(moveCamera){
 			//send camera an update on candidates position so it can move faster to catchup
-			camera.update(delta, candidate);
-			mapRenderer.setView(camera.source);	
+			worldCam.update(delta, candidate);
+			mapRenderer.setView(worldCam.source);	
 		}
 		
 		
@@ -396,7 +474,7 @@ public class OutsideScreen implements Screen, InputProcessor {
 
 
 		
-		MapObjects mapObjects = tileMap.tiledMap.getLayers().get("physics").getObjects();
+		MapObjects mapObjects = tileMap.mapObjs;
  
 		
 		for (MapObject object : mapObjects){
@@ -413,17 +491,21 @@ public class OutsideScreen implements Screen, InputProcessor {
             	
             	String type = (String) mapObj.getProperties().get(Constants.MAP_OBJ_OBJECT_TYPE);
             	        	
-            	Rectangle rect = mapObj.getRectangle();
+            	Rectangle rect = mapObj.getRectangle();//Utilities.scaleRectangle(mapObj.getRectangle(), mapRenderer.getUnitScale());
+
             	
+            	//rect.setSize(  rect.width * mapRenderer.getUnitScale() , rect.height * mapRenderer.getUnitScale());
             	          	
-            	if( rect.overlaps(candidate.sprite.getBoundingRectangle())){
+            	if( rect.overlaps(candidate.getBoundingRectangle())){
             		
             		//If its a door, and you are overlapping, let candidate move through, and set the ID for the interactedDoor
             		if( type.equals(Constants.MAP_OBJ_DOOR)){
+            			
+            			prevDoor = rect;
                 		interactedDoor = Integer.parseInt( (String) mapObj.getProperties().get(Constants.MAP_OBJ_DOOR_ID) ); 
                 	}else{
                 		interactedDoor = Constants.MAP_OBJ_DOOR_NONE;
-                		candidate.sprite.setPosition(prevPosition.x, prevPosition.y);
+                		candidate.setPosition(prevPosition.x, prevPosition.y);
                 		moveCamera= false;
 
                 	}
@@ -436,19 +518,28 @@ public class OutsideScreen implements Screen, InputProcessor {
 
             	
             	Polygon polygon = ((PolygonMapObject)object).getPolygon();
-            	if( polygon.getBoundingRectangle().overlaps( candidate.sprite.getBoundingRectangle()) ){
-            		candidate.sprite.setPosition(prevPosition.x, prevPosition.y);
+            	//polygon.setScale(mapRenderer.getUnitScale(), mapRenderer.getUnitScale());
+            	
+            	Rectangle boundingRect = candidate.getBoundingRectangle();
+            	
+            	if( polygon.contains(boundingRect.x, boundingRect.y) ||
+            		polygon.contains( boundingRect.x, boundingRect.y + boundingRect.height) ||
+            		polygon.contains( boundingRect.x + boundingRect.width, boundingRect.y + boundingRect.height) ||
+            		polygon.contains( boundingRect.x + boundingRect.width, boundingRect.y )	 ){
+            		
+            		candidate.setPosition(prevPosition.x, prevPosition.y);
             		moveCamera= false;
-            		/*String type = (String) object.getProperties().get("type");
-        			System.out.println("Object type: " + type);	*/
             	}
+            	
+            	
             	
             }
             else if (object instanceof PolylineMapObject) {
             	
             	Polyline polyline = ((PolylineMapObject)object).getPolyline();
-            	if( polyline.contains(candidate.sprite.getBoundingRectangle().x, candidate.sprite.getBoundingRectangle().y)){
-            		candidate.sprite.setPosition(prevPosition.x, prevPosition.y);
+            	
+            	if( polyline.contains(candidate.getBoundingRectangle().x, candidate.getBoundingRectangle().y)){
+            		candidate.setPosition(prevPosition.x, prevPosition.y);
             		moveCamera= false;
             		/*String type = (String) object.getProperties().get("type");
         			System.out.println("Object type: " + type);	*/
@@ -468,18 +559,12 @@ public class OutsideScreen implements Screen, InputProcessor {
 			
 		}
 		
-		prevPosition.set( candidate.sprite.getX(), candidate.sprite.getY());
+		prevPosition.set( candidate.getX(), candidate.getY());
 	
 		
 	}
 
 	
-	
-	@Override
-	public void resize(int width, int height) {
-		// TODO Auto-generated method stub
-
-	}
 
 	@Override
 	public void pause() {
@@ -614,7 +699,7 @@ public class OutsideScreen implements Screen, InputProcessor {
 
 			
 			if( interactedDoor != Constants.MAP_OBJ_DOOR_NONE){
-				loadMap(interactedDoor, 1);
+				loadMap(interactedDoor, 1f/128f);
 				return;
 			}
 			

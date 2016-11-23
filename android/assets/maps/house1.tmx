@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.0" orientation="orthogonal" renderorder="right-down" width="15" height="10" tilewidth="128" tileheight="128" nextobjectid="1">
+<map version="1.0" orientation="orthogonal" renderorder="right-down" width="15" height="10" tilewidth="128" tileheight="128" nextobjectid="16">
  <tileset firstgid="1" name="highres" tilewidth="128" tileheight="128" tilecount="81" columns="9">
   <image source="../tiles/tileset_ayan.png" width="1152" height="1152"/>
  </tileset>
@@ -45,5 +45,21 @@
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,12
 </data>
  </layer>
- <objectgroup name="physics"/>
+ <objectgroup name="physics">
+  <object id="1" name="side" type="collide" x="9.09091" y="15.1515" width="390.909" height="381.818"/>
+  <object id="2" name="side" type="collide" x="1005" y="1.5" width="293.5" height="397.5"/>
+  <object id="4" name="side" type="collide" x="1298" y="2" width="618" height="144"/>
+  <object id="6" name="side" type="collide" x="1896" y="152" width="22" height="1086"/>
+  <object id="7" name="side" type="collide" x="1775" y="598" width="119" height="682"/>
+  <object id="9" name="side" type="collide" x="0" y="393" width="22" height="843"/>
+  <object id="10" name="side" type="collide" x="14" y="1220" width="1761" height="54"/>
+  <object id="11" name="side" type="collide" x="392" y="5.33333" width="629.333" height="18.6667"/>
+ </objectgroup>
+ <objectgroup name="objects">
+  <object id="15" name="door" type="door" x="248" y="1208" width="140" height="72">
+   <properties>
+    <property name="id" value="1"/>
+   </properties>
+  </object>
+ </objectgroup>
 </map>

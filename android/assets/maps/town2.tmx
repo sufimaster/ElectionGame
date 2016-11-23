@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.0" orientation="orthogonal" renderorder="right-down" width="100" height="25" tilewidth="32" tileheight="32" nextobjectid="118">
+<map version="1.0" orientation="orthogonal" renderorder="right-down" width="100" height="25" tilewidth="32" tileheight="32" nextobjectid="141">
  <tileset firstgid="1" name="maptiles" tilewidth="32" tileheight="32" tilecount="667" columns="23">
   <image source="../tiles/32x32_map_tile v3.1 [MARGINLESS].png" width="736" height="928"/>
  </tileset>
@@ -149,73 +149,54 @@
 </data>
  </layer>
  <objectgroup name="physics">
-  <object id="34" name="seaBottom" type="water" x="2" y="669.333" width="2016.67" height="142.667"/>
-  <object id="39" name="seaUL" type="water" x="0" y="155.2">
-   <polygon points="0,-25.8666 1.33333,-155.2 194.667,-155.2 196,-114.783 100,-113.167 100,-27.4834"/>
+  <object id="119" name="seaBottom" type="Collide" x="2" y="666" width="1138" height="132"/>
+  <object id="121" name="structure" type="Collide" x="158" y="260" width="96" height="60"/>
+  <object id="122" name="structure" type="Collide" x="60" y="480" width="96" height="62"/>
+  <object id="123" name="structure" type="Collide" x="642" y="513" width="94" height="62"/>
+  <object id="124" name="structure" type="Collide" x="704" y="320" width="94" height="62"/>
+  <object id="125" name="structure" type="Collide" x="480" y="96" width="94" height="62"/>
+  <object id="126" name="structure" type="Collide" x="672" y="40" width="94" height="118"/>
+  <object id="127" name="structure" type="Collide" x="834.333" y="73" width="91" height="118"/>
+  <object id="128" name="seaBottom" type="Collide" x="1137.33" y="796">
+   <polygon points="0,0 876,1.33333 881.333,-130.667 662,-130.667 663,-164.333 347.667,-160 345.333,-193.333 312,-195.666 310.667,-256.333 278,-259.667 276,-309.667 229.333,-312 226.667,-190.667 181.333,-188 181.333,-313.333 133.666,-313.333 133.334,-262.333 104,-260.667 101,-227 72.6667,-227.333 70.6667,-194.667 40,-196 37,-162.333 5.33333,-162.667"/>
   </object>
-  <object id="49" name="Structure" type="collide" x="448" y="342.667">
-   <polyline points="0,0 -1.33333,101.333 29.3333,101.333 30.6667,73.3333 64,74.6667 64,102.667 93.3333,102.667 97.3333,1.33333 69.3333,-26.6667 18.6667,-25.3333 -4,0 -1.33333,-2.66667"/>
-  </object>
-  <object id="54" name="seaLeft" type="water" x="-46.6667" y="142.667" width="45.3333" height="525.333"/>
-  <object id="56" name="Trees" type="collide" x="129.333" y="140" width="182.667" height="68"/>
-  <object id="58" name="Trees" type="collide" x="72" y="169.333" width="46.6667" height="268"/>
-  <object id="59" name="Trees" type="collide" x="136" y="405.333" width="176" height="61.3333"/>
-  <object id="61" name="House7" type="collide" x="162.667" y="258.667" width="89.3333" height="66.667"/>
-  <object id="64" name="House4" type="collide" x="708" y="318.667" width="86.6667" height="68"/>
-  <object id="67" name="House1" type="collide" x="482.667" y="101.333" width="86.6667" height="64"/>
-  <object id="68" name="House2" type="collide" x="678.667" y="28" width="85.3333" height="137.333"/>
-  <object id="69" name="House3" type="collide" x="838.667" y="69.3333" width="82.6667" height="128"/>
-  <object id="71" name="Bushes" type="collide" x="608" y="477.333" width="28" height="94.6667"/>
-  <object id="72" name="House6" type="collide" x="644" y="510.667" width="88" height="69.3333"/>
-  <object id="73" name="House5" type="collide" x="62.6667" y="480" width="96" height="70.6667"/>
-  <object id="75" name="seaBottom" type="water" x="2301.33" y="764" width="864" height="38.6667"/>
-  <object id="76" name="seaBottom" type="water" x="2014.67" y="695.333" width="282.667" height="113.333"/>
-  <object id="77" name="seaBottom" type="water" x="3161.33" y="1.33333" width="36" height="762.667"/>
-  <object id="78" name="seaBottom" type="water" x="1314.67" y="509.333">
-   <polygon points="1.33333,-4 -1.33333,154.667 -194.667,157.333 -32,-4"/>
-  </object>
-  <object id="79" name="seaBottom" type="water" x="1678.67" y="501.333">
-   <polygon points="-309.333,4 -312,161.334 -156,161.333 -273.333,1.33333"/>
-  </object>
-  <object id="80" name="seaBottom" type="water" x="1502.67" y="632" width="296" height="32.6665"/>
-  <object id="81" name="seaDeck" type="water" x="1317.33" y="608" width="48" height="57.3333"/>
-  <object id="98" name="Door1" type="door" x="132" y="552" width="24" height="27">
-   <properties>
-    <property name="id" value="1"/>
-   </properties>
-  </object>
-  <object id="99" name="Door2" type="door" x="227" y="329" width="24" height="27">
+  <object id="129" name="seaBottom" type="Collide" x="2013.33" y="697.333" width="294.667" height="102.667"/>
+  <object id="130" name="seaBottom" type="Collide" x="2307.33" y="759.333" width="896.667" height="40.6668"/>
+  <object id="131" name="seaBottom" type="Collide" x="3161.33" y="0.6665" width="46.0002" height="771.333"/>
+  <object id="133" name="Door1" type="door" x="131" y="550.75" width="24" height="27">
    <properties>
     <property name="id" value="2"/>
    </properties>
   </object>
-  <object id="100" name="Door3" type="door" x="545.5" y="170" width="24" height="27">
+  <object id="135" name="Door1" type="door" x="706" y="583.5" width="24" height="27">
    <properties>
-    <property name="id" value="3"/>
+    <property name="id" value="1"/>
    </properties>
   </object>
-  <object id="101" name="Door4" type="door" x="708" y="167.5" width="24" height="27">
+  <object id="136" name="Door1" type="door" x="225" y="327.5" width="24" height="27">
    <properties>
-    <property name="id" value="4"/>
+    <property name="id" value="1"/>
    </properties>
   </object>
-  <object id="102" name="Door5" type="door" x="869" y="196.5" width="24" height="27">
+  <object id="137" name="Door1" type="door" x="770" y="391.5" width="24" height="27">
    <properties>
-    <property name="id" value="5"/>
+    <property name="id" value="1"/>
    </properties>
   </object>
-  <object id="103" name="Door6" type="door" x="769" y="392.5" width="24" height="27">
+  <object id="138" name="Door1" type="door" x="547" y="166.5" width="24" height="27">
    <properties>
-    <property name="id" value="6"/>
+    <property name="id" value="1"/>
    </properties>
   </object>
-  <object id="104" name="Door7" type="door" x="704" y="585.5" width="24" height="27">
+  <object id="139" name="Door1" type="door" x="867" y="197.5" width="24" height="27">
    <properties>
-    <property name="id" value="7"/>
+    <property name="id" value="1"/>
    </properties>
   </object>
-  <object id="117" name="Trees" type="collide" x="138.667" y="396">
-   <polygon points="0,0 180.667,-0.666667 180,75.3333 -3.33333,76.6667 -0.666667,37.3333"/>
+  <object id="140" name="Door1" type="door" x="708" y="168.5" width="24" height="27">
+   <properties>
+    <property name="id" value="1"/>
+   </properties>
   </object>
  </objectgroup>
  <objectgroup name="npc_locations">

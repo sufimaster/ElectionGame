@@ -12,7 +12,6 @@ import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator.FreeTypeFontParameter;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.election.game.States.GameState;
-import com.election.game.dialog.DialogHandler;
 import com.election.game.dialog.DialogHandler2;
 import com.election.game.dialog.DialogParser;
 
@@ -30,7 +29,6 @@ public class ElectionGame extends Game {
 	
 	
 	public GameState state = GameState.READY;
-	private boolean isPaused = false;
 	
 	public BitmapFont dialogFont;
 	public BitmapFont selectedDialogFont;
@@ -56,8 +54,9 @@ public class ElectionGame extends Game {
 	}
 	
 	
-	
 
+	
+	
 
 	private void createBatches() {
 		hudBatch = new SpriteBatch();

@@ -3,6 +3,9 @@ package com.election.game.sprites;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.Texture.TextureFilter;
 import com.badlogic.gdx.graphics.g2d.Sprite;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.maps.objects.TextureMapObject;
+import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.election.game.Constants;
 import com.election.game.ElectionGame;
@@ -15,6 +18,10 @@ public class Candidate {
 	
 	private Vector2 prevPosition;
 	
+	private Direction direction;
+	public Sprite sprite;
+
+	
 	private enum Direction{
 		NONE,
 		UP,
@@ -22,16 +29,22 @@ public class Candidate {
 		LEFT,
 		RIGHT;
 	}
-	
-	private Direction direction;
-	public Sprite sprite;
 
-	
-	
 	public Candidate(Texture texture) {
-		
+
 		texture.setFilter(TextureFilter.Linear, TextureFilter.Linear);
+
+
 		sprite = new Sprite(texture);
+		prevPosition = new Vector2();
+	}
+	
+	public Candidate(Texture texture, int width, int height) {
+
+		texture.setFilter(TextureFilter.Linear, TextureFilter.Linear);
+
+
+		sprite = new Sprite(texture, width, height);
 		prevPosition = new Vector2();
 	}
 
@@ -145,5 +158,37 @@ public class Candidate {
 				
 	}
 	
+	public float getX(){
+		return sprite.getX();
+	}
+	public float getY(){
+		return sprite.getY();
+	}
+
+
+	public void setPosition(float f, float g) {
+
+		sprite.setPosition(f, g);
+/*		getBoundingRectangle().
+*/
+		
+		sprite.setOrigin(f,g);
+
+		
+	}
+
+
+	public boolean overlaps(Rectangle boundingRectangle) {
+		// TODO Auto-generated method stub
+		return boundingRectangle.overlaps(sprite.getBoundingRectangle());
+	}
+
+
+	public Rectangle getBoundingRectangle() {
+		// TODO Auto-generated method stub
+		return sprite.getBoundingRectangle();
+	}
+
+
 	
 }
