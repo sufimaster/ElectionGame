@@ -323,7 +323,7 @@ public class OutsideScreen implements Screen, InputProcessor {
 		
 		 
 		renderMap(delta);
-		renderSprites(delta);
+		//renderSprites(delta);
 		
 	}
 
@@ -357,7 +357,7 @@ public class OutsideScreen implements Screen, InputProcessor {
 		
 		ElectionGame.GAME_OBJ.batch.begin();
 		
-		candidate.draw();
+		candidate.draw(ElectionGame.GAME_OBJ.batch);
 				
 		ElectionGame.GAME_OBJ.batch.end();
 

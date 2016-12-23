@@ -2,13 +2,11 @@ package com.election.game.sprites;
 
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.Texture.TextureFilter;
+import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.Sprite;
-import com.badlogic.gdx.graphics.g2d.TextureRegion;
-import com.badlogic.gdx.maps.objects.TextureMapObject;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.election.game.Constants;
-import com.election.game.ElectionGame;
 
 public class Candidate {
 	private boolean moveUp= false;
@@ -49,9 +47,9 @@ public class Candidate {
 	}
 
 	
-	public void draw(){
+	public void draw(Batch batch){
 				
-		sprite.draw(ElectionGame.GAME_OBJ.batch);
+		sprite.draw(batch);
 	}
 	
 
