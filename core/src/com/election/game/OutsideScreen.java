@@ -10,6 +10,7 @@ import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.maps.MapLayer;
 import com.badlogic.gdx.maps.MapObject;
 import com.badlogic.gdx.maps.MapObjects;
@@ -22,6 +23,7 @@ import com.badlogic.gdx.math.Polygon;
 import com.badlogic.gdx.math.Polyline;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.math.Vector3;
 import com.election.game.States.GameState;
 import com.election.game.camera.OrthographicCameraMovementWrapper;
 import com.election.game.render.DebugRenderer;
@@ -36,21 +38,21 @@ public class OutsideScreen implements Screen, InputProcessor {
 	private static final int CANDIDATE_MOVE_D_KEY = Keys.D;
 	private static final int NUM_TYPES_PEOPLE = 3;
 
-	private Candidate candidate;
+	public Candidate candidate;
 	BitmapFont font = new BitmapFont();
 	private ArrayList<Electorate> electorate;
 	
 	
 		
+	private boolean userOutside = true;
 	//boolean for switching between camera and character movement
 	private boolean moveCamera = false;
-
 	private boolean cameraAtMapEdge = false;
 	
-	private OrthographicCamera hudCam;
+	public OrthographicCamera hudCam;
 	
-	private OrthographicCameraMovementWrapper worldCam;	
-	private SpriteAndTiledRenderer mapRenderer;
+	public OrthographicCameraMovementWrapper worldCam;	
+	public SpriteAndTiledRenderer mapRenderer;
 	
 	public TownMap tileMap;
 	
@@ -59,7 +61,7 @@ public class OutsideScreen implements Screen, InputProcessor {
 	
 	
 	//giggle
-	private Region [][] regions;
+	Region [][] regions;
 	
 	private Vector2 prevPosition;
 	
@@ -70,12 +72,15 @@ public class OutsideScreen implements Screen, InputProcessor {
 	private boolean interactBtn=false;
 	private Electorate interactedElector;
 	private DebugInfo debugInfo;
-	private int interactedDoor;
+	private String interactedDoor = Constants.MAP_OBJ_DOOR_NONE;
 	private Rectangle prevDoor;
+	public Vector3 mousePos;
+	Vector2  mouseRegion;
 
 	public OutsideScreen(final ElectionGame gameObj) {
 
-
+		mousePos = new Vector3();
+		mouseRegion = new Vector2();
 		
 		//create main character and position in middle of map
 		candidate = new Candidate( new Texture(Gdx.files.internal("man.png")));
@@ -98,7 +103,7 @@ public class OutsideScreen implements Screen, InputProcessor {
 		//TODO: should be 1/128f since my tile size will be 128f and I want one unit in my game to equal 1 tile size		
 		//right now tile size is 32pixels for town map. Need to fix that.
 		float unitScale = 1f / 32f;
-		tileMap = 	Constants.tiledMaps.get(1);
+		tileMap = 	Constants.tiledMaps.get(Constants.MAP_OUTSIDE_WORLD_PREFIX + "1");
 		//tileMap.addSprite(candidate);
 
 		//create a new map renderer
@@ -128,17 +133,28 @@ public class OutsideScreen implements Screen, InputProcessor {
 		hudCam.setToOrtho(false, width, height);
 	}
 	
-	private void loadMap(int mapId, float unitScale){
+	private void loadMap(String mapId, float unitScale){
 		
 		tileMap = Constants.tiledMaps.get(mapId);
 		//tileMap.addSprite(candidate);
-		mapRenderer.resetMap(tileMap, unitScale);
-		
-		RectangleMapObject obj =  (RectangleMapObject) tileMap.getMapObjects(Constants.MAP_OBJ_OBJECT_LAYER).get("door");
-		
-		candidate.setPosition(obj.getRectangle().x, obj.getRectangle().y+obj.getRectangle().height);
 		
 		
+		if( mapId.startsWith(Constants.MAP_OUTSIDE_WORLD_PREFIX)){
+		
+			mapRenderer.resetMap(tileMap, 1f/32f);
+
+			candidate.setPosition(prevDoor.getX(), prevDoor.getY());
+			userOutside = true;
+			
+		}else{
+			mapRenderer.resetMap(tileMap, 1f/128f);
+			
+			RectangleMapObject obj =  (RectangleMapObject) tileMap.getMapObjects(Constants.MAP_OBJ_PHYSICS_LAYER).get("door");		
+			candidate.setPosition(obj.getRectangle().x, obj.getRectangle().y+obj.getRectangle().height);
+			userOutside = false;
+			
+		}
+		 
 	}
 	
 
@@ -166,7 +182,7 @@ public class OutsideScreen implements Screen, InputProcessor {
 	}
 	
 	
-	private Region getRegion(int xLoc, int yLoc){
+	Region getRegion(int xLoc, int yLoc){
 		
 		int xIdx= xLoc; ///Constants.TILE_SIZE;
 		int yIdx= yLoc; ///Constants.TILE_SIZE;
@@ -178,6 +194,7 @@ public class OutsideScreen implements Screen, InputProcessor {
 		
 		
 	}
+
 	
 
 	private void initElectorate() {
@@ -235,6 +252,8 @@ public class OutsideScreen implements Screen, InputProcessor {
 				
 				Gdx.app.log(this.getClass().getName(), "Region: (" + (int)regionX + ", " + (int)regionY + " )" );
 				
+				
+				//electors going into wrong regions?
 				Region region = regions[(int)regionX ][(int)regionY];
 				region.addElectors(elector);
 			
@@ -278,11 +297,15 @@ public class OutsideScreen implements Screen, InputProcessor {
 	}
 	
 	private void updateRunning(float delta){
+		
+		updateMouseRegion();
 		updateCandidate(delta);
 		checkCollisions(delta);		
 		updateCamera(delta);	
-		renderSprites(delta);
+		renderGraphics(delta);
+		
 		renderHud(delta);
+		
 		
 		//draw dialog box
 		if( ElectionGame.GAME_OBJ.state == GameState.DIALOG){
@@ -291,18 +314,53 @@ public class OutsideScreen implements Screen, InputProcessor {
 
 	}
 
-	private void renderSprites(float delta) {
+	private void renderGraphics(float delta) {
+
 		Gdx.gl.glClearColor(0, 0, 0, 1);
         Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
 
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
+		
 		 
+		renderMap(delta);
+		renderSprites(delta);
+		
+	}
 
+	private void updateMouseRegion() {
+
+		
+		//mouse position is set in pixels - top left is 0,0, bottom right is 1024, 800 (depending on screen width/height)
+		//must convert from screen position to map position
+		
+		
+		
+		//take into account camera position
+		
+		//float regionY = (mousePos.y - worldCam.source.position.y)/Constants.VIRTUAL_HEIGHT;
+		//float regionX =  (mousePos.x - worldCam.source.position.x)/ Constants.VIRTUAL_HEIGHT;
+		
+		mouseRegion.y = (int)mousePos.y;
+		mouseRegion.x = (int)mousePos.x;
+		
+	}
+
+	private void renderMap(float delta){
 		worldCam.source.update();
 		mapRenderer.setView(worldCam.source);		
 		mapRenderer.render();
 
+
+	}
+	
+	private void renderSprites(float delta) {
 		
+		ElectionGame.GAME_OBJ.batch.begin();
+		
+		candidate.draw();
+				
+		ElectionGame.GAME_OBJ.batch.end();
+
 		
 	}
 	
@@ -316,29 +374,12 @@ public class OutsideScreen implements Screen, InputProcessor {
 	}
 
 	private void renderDebugInfo() {
-		ElectionGame.GAME_OBJ.hudBatch.setProjectionMatrix(hudCam.combined);
-		ElectionGame.GAME_OBJ.hudBatch.begin();		
-		debugInfo.draw(candidate, worldCam, hudCam, this);
-		ElectionGame.GAME_OBJ.hudBatch.end();
+			
+		debugInfo.render(this);
 		
-		
-		renderCollisionObjects();
-		
-		DebugRenderer.DrawDebugCameraScrollBounds( worldCam);
-
 		
 	}
 
-	
-	
-	private void renderCollisionObjects() {
-		//MapObjects mapObjs = tileMap.getMapObjects(Constants.MAP_OBJ_PHYSICS_LAYER);
-		//debugInfo.drawMapObjectNames(tileMap.getAllMapObjects(), mapRenderer.getUnitScale(), worldCam);
-
-		debugInfo.drawMapObjects(tileMap.getAllMapObjects(), mapRenderer.getUnitScale(), worldCam);
-		
-
-	}
 
 	private void updatePaused(float delta){
 		Gdx.gl.glClearColor(.3f, .2f, .4f, 1);
@@ -347,6 +388,7 @@ public class OutsideScreen implements Screen, InputProcessor {
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 		 
 
+		
 		//camera.source.update();
 	}
 	
@@ -472,6 +514,14 @@ public class OutsideScreen implements Screen, InputProcessor {
 	
 	private void checkMapCollisions(float delta) {
 
+		/* 
+		 *
+		 * For the future: iterate through physics objects, add each
+		 * to list of regions it overlaps to avoid so much collision checking
+		 * 
+		 */
+		
+		//Region region = getRegion((int)candidate.getX(), (int)candidate.getY());
 
 		
 		MapObjects mapObjects = tileMap.mapObjs;
@@ -494,16 +544,18 @@ public class OutsideScreen implements Screen, InputProcessor {
             	Rectangle rect = mapObj.getRectangle();//Utilities.scaleRectangle(mapObj.getRectangle(), mapRenderer.getUnitScale());
 
             	
-            	//rect.setSize(  rect.width * mapRenderer.getUnitScale() , rect.height * mapRenderer.getUnitScale());
-            	          	
             	if( rect.overlaps(candidate.getBoundingRectangle())){
             		
             		//If its a door, and you are overlapping, let candidate move through, and set the ID for the interactedDoor
             		if( type.equals(Constants.MAP_OBJ_DOOR)){
-            			
-            			prevDoor = rect;
-                		interactedDoor = Integer.parseInt( (String) mapObj.getProperties().get(Constants.MAP_OBJ_DOOR_ID) ); 
-                	}else{
+            			if(userOutside){
+            				prevDoor = rect;
+            				interactedDoor = (String) mapObj.getProperties().get(Constants.MAP_OBJ_DOOR_ID);
+            			}else{
+            				
+            				interactedDoor = Constants.MAP_OUTSIDE_WORLD_PREFIX+ (String) mapObj.getProperties().get(Constants.MAP_OBJ_DOOR_ID);
+            			}
+                	}else{  //if it is not a door, its a regular collision object - don't let the player pass through
                 		interactedDoor = Constants.MAP_OBJ_DOOR_NONE;
                 		candidate.setPosition(prevPosition.x, prevPosition.y);
                 		moveCamera= false;
@@ -689,7 +741,8 @@ public class OutsideScreen implements Screen, InputProcessor {
 		
 
 		
-		interactBtn = !interactBtn;
+		//interactBtn = !interactBtn;
+		interactBtn = true;
 		
 		
 		
@@ -698,14 +751,19 @@ public class OutsideScreen implements Screen, InputProcessor {
 		if(interactBtn ){
 
 			
-			if( interactedDoor != Constants.MAP_OBJ_DOOR_NONE){
+			if( !Constants.MAP_OBJ_DOOR_NONE.equals( interactedDoor)){
 				loadMap(interactedDoor, 1f/128f);
+				worldCam.setLookAt(candidate.getX(), candidate.getY());
 				return;
+			}else{
+				interactBtn = false;
 			}
 			
 			if( interactedElector != null){
 				ElectionGame.GAME_OBJ.state = GameState.DIALOG;			
 				Gdx.input.setInputProcessor(ElectionGame.GAME_OBJ.dialogHandler);
+			}else{
+				interactBtn = false;
 			}
 			
 		}else{
@@ -740,7 +798,15 @@ public class OutsideScreen implements Screen, InputProcessor {
 
 	@Override
 	public boolean mouseMoved(int screenX, int screenY) {
-		// TODO Auto-generated method stub
+
+		
+		
+		
+		mousePos.x = screenX;
+		mousePos.y = screenY;
+		
+		worldCam.source.unproject(mousePos);
+		
 		return false;
 	}
 

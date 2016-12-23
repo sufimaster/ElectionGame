@@ -10,6 +10,7 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator.FreeTypeFontParameter;
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.election.game.States.GameState;
 import com.election.game.dialog.DialogHandler2;
@@ -17,15 +18,19 @@ import com.election.game.dialog.DialogParser;
 
 public class ElectionGame extends Game {
 	
+	public static Random randGen = new Random(System.currentTimeMillis());
 	public static  ElectionGame  GAME_OBJ= null;
+	
 	public BitmapFont font;
 	public SpriteBatch batch;
 	public SpriteBatch hudBatch;
-	public boolean isdebug = true;
+	public ShapeRenderer shapeRenderer;
 	public DialogHandler2 dialogHandler;
 	
-	public static boolean isFullScreen = false;	
-	public static Random randGen = new Random(System.currentTimeMillis());
+	public boolean isdebug = true;
+	public static boolean isFullScreen = false;
+	
+	
 	
 	
 	public GameState state = GameState.READY;
@@ -48,7 +53,8 @@ public class ElectionGame extends Game {
 		createSkins();
 		createFonts();
 		createDialogObjects();
-				
+		createRenderers();
+		
 		this.setScreen(new MenuScreen(this));
 		
 	}
@@ -57,6 +63,15 @@ public class ElectionGame extends Game {
 
 	
 	
+
+	private void createRenderers() {
+		shapeRenderer = new ShapeRenderer();		
+	}
+
+
+
+
+
 
 	private void createBatches() {
 		hudBatch = new SpriteBatch();

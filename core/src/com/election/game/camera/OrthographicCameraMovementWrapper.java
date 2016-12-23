@@ -54,6 +54,13 @@ public class OrthographicCameraMovementWrapper {
 		cameraRect.setCenter(prevPosition);
 	}
 	
+	public void setLookAt(float x, float y){
+		this.source.position.x = x;
+		this.source.position.y = y;
+		//lookAt(x, y, z);
+		syncRects();
+	}
+	
 	public void update(float delta, MapSprite candidate){
 		
 		prevPosition.set(source.position.x, source.position.y);

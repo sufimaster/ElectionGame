@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.0" orientation="orthogonal" renderorder="right-down" width="15" height="10" tilewidth="128" tileheight="128" nextobjectid="16">
+<map version="1.0" orientation="orthogonal" renderorder="right-down" width="15" height="10" tilewidth="128" tileheight="128" nextobjectid="17">
  <tileset firstgid="1" name="highres" tilewidth="128" tileheight="128" tilecount="81" columns="9">
   <image source="../tiles/tileset_ayan.png" width="1152" height="1152"/>
  </tileset>
@@ -54,12 +54,11 @@
   <object id="9" name="side" type="collide" x="0" y="393" width="22" height="843"/>
   <object id="10" name="side" type="collide" x="14" y="1220" width="1761" height="54"/>
   <object id="11" name="side" type="collide" x="392" y="5.33333" width="629.333" height="18.6667"/>
- </objectgroup>
- <objectgroup name="objects">
-  <object id="15" name="door" type="door" x="248" y="1208" width="140" height="72">
+  <object id="16" name="door" type="door" x="256" y="1200" width="140" height="72">
    <properties>
     <property name="id" value="1"/>
    </properties>
   </object>
  </objectgroup>
+ <objectgroup name="objects"/>
 </map>

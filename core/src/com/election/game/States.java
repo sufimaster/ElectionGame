@@ -20,7 +20,7 @@ public class States {
 	}
 	
 	public enum InteractionState{
-		
+		NONE,
 		ELECTOR,
 		HOUSE,
 		ITEM,

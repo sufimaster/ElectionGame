@@ -48,19 +48,23 @@ public class Constants {
 	public static final String MAP_OBJ_DOOR_ID = "id";
 
 	
-	public static final TreeMap<Integer, TownMap> tiledMaps = new TreeMap<Integer, TownMap>();
-	public static final int MAP_OBJ_DOOR_NONE = -1;
+	public static final TreeMap<String, TownMap> tiledMaps = new TreeMap<String, TownMap>();
+	public static final String MAP_OBJ_DOOR_NONE = "-1";
 	public static final String MAP_OBJ_OBJECT_LAYER = "objects";
+
+
+	public static final String MAP_OUTSIDE_WORLD_PREFIX = "MO";
 
 	static
 	    {
-	        tiledMaps.put(new Integer(1), new TownMap("maps/town2.tmx", true));
-	        tiledMaps.put(new Integer(2), new TownMap("maps/house1.tmx", true));
-	        tiledMaps.put(new Integer(3), new TownMap("maps/house1.tmx", true));
-	        tiledMaps.put(new Integer(4), new TownMap("maps/house1.tmx", true));
-	        tiledMaps.put(new Integer(5), new TownMap("maps/house1.tmx", true));
-	        tiledMaps.put(new Integer(6), new TownMap("maps/house1.tmx", true));
-	        tiledMaps.put(new Integer(7), new TownMap("maps/house1.tmx", true));
+	        tiledMaps.put(MAP_OUTSIDE_WORLD_PREFIX + "1", new TownMap("maps/town2.tmx", true));
+	        tiledMaps.put("1", new TownMap("maps/house1.tmx", true));
+	        tiledMaps.put("2", new TownMap("maps/house1.tmx", true));
+	        tiledMaps.put("3", new TownMap("maps/house1.tmx", true));
+	        tiledMaps.put("4", new TownMap("maps/house1.tmx", true));
+	        tiledMaps.put("5", new TownMap("maps/house1.tmx", true));
+	        tiledMaps.put("6", new TownMap("maps/house1.tmx", true));
+	        tiledMaps.put("7", new TownMap("maps/house1.tmx", true));
 	    }
 	
 	
