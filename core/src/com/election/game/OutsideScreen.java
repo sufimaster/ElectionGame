@@ -341,7 +341,7 @@ public class OutsideScreen implements Screen, InputProcessor {
 		
 		 
 		renderMap(delta);
-		renderSprites(delta);
+		//renderSprites(delta);
 		
 		
 		renderHud(delta);
@@ -365,10 +365,11 @@ public class OutsideScreen implements Screen, InputProcessor {
 
 	}
 	
-	private void renderSprites(float delta) {
+/*	private void renderSprites(float delta) {
 		
 		spriteBatch.setProjectionMatrix(worldCam.source.combined);
 		
+<<<<<<< HEAD
 		spriteBatch.begin();
 		for (Electorate electorate2 : currentTownMap.electorate) {
 			electorate2.draw(spriteBatch);
@@ -376,9 +377,14 @@ public class OutsideScreen implements Screen, InputProcessor {
 		candidate.draw(spriteBatch);
 		
 		spriteBatch.end();
+=======
+		candidate.draw(ElectionGame.GAME_OBJ.batch);
+				
+		ElectionGame.GAME_OBJ.batch.end();
+>>>>>>> 3fd79fe7bd31ea2edd7f8eb7ab5c901b7fc2af8c
 
 		
-	}
+	}*/
 	
 	private void renderHud(float delta) {
 		/*Matrix4 uiMatrix = hudCam.combined.cpy();

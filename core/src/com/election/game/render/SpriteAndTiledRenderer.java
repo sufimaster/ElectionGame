@@ -85,6 +85,7 @@ public class SpriteAndTiledRenderer extends OrthogonalTiledMapRenderer {
 					
 					//draw candidate						
 					//candidate.draw(this.getBatch());
+					candidate.draw(this.getBatch());
 				}
 				
 				

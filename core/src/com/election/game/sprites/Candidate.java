@@ -13,6 +13,7 @@ import com.election.game.States;
 import com.election.game.States.AnimationState;
 import com.election.game.States.WalkingDirection;
 
+
 public class Candidate {
 	
 	//positive points from quest
@@ -115,6 +116,7 @@ public class Candidate {
 		
 		idleAnimationLeft = new Animation(1f/4f, animationFramesLeft);		
 		
+
 	}
 	
 

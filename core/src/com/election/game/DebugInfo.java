@@ -84,12 +84,19 @@ public class DebugInfo {
 					//draw selection rectangle
 					shapeRender.setColor(Color.RED);
 					shapeRender.rect( region.rect.x + .01f, region.rect.y+ .01f, region.rect.width-.03f, region.rect.height-.03f);
+
+					
+					//draw region borders					
+					//shapeRender.setColor(Color.WHITE);
+					//shapeRender.rect( region.rect.x, region.rect.y, region.rect.width, region.rect.height);
 					
 					
 					//draw boundary rects of electors in selected region
 					for (Electorate elector: region.electorsInRegion ) {
 						Rectangle boundRect =elector.sprite.getBoundingRectangle(); 
-						shapeRender.rect( boundRect.x, boundRect.y, boundRect.width, boundRect.height );
+
+						shapeRender.rect( boundRect.x, boundRect.y, boundRect.x, boundRect.y, boundRect.width, boundRect.height,scale, scale, 0f );
+
 						
 					}
 					
@@ -222,7 +229,9 @@ public class DebugInfo {
 		drawMapObjects(screen.tileMap.getAllMapObjects(), screen.mapRenderer.getUnitScale(), screen.worldCam);
 		
 		//draw each region
+
 		drawRegions(screen.currentTownMap.regions, screen.worldCam, screen.mouseRegion, screen.mapRenderer.getUnitScale());
+
 
 		//draw cnadidate location
 		drawCandidateBounds(screen.candidate, screen.worldCam);
