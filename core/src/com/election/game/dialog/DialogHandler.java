@@ -8,104 +8,169 @@ import java.util.Set;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.InputProcessor;
-import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.Texture.TextureFilter;
-import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
-import com.badlogic.gdx.graphics.g2d.GlyphLayout;
-import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.math.Rectangle;
-import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.scenes.scene2d.Actor;
+import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.ui.Label;
+import com.badlogic.gdx.scenes.scene2d.ui.ScrollPane;
+import com.badlogic.gdx.scenes.scene2d.ui.Skin;
+import com.badlogic.gdx.scenes.scene2d.ui.Table;
+import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
+import com.badlogic.gdx.scenes.scene2d.ui.Window;
+import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.utils.Align;
 import com.election.game.Constants;
 import com.election.game.ElectionGame;
 import com.election.game.Electorate;
-import com.election.game.States.*;
+import com.election.game.States.DialogState;
+import com.election.game.States.GameState;
 
 
 public class DialogHandler implements InputProcessor {
-	
-	private static final float BUFFER_WIDTH = 20;
-	public Sprite dialogBox;
-	public Sprite choiceBox;
-	public Vector2 position;
-	
-	public Rectangle rect;
-	//public ShapeRenderer shapeRenderer;
-
-	Electorate elector;
-
-	DialogContainer dialogObj;
-	DialogTree candidateDialogTree;
-	Map<String, String> currentDialogOptions;
-	//Dialog currentElectorDialog;
-	DialogModel displayingDialog;
 	
 	BitmapFont font;
 	BitmapFont selectedFont;
 
 	
-	private boolean dialogEnabled = false;
-	
+	Electorate elector;
+	DialogContainer dialogObj;
+	DialogTree candidateDialogTree;
+	Map<String, String> currentDialogOptions;
+	DialogModel displayingDialog;
+
 	
 	int candidateDialogIdx = 0;
 	int highlightedDialogOption=0;
 	int selectedDialogOption= Constants.UNSELECTED;
-	//private int dialogOptionCount;
-	
-
-	
 	float accum = 0f;
-	//private boolean endDialog = false;;
-	
-
+	private boolean dialogEnabled = false;
 	
 	public DialogState dialogState=DialogState.DISPLAYING;
 	
-	public Animation prompt;
 	
-	public GlyphLayout layout1;
-	public GlyphLayout layout2;
+	//new stuff scene2d
+	private Stage stage;
+	private Window dialogDisplay;
+	
+	private Window dialogSelection;
+	private Label dialogLabel;
+	
+	float letterDrawRate = 1f/.2f;  //1 letter every .2 seconds
+	private float percentage;
+	private Table selectionTable;
+	private Skin skin;
+	
 	
 	public DialogHandler(DialogContainer dialogContainer, BitmapFont font, BitmapFont selectedFont){
 		init();
 		
-		Texture texture = new Texture(Gdx.files.internal("dialog_box2.png"));
-		texture.setFilter(TextureFilter.Linear, TextureFilter.Linear);
-		
-		dialogBox = new Sprite(texture);		
-		dialogBox.setSize(dialogBox.getWidth()*0.2f, dialogBox.getHeight()* 0.2f);
-		dialogBox.setOriginCenter();
 		
 		
-		layout1 = new GlyphLayout(); 
-		layout1.width = dialogBox.getWidth() - BUFFER_WIDTH;
-		
-		
-		choiceBox = new Sprite(texture);
-		choiceBox.setSize(choiceBox.getWidth()*0.2f, choiceBox.getHeight()* 0.1f);
-		choiceBox.setOriginCenter();
-		
-		layout2= new GlyphLayout(); 
-		layout2.width = choiceBox.getWidth() - BUFFER_WIDTH;
-		
-		
-		
-		//shapeRenderer = new ShapeRenderer();
-		rect = new Rectangle(Gdx.graphics.getWidth()/6, Gdx.graphics.getHeight()/2, Gdx.graphics.getWidth()/2, Gdx.graphics.getHeight()/2 );
-	
 		this.font = font;
 		this.selectedFont = selectedFont;
 		
 		dialogObj = dialogContainer;
+		skin = ElectionGame.GAME_OBJ.dialogSkin;
+		stage = new Stage();
+
 		
-		//prompt = new Animation(10, );
+		createDialogDisplay();
+		createDialogSelection();
 		
 	}
 
+	private void createDialogDisplay() {
+		dialogDisplay = new Window("Dialog", skin);
+		dialogDisplay.setSize(Gdx.graphics.getWidth()/2f, Gdx.graphics.getHeight()/2.5f);
+		
+		
+		//dialogDisplay.setDebug(true);
+		dialogDisplay.setPosition(0,0 );
+		
+		stage.addActor(dialogDisplay);
+				
+		Table table = new Table();
+		table.debug();
+		table.center().left();		
+		
+		final ScrollPane scroll = new ScrollPane(table, skin);
+		scroll.setFadeScrollBars(false);
+		//scroll.setDebug(true);
+		
+		
+		dialogLabel = new Label("", skin);	
+		dialogLabel.setWrap(true);
+		dialogLabel.setFillParent(true);
+		
+		table.row();
+		table.add( dialogLabel);
+		
+		TextButton closeButton = new TextButton("X", skin);
+		closeButton.addListener(new ChangeListener() {
+			
+			@Override
+			public void changed(ChangeEvent event, Actor actor) {
+				closeDialog();
+				
+			}
 
+			
+		});
+		
+		dialogDisplay.getTitleTable().add(closeButton);
+		
+		
+		dialogDisplay.add(scroll).expand().fill().colspan(4);
+		dialogDisplay.row().space(10).padBottom(10);
+		TextButton continueButton = new TextButton("Ok", skin);
+		continueButton.addListener(new ChangeListener() {
+			
+			@Override
+			public void changed(ChangeEvent event, Actor actor) {
+				// change state to DIALOG_MAKING_SELECTION
+				dialogState = DialogState.MAKING_SELECTION;
+			}
+		});
+		
+		dialogDisplay.add(continueButton);
+		
+		dialogDisplay.setVisible(false);
+	}
+	
+	
+	private void closeDialog() {
+		dialogDisplay.remove();
+		dialogSelection.remove();
+		endDialog();
+		
+	}
+	
+	
+	public void createDialogSelection(){
+		
+		dialogSelection = new Window("Choices", skin);
+		dialogSelection.setSize(Gdx.graphics.getWidth()/3, dialogDisplay.getHeight());
+		dialogSelection.setDebug(false);
+		dialogSelection.setPosition( 20 + dialogDisplay.getX() + dialogDisplay.getWidth(), 0);
+		
+		stage.addActor(dialogSelection);
+				
+		selectionTable = new Table();
+		selectionTable.debug();
+	
+
+		final ScrollPane scroll = new ScrollPane(selectionTable, skin);		
+		scroll.setFadeScrollBars(false);
+		scroll.setDebug(true);
+				
+		selectionTable.padTop(10);
+		
+		dialogSelection.add(scroll).expand().fill().colspan(4);
+		
+	}
+	
+	
 	public void init(){
 		
 		candidateDialogIdx = 0;
@@ -121,30 +186,30 @@ public class DialogHandler implements InputProcessor {
 	}
 	
 	
-	public void draw(SpriteBatch batch, float delta){
+	public void draw(float delta){
 		
 		//Gdx.app.log(this.getClass().getName(), "Dialog State:" + dialogState);
+		
+		stage.setDebugAll(ElectionGame.GAME_OBJ.isdebug);
+			
 		
 		if(!dialogEnabled){
 			return;
 		}
 		
-		
 		if( dialogState == DialogState.DISPLAYING){
-			
-			if( displayingDialog != null){
-				drawDialog(batch);
-			}
+			populateDialog();
 			
 		}else if( dialogState == DialogState.WAITING_TO_DISMISS){
-			
-			drawDialog(batch);
-			drawPrompt( batch);
+			populateDialog();
 			
 		}else if( dialogState == DialogState.MAKING_SELECTION){
-		
-			drawDialog(batch);
-			drawCandidateOptions(batch);
+			
+			
+			if( !dialogLabel.getText().toString().trim().equals("")){
+				populateDialog();
+			}
+			//populateChoices();
 						
 		}else if( dialogState == DialogState.ENDING){
 			
@@ -153,45 +218,59 @@ public class DialogHandler implements InputProcessor {
 		
 		
 		
-	}
-
-
-
-
-	private void drawPrompt(SpriteBatch batch) {
-
+		stage.act(Gdx.graphics.getDeltaTime());
+		stage.draw();
 		
-		//Gdx.app.log(this.getClass().getName(), "Press Enter to proceed");
-		selectedFont.draw(batch, "Press enter to continue", dialogBox.getX()+ dialogBox.getWidth()/2 - BUFFER_WIDTH, dialogBox.getY()/2 - BUFFER_WIDTH);
+		
 		
 	}
 
 
-	private void drawDialog(SpriteBatch batch) {
+
+
+
+	private void populateDialog() {
 		
+			
+		//Gdx.app.log(this.getClass().getName(), "length to draw: " + lengthToDraw);
+		//Gdx.app.log(this.getClass().getName(), "Dialog length: " + dialogLabel.getText().length);
+		
+		
+				
 		if( displayingDialog !=null){
 			
-			layout1.setText(font, displayingDialog.id + ": " + displayingDialog.value, Color.RED, dialogBox.getWidth() , Align.topLeft, true );
+			dialogDisplay.setVisible(true);
+			dialogLabel.setText(displayingDialog.toString());
+							
+			//layout1.setText(font, , Color.RED, dialogBox.getWidth() , Align.topLeft, true );
 			//float width = layout.width;
 			//float height = layout.height;
 			
 			
-			dialogBox.draw(batch);
-			font.draw(batch, layout1, dialogBox.getX()+ BUFFER_WIDTH, dialogBox.getY() + dialogBox.getHeight()/1.6f - BUFFER_WIDTH);
+			//dialogBox.draw(batch);
+			//font.draw(batch, layout1, dialogBox.getX()+ BUFFER_WIDTH, dialogBox.getY() + dialogBox.getHeight()/1.6f - BUFFER_WIDTH);
 		}
+		
 		
 		if( candidateDialogIdx == Constants.NO_MORE_DIALOG){
 			dialogState = DialogState.WAITING_TO_DISMISS;
-		}	else{
+		}else{
 			dialogState = DialogState.MAKING_SELECTION;
 		}
 		
 		
-		
-		
 	}
 
-	private void drawCandidateOptions(SpriteBatch batch) {
+	private void populateChoices() {
+		
+		if( candidateDialogIdx == Constants.NO_MORE_DIALOG){
+			dialogSelection.setVisible(false);
+			dialogState = DialogState.WAITING_TO_DISMISS;
+			return;
+		}
+		
+		dialogSelection.setVisible(true);
+		selectionTable.clear();
 		
 		//get the list of dialogs available for candidate to say
 		List<Map<String, String>> list  = candidateDialogTree.getInput();				
@@ -202,30 +281,57 @@ public class DialogHandler implements InputProcessor {
 		//tree that is in response to the elector's response
 		currentDialogOptions = list.get(candidateDialogIdx);		
 		
-		choiceBox.draw(batch);
+		//choiceBox.draw(batch);
 		
 		
-		//iterate through each of the dialog line options for the candidate and print them
-		int yOffset = 0;
+		//iterate through each of the dialog line options for the candidate and add them to dialog box		
 		int count=0;		
 		Iterator<String> itr  = currentDialogOptions.keySet().iterator();
 		while(itr.hasNext()){
 			
 			String key = itr.next();				
-			DialogModel text = dialogObj.getDialogs().get(key);
+			DialogModel dialogModelObj = dialogObj.getDialogs().get(key);
+			
+			
+			
+			
 			
 			if( count==highlightedDialogOption){
-				layout2.setText(selectedFont,  text.id + ": " + text.value, Color.RED, choiceBox.getWidth(), Align.topLeft, true );
 				
-				selectedFont.draw(batch, layout2, 10, choiceBox.getY() + choiceBox.getHeight()/1.7f - yOffset);
+				Label choice1 = new Label(dialogModelObj.toString(), skin);			
+				choice1.setWrap(true);
+				choice1.setAlignment(Align.left);
+				
+				//add to table
+				Label highlightLabel = new Label(">>", skin);
+				highlightLabel.setWidth(5);
+				highlightLabel.setAlignment(Align.top | Align.left);
+
+				selectionTable.add(highlightLabel);
+				selectionTable.add( choice1).growX().top().left().padLeft(10);
+				selectionTable.row().pad(15);
+				
+				//layout2.setText(selectedFont,  text.id + ": " + text.value, Color.RED, choiceBox.getWidth(), Align.topLeft, true );				
+				//selectedFont.draw(batch, layout2, 10, choiceBox.getY() + choiceBox.getHeight()/1.7f - yOffset);
 			}else{			
 				
-				layout2.setText(font,  text.id + ": " + text.value, Color.RED, choiceBox.getWidth(), Align.topLeft, true );
-				font.draw(batch, layout2, 10, choiceBox.getY() + choiceBox.getHeight()/1.7f- yOffset);
+				//TODO: Distinguish by using different skin?				
+				Label choice1 = new Label(dialogModelObj.toString(), skin);			
+				choice1.setWrap(true);
+				choice1.setAlignment(Align.left);
+								
+				//add to table
+				Label notHighlightLabel = new Label("---", skin);
+				notHighlightLabel.setWidth(5);
+				notHighlightLabel.setAlignment(Align.top | Align.left);
+				
+				selectionTable.add(notHighlightLabel);
+				selectionTable.add( choice1).growX().top().left().padLeft(10);
+				selectionTable.row().pad(15);
+				//layout2.setText(font,  text.id + ": " + text.value, Color.RED, choiceBox.getWidth(), Align.topLeft, true );
+				//font.draw(batch, layout2, 10, choiceBox.getY() + choiceBox.getHeight()/1.7f- yOffset);
 			}
-			
-			yOffset+=layout2.height + 3;
-			count++;
+			count ++;
 		}		
 	}
 
@@ -258,6 +364,7 @@ public class DialogHandler implements InputProcessor {
 		}
 		
 		if( candidateDialogTree.input.size() > 0){
+			populateChoices();
 			dialogState = DialogState.MAKING_SELECTION;
 		}
 		
@@ -267,6 +374,9 @@ public class DialogHandler implements InputProcessor {
 	
 
 	public void endDialog(){
+		dialogDisplay.setVisible(false);
+		dialogSelection.setVisible(false);
+		
 		Gdx.app.log(this.getClass().getName(), "Ending Dialog");
 		dialogEnabled = false;
 		resetDialog();
@@ -301,7 +411,7 @@ public class DialogHandler implements InputProcessor {
 				dialogState = DialogState.WAITING_TO_DISMISS;
 			}
 	
-			
+			selectedDialogOption = 0;
 		}
 	}
 
@@ -344,6 +454,16 @@ public class DialogHandler implements InputProcessor {
 			}
 		}
 		
+		
+		
+		//check if the candidate's selected dialog line adds a quest to his Task List
+		String questID = candidateDialogTree.quest.get(selectedCandidateKey);
+		if( questID != null && !questID.trim().isEmpty()){
+			//add quest to task list
+			ElectionGame.GAME_OBJ.questHandler.activateQuest(questID);
+		}
+		
+		
 		//get the elector response KEY (like R1, R2 etc) mapped to the selected Candidate dialog line C1, C2, etc...
 		//if this is null, that means you display the final response, and end the dialog
 		String electorDialogKey = currentDialogOptions.get(selectedCandidateKey);
@@ -372,7 +492,7 @@ public class DialogHandler implements InputProcessor {
 			selectedDialogOption = 0;
 		}
 		
-		
+		populateChoices();
 		dialogState = DialogState.DISPLAYING;
 
 		
@@ -402,6 +522,8 @@ public class DialogHandler implements InputProcessor {
 			highlightedDialogOption+= incrementSelection;
 			
 		}
+		
+		populateChoices();
 	}
 
 

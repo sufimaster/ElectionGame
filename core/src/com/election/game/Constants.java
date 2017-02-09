@@ -3,6 +3,7 @@ package com.election.game;
 import java.util.TreeMap;
 
 import com.badlogic.gdx.Input.Keys;
+import com.election.game.maps.TownMap;
 
 public class Constants {
 
@@ -30,42 +31,46 @@ public class Constants {
 	public static final int TILE_SIZE = WINDOWS_GAME_WIDTH/TILE_NUMBER;
 	public static final int CANDIDATE_INTERACT_KEY = Keys.E;
 	
+	//NPC CONSTANTS
+	public static final String NPC_DEF_PATH = "data/npcdata/npcdata.json";
+	
+	
+	//Quest Constants
+	public static final String QUEST_DEF_PATH = "data/quests/quests.json";
+	
+	//skin constants
+	public static final String UI_SKIN_PATH = "data/skins/uiskin.json";
+	public static final String UI_FONT_PATH = "data/font/arial.ttf";
 	
 	//DIALOG CONSTANTS
 	public static final int CAND_NAME =0;
-	public static final String DIALOG_TREES_PATH="dialog/dialog_trees.json";
-	public static final String DIALOG_LINES_PATH="dialog/dialog_lines.json";
+	public static final String DIALOG_TREES_PATH="data/dialog/dialog_trees.json";
+	public static final String DIALOG_LINES_PATH="data/dialog/dialog_lines.json";
 	public static final int UNSELECTED = -128929;
 	public static final int NO_MORE_DIALOG = -12123;
 	
+	
+	//MAP CONSTANTS
+	public static final String MAPS_DEF_PATH = "data/config/maps.json";
 	public static final String MAP_OBJ_PHYSICS_LAYER = "physics";
 	public static final String MAP_OBJ_NPC_LOCATION_LAYER = "npc_locations";
 	public static final String MAP_OBJ_OBJECT_TYPE = "type";
 	public static final String MAP_OBJ_OBJECT_TYPE_COLLIDE = "collide";
-	
-	
 	public static final String MAP_OBJ_DOOR = "door";
-	public static final String MAP_OBJ_DOOR_ID = "id";
-
-	
-	public static final TreeMap<String, TownMap> tiledMaps = new TreeMap<String, TownMap>();
+	public static final String MAP_OBJ_DOOR_ID = "id";	
 	public static final String MAP_OBJ_DOOR_NONE = "-1";
 	public static final String MAP_OBJ_OBJECT_LAYER = "objects";
 
 
-	public static final String MAP_OUTSIDE_WORLD_PREFIX = "MO";
+	public static final Object QUEST_DEFN_QUESTS_KEY = "quests";
 
-	static
-	    {
-	        tiledMaps.put(MAP_OUTSIDE_WORLD_PREFIX + "1", new TownMap("maps/town2.tmx", true));
-	        tiledMaps.put("1", new TownMap("maps/house1.tmx", true));
-	        tiledMaps.put("2", new TownMap("maps/house1.tmx", true));
-	        tiledMaps.put("3", new TownMap("maps/house1.tmx", true));
-	        tiledMaps.put("4", new TownMap("maps/house1.tmx", true));
-	        tiledMaps.put("5", new TownMap("maps/house1.tmx", true));
-	        tiledMaps.put("6", new TownMap("maps/house1.tmx", true));
-	        tiledMaps.put("7", new TownMap("maps/house1.tmx", true));
-	    }
+	public static final int HOMELESS = -129;
+
+	public static final String MAP_OUTSIDE_WORLD_PREFIX = "MO";	
+
+
+
+	public static final float MAP_TRANSITION_TIME = 2f; //2 second transition between maps
 	
 	
 	

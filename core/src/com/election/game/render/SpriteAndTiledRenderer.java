@@ -16,8 +16,8 @@ import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer;
 import com.election.game.Constants;
 
 import com.election.game.Electorate;
-import com.election.game.TownMap;
 import com.election.game.camera.OrthographicCameraMovementWrapper;
+import com.election.game.maps.TownMap;
 import com.election.game.sprites.Candidate;
 
 public class SpriteAndTiledRenderer extends OrthogonalTiledMapRenderer {
@@ -84,7 +84,7 @@ public class SpriteAndTiledRenderer extends OrthogonalTiledMapRenderer {
 					}*/
 					
 					//draw candidate						
-					//candidate.sprite.draw(this.getBatch());
+					//candidate.draw(this.getBatch());
 				}
 				
 				

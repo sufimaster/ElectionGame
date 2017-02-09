@@ -1,5 +1,6 @@
 package com.election.game;
 
+import java.util.Map;
 import java.util.Random;
 
 import com.badlogic.gdx.Game;
@@ -13,8 +14,11 @@ import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator.FreeTypeFont
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.election.game.States.GameState;
-import com.election.game.dialog.DialogHandler2;
-import com.election.game.dialog.DialogParser;
+import com.election.game.dialog.DialogHandler;
+import com.election.game.json.JsonParser;
+import com.election.game.maps.MapHandler;
+import com.election.game.maps.TownMap;
+import com.election.game.quests.QuestHandler;
 
 public class ElectionGame extends Game {
 	
@@ -25,7 +29,7 @@ public class ElectionGame extends Game {
 	public SpriteBatch batch;
 	public SpriteBatch hudBatch;
 	public ShapeRenderer shapeRenderer;
-	public DialogHandler2 dialogHandler;
+	public DialogHandler dialogHandler;
 	
 	public boolean isdebug = true;
 	public static boolean isFullScreen = false;
@@ -41,7 +45,8 @@ public class ElectionGame extends Game {
 	public BitmapFont  menuFont;
 	public Skin dialogSkin;
 	
-	
+	public QuestHandler questHandler;
+	public MapHandler mapHandler;
 	
 
 	public void create () {
@@ -52,8 +57,12 @@ public class ElectionGame extends Game {
 		createBatches();
 		createSkins();
 		createFonts();
+		createQuests();
 		createDialogObjects();
 		createRenderers();
+		loadMaps();
+		//createNPCs();
+		
 		
 		this.setScreen(new MenuScreen(this));
 		
@@ -80,7 +89,7 @@ public class ElectionGame extends Game {
 
 
 	private void createSkins() {
-		dialogSkin = new Skin(Gdx.files.internal("data/uiskin.json"));
+		dialogSkin = new Skin(Gdx.files.internal(Constants.UI_SKIN_PATH));
 		
 	}
 
@@ -90,7 +99,7 @@ public class ElectionGame extends Game {
 		font = new BitmapFont();
 
 		
-		FreeTypeFontGenerator generator = new FreeTypeFontGenerator(Gdx.files.internal("font/arial.ttf"));
+		FreeTypeFontGenerator generator = new FreeTypeFontGenerator(Gdx.files.internal(Constants.UI_FONT_PATH));
 		FreeTypeFontParameter param = new FreeTypeFontParameter();
 		
 		param.size=16;
@@ -122,10 +131,28 @@ public class ElectionGame extends Game {
 		
 	}
 
+	private void loadMaps(){
+		
+		JsonParser jsonParser = new JsonParser();
+		mapHandler = new MapHandler();
+		mapHandler.gameMaps = jsonParser.parseMapsFile( Constants.MAPS_DEF_PATH);
+		mapHandler.init();
+	}
+	
+	private void createQuests(){
+		
+		questHandler = new QuestHandler();
+		JsonParser jsonParser = new JsonParser();				
+
+		questHandler.setQuests(  jsonParser.parseQuest( Constants.QUEST_DEF_PATH) );
+	}
+	
 	private void createDialogObjects() {
 
-		DialogParser dialogParser = new DialogParser();				
-		dialogHandler = new DialogHandler2 (dialogParser.parseDialog(Constants.DIALOG_TREES_PATH, Constants.DIALOG_LINES_PATH), dialogFont, selectedDialogFont);
+		
+		
+		JsonParser jsonParser = new JsonParser();				
+		dialogHandler = new DialogHandler (jsonParser.parseDialog(Constants.DIALOG_TREES_PATH, Constants.DIALOG_LINES_PATH), dialogFont, selectedDialogFont);
 				
 	}
 	
@@ -133,9 +160,7 @@ public class ElectionGame extends Game {
 	
 	public void render () {
 		
-		
 		super.render();
-
 
 	}
 	

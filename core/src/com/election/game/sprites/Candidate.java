@@ -2,15 +2,25 @@ package com.election.game.sprites;
 
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.Texture.TextureFilter;
+import com.badlogic.gdx.graphics.g2d.Animation;
+import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
-import com.badlogic.gdx.maps.objects.TextureMapObject;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.election.game.Constants;
-import com.election.game.ElectionGame;
+import com.election.game.States;
+import com.election.game.States.AnimationState;
+import com.election.game.States.WalkingDirection;
 
 public class Candidate {
+	
+	//positive points from quest
+	public float questPositiveReward=0;
+	
+	//negative points from quest
+	public float questNegativeReward=0;
+	
 	private boolean moveUp= false;
 	private boolean moveDown= false;
 	private boolean moveLeft= false;
@@ -18,65 +28,161 @@ public class Candidate {
 	
 	private Vector2 prevPosition;
 	
-	private Direction direction;
+	private WalkingDirection directionState;
+	private WalkingDirection prevDirectionState;
+	
 	public Sprite sprite;
 
+	//public TextureRegion[] animationFramesLeft;
+	Animation idleAnimationLeft;
 	
-	private enum Direction{
-		NONE,
-		UP,
-		DOWN,
-		LEFT,
-		RIGHT;
-	}
+	//public TextureRegion[] animationFramesRight;
+	Animation idleAnimationRight;
+	
+	
+	float elapsedTime=0;
+
+	private float width;
+
+	private float height;
+
+	//private AnimationState state = AnimationState.IDLE;
+	
+
 
 	public Candidate(Texture texture) {
-
+		
 		texture.setFilter(TextureFilter.Linear, TextureFilter.Linear);
 
 
 		sprite = new Sprite(texture);
 		prevPosition = new Vector2();
+		
+		initAnimations(texture);
+		
+		
+		
 	}
 	
-	public Candidate(Texture texture, int width, int height) {
+	private void initAnimations(Texture texture) {
+		//idle animation
+		
+		initLeftAnimations(texture);
+		
+		initRightAnimations(texture);
+		
+			
+	}
+
+
+
+	private void initRightAnimations(Texture texture) {
+		TextureRegion[][] tmpFrames = TextureRegion.split(texture, 128, 256);
+		TextureRegion [] animationFramesRight = new TextureRegion[8];
+		int index=0;
+		
+		for(int i=0; i<tmpFrames.length; i++){
+			for(int j=0; j<tmpFrames[i].length; j++){
+				TextureRegion region =tmpFrames[i][j]; 
+				region.flip(true, false);
+				
+				animationFramesRight[index] = region;
+				animationFramesRight[animationFramesRight.length-1-index] = tmpFrames[i][j];
+				index++;
+			}
+		}
+				
+		
+		idleAnimationRight = new Animation(1f/4f, animationFramesRight);			
+	}
+	
+	private void initLeftAnimations(Texture texture) {
+
+		TextureRegion[][] tmpFrames = TextureRegion.split(texture, 128, 256);
+		TextureRegion [] animationFramesLeft = new TextureRegion[8];
+		int index=0;
+		
+		for(int i=0; i<tmpFrames.length; i++){
+			for(int j=0; j<tmpFrames[i].length; j++){
+				
+				
+				animationFramesLeft[index] = tmpFrames[i][j];
+				animationFramesLeft[animationFramesLeft.length-1-index] = tmpFrames[i][j];
+				index++;
+			}
+		}
+				
+		
+		idleAnimationLeft = new Animation(1f/4f, animationFramesLeft);		
+		
+	}
+	
+
+	public Candidate(Texture texture, float width, float height) {
 
 		texture.setFilter(TextureFilter.Linear, TextureFilter.Linear);
 
-
-		sprite = new Sprite(texture, width, height);
+		sprite = new Sprite(texture);
+		sprite.setSize(width, height);					
 		prevPosition = new Vector2();
+
+		this.width = width;
+		this.height = height;
+		
+		initAnimations(texture);
+		
+		
 	}
 
 	
-	public void draw(){
-				
-		sprite.draw(ElectionGame.GAME_OBJ.batch);
+	public void draw(Batch batch){
+			
+		if( directionState == WalkingDirection.NONE){
+		
+			
+			if( prevDirectionState == WalkingDirection.RIGHT){
+				batch.draw(idleAnimationRight.getKeyFrame(elapsedTime, true), sprite.getX(), sprite.getY(), width, height);
+			}else if( prevDirectionState == WalkingDirection.LEFT){
+				batch.draw(idleAnimationLeft.getKeyFrame(elapsedTime, true), sprite.getX(), sprite.getY(), width, height);	
+			}else if( prevDirectionState == WalkingDirection.DOWN){
+				batch.draw(idleAnimationRight.getKeyFrame(elapsedTime, true), sprite.getX(), sprite.getY(), width, height);
+			}else if(prevDirectionState == WalkingDirection.LEFT){
+				batch.draw(idleAnimationLeft.getKeyFrame(elapsedTime, true), sprite.getX(), sprite.getY(), width, height);
+			}
+			//sprite.draw(batch);
+			
+		
+		}else if(directionState == WalkingDirection.RIGHT){
+			batch.draw(idleAnimationRight.getKeyFrame(0f), sprite.getX(), sprite.getY(), width, height);
+		}else if(directionState == WalkingDirection.LEFT){
+			batch.draw(idleAnimationLeft.getKeyFrame(0f), sprite.getX(), sprite.getY(), width, height);
+		}
 	}
-	
+	 
 
 	
 	public void update(float delta){
 		
 		prevPosition.set(sprite.getX(), sprite.getY());
 		
-		if( direction == Direction.UP && !(direction == Direction.LEFT || direction == Direction.RIGHT)){
+		if( directionState == WalkingDirection.UP && !(directionState == WalkingDirection.LEFT || directionState == WalkingDirection.RIGHT)){
 			moveY(delta);
 		}
 		
 		
-		if( direction == Direction.DOWN && !(direction == Direction.LEFT || direction == Direction.RIGHT)){
+		if( directionState == WalkingDirection.DOWN && !(directionState == WalkingDirection.LEFT || directionState == WalkingDirection.RIGHT)){
 			moveY(-delta);
 		}
 		
-		if( direction == Direction.RIGHT && !(direction == Direction.UP || direction == Direction.DOWN)){
+		if( directionState == WalkingDirection.RIGHT && !(directionState == WalkingDirection.UP || directionState == WalkingDirection.DOWN)){
 			moveX(delta);
 		}
 		
-		if( direction == Direction.LEFT && !(direction == Direction.UP || direction == Direction.DOWN)){
+		if( directionState == WalkingDirection.LEFT && !(directionState == WalkingDirection.UP || directionState == WalkingDirection.DOWN)){
 			moveX(-delta);
 		}
 
+		elapsedTime += delta;
 			
 	}
 	
@@ -100,10 +206,13 @@ public class Candidate {
 
 
 	public void setMoveUp(boolean b) {
+		
+		prevDirectionState = directionState;
+		
 		if(b){
-			direction = Direction.UP;	
+			directionState = WalkingDirection.UP;	
 		}else{
-			direction = Direction.NONE;
+			directionState = WalkingDirection.NONE;
 		}
 		
 		
@@ -115,10 +224,13 @@ public class Candidate {
 
 	public void setMoveDown(boolean b) {
 		
+		prevDirectionState = directionState;
+		
 		if(b){
-			direction = Direction.DOWN;
+			directionState = WalkingDirection.DOWN;
+
 		}else{
-			direction = Direction.NONE;
+			directionState = WalkingDirection.NONE;
 		}
 		
 		
@@ -133,10 +245,12 @@ public class Candidate {
 
 	public void setMoveRight(boolean b) {
 		
+		prevDirectionState = directionState;
+		
 		if(b){
-			direction = Direction.RIGHT;
+			directionState = WalkingDirection.RIGHT;
 		}else{
-			direction = Direction.NONE;
+			directionState = WalkingDirection.NONE;
 		}
 		
 		
@@ -147,10 +261,13 @@ public class Candidate {
 	}
 
 	public void setMoveLeft(boolean b) {
+		
+		prevDirectionState = directionState;
+		
 		if(b){
-			direction = Direction.LEFT;
+			directionState = WalkingDirection.LEFT;
 		}else{
-			direction = Direction.NONE;
+			directionState = WalkingDirection.NONE;
 		}
 		
 		if( moveRight && b) moveRight = false;
@@ -177,6 +294,15 @@ public class Candidate {
 		
 	}
 
+	
+	public void setSize(float width, float height){	
+		
+		this.width = width;
+		this.height = height;
+		
+		sprite.setSize(width, height);
+	}
+	
 
 	public boolean overlaps(Rectangle boundingRectangle) {
 		// TODO Auto-generated method stub

@@ -1,15 +1,19 @@
 package com.election.game;
 
 import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.Map;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.Screen;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.maps.MapLayer;
 import com.badlogic.gdx.maps.MapObject;
@@ -24,8 +28,12 @@ import com.badlogic.gdx.math.Polyline;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
+import com.badlogic.gdx.utils.Timer;
+import com.badlogic.gdx.utils.Timer.Task;
 import com.election.game.States.GameState;
 import com.election.game.camera.OrthographicCameraMovementWrapper;
+import com.election.game.json.JsonParser;
+import com.election.game.maps.TownMap;
 import com.election.game.render.DebugRenderer;
 import com.election.game.render.SpriteAndTiledRenderer;
 import com.election.game.sprites.Candidate;
@@ -40,7 +48,7 @@ public class OutsideScreen implements Screen, InputProcessor {
 
 	public Candidate candidate;
 	BitmapFont font = new BitmapFont();
-	private ArrayList<Electorate> electorate;
+	//private ArrayList<Electorate> electorate;
 	
 	
 		
@@ -76,16 +84,28 @@ public class OutsideScreen implements Screen, InputProcessor {
 	private Rectangle prevDoor;
 	public Vector3 mousePos;
 	Vector2  mouseRegion;
-
+	
+	private SpriteBatch spriteBatch;
+	private String currentMap;
+	public TownMap currentTownMap;
+	
+	private float elapsedTime;	
+	float alphaBlend =0f;
+	
+	
 	public OutsideScreen(final ElectionGame gameObj) {
 
+		spriteBatch = new SpriteBatch();
+				
+		
+				
 		mousePos = new Vector3();
 		mouseRegion = new Vector2();
 		
 		//create main character and position in middle of map
-		candidate = new Candidate( new Texture(Gdx.files.internal("man.png")));
+		candidate = new Candidate( new Texture(Gdx.files.internal("MC.png")));
 		candidate.setPosition(5,5);
-		candidate.sprite.setSize(1f, 1f);		
+		candidate.setSize(.75f, 1f);		
 		
 		prevPosition = new Vector2(Constants.VIRTUAL_HEIGHT/2, Constants.VIRTUAL_HEIGHT/2);
 		
@@ -97,15 +117,18 @@ public class OutsideScreen implements Screen, InputProcessor {
 		hudCam = new OrthographicCamera();
 		
 		
-		
+		currentMap = Constants.MAP_OUTSIDE_WORLD_PREFIX + "1";
 		//create new town map by loading map of town from static file
 		//add the sprite to the map so it is rendered with it
 		//TODO: should be 1/128f since my tile size will be 128f and I want one unit in my game to equal 1 tile size		
 		//right now tile size is 32pixels for town map. Need to fix that.
 		float unitScale = 1f / 32f;
-		tileMap = 	Constants.tiledMaps.get(Constants.MAP_OUTSIDE_WORLD_PREFIX + "1");
-		//tileMap.addSprite(candidate);
-
+		
+		tileMap = ElectionGame.GAME_OBJ.mapHandler.getMap(Constants.MAP_OUTSIDE_WORLD_PREFIX + 1);
+		tileMap.activate();
+		currentTownMap =tileMap;
+		//tileMap = 	Constants.tiledMaps.get(currentMap);
+		
 		//create a new map renderer
 		mapRenderer = new SpriteAndTiledRenderer(tileMap, worldCam, unitScale);
 	
@@ -113,11 +136,11 @@ public class OutsideScreen implements Screen, InputProcessor {
 		gameSpace = new Rectangle(0,0, tileMap.mapWidth, tileMap.mapHeight);
 		
 		//blocks of the world space, so we can easily calculate intersections
-		initRegions(tileMap.mapWidth, tileMap.mapHeight);
+		//initRegions(tileMap.mapWidth, tileMap.mapHeight);
 
 		//people that candidate can convince to vote for him
-		initElectorate();
-		tileMap.addSprites(electorate);
+		//initElectorate();
+		//tileMap.addSprites(electorate);
 		
 		//render these using the mapRenderer
 		//mapRenderer.setSprites(electorate);
@@ -134,8 +157,12 @@ public class OutsideScreen implements Screen, InputProcessor {
 	}
 	
 	private void loadMap(String mapId, float unitScale){
+		currentMap = mapId;
 		
-		tileMap = Constants.tiledMaps.get(mapId);
+		tileMap = ElectionGame.GAME_OBJ.mapHandler.getMap(mapId);
+		tileMap.activate();
+		currentTownMap = tileMap;
+		//tileMap = Constants.tiledMaps.get(mapId);
 		//tileMap.addSprite(candidate);
 		
 		
@@ -155,31 +182,10 @@ public class OutsideScreen implements Screen, InputProcessor {
 			
 		}
 		 
+		ElectionGame.GAME_OBJ.state = GameState.MAP_TRANSITION;
+		
 	}
 	
-
-	private void initRegions(int mapWidth, int mapHeight) {
-		
-		int numTilesX = mapWidth;//Constants.TILE_SIZE;
-		int numTilesY = mapHeight;///Constants.TILE_SIZE;
-		
-		
-		regions = new Region[numTilesX][numTilesY];
-		
-		for (int i = 0; i < numTilesX; i++) {
-
-			for (int j = 0; j < numTilesY; j++) {
-				
-				
-				regions[i][j] = new Region(i, j);
-				
-				
-			}
-			
-		}
-		
-				
-	}
 	
 	
 	Region getRegion(int xLoc, int yLoc){
@@ -188,7 +194,7 @@ public class OutsideScreen implements Screen, InputProcessor {
 		int yIdx= yLoc; ///Constants.TILE_SIZE;
 		
 		
-		Region region = regions[xIdx][yIdx];
+		Region region = currentTownMap.regions[xIdx][yIdx];
 		
 		return region;
 		
@@ -197,76 +203,6 @@ public class OutsideScreen implements Screen, InputProcessor {
 
 	
 
-	private void initElectorate() {
-		
-		
-		MapLayer layer  = tileMap.tiledMap.getLayers().get(Constants.MAP_OBJ_NPC_LOCATION_LAYER);
-		
-		if( layer == null )		
-			return;
-		
-		MapObjects mapObjects = layer.getObjects();
-		
-		
-		
-		
-		
-		
-		electorate = new ArrayList<Electorate>();
-		for (int i=0; i<Constants.ELECTORATE_COUNT_MAX; i++ ) {
-		
-			int randomIdx = ElectionGame.randGen.nextInt(mapObjects.getCount());		
-			MapObject mapObject = mapObjects.get(randomIdx);
-			
-						
-			if( mapObject instanceof RectangleMapObject ){
-			
-				RectangleMapObject obj = (RectangleMapObject) mapObject;
-				
-				int personType = 1 + ElectionGame.randGen.nextInt(NUM_TYPES_PEOPLE);
-						
-					 
-				//int xLoc = (int)(ElectionGame.randGen.nextFloat() * tileMap.mapWidth);				
-				//int yLoc = (int)(ElectionGame.randGen.nextFloat() * tileMap.mapHeight);
-				
-				Rectangle rect = obj.getRectangle();//Utilities.scaleRectangle(obj.getRectangle(),  mapRenderer.getUnitScale());	
-				
-				float xLoc = rect.x + (ElectionGame.randGen.nextFloat() *  rect.width);
-				float yLoc = rect.y + (ElectionGame.randGen.nextFloat() * rect.height);
-				
-				
-				Electorate elector = new Electorate( new Texture( Gdx.files.internal("person" + personType + ".png")) );
-				
-				/*Gdx.app.log(this.getClass().getName(), "Creating Elector at: (" + xLoc + ", " + yLoc + ")" );
-				
-				elector.sprite.setPosition(xLoc, yLoc);			
-				electorate.add(elector);
-				*/
-				
-				float regionX = xLoc;				
-				float regionY = yLoc;
-				Gdx.app.log(this.getClass().getName(), "Creating Elector at screen position: (" + regionX + ", " + regionY + ")" );
-
-				elector.sprite.setPosition(regionX, regionY);
-				electorate.add(elector);
-				
-				Gdx.app.log(this.getClass().getName(), "Region: (" + (int)regionX + ", " + (int)regionY + " )" );
-				
-				
-				//electors going into wrong regions?
-				Region region = regions[(int)regionX ][(int)regionY];
-				region.addElectors(elector);
-			
-		
-			
-			}
-			
-			
-		}
-	}
-
-	
-	
 	
 	@Override
 	public void show() {
@@ -282,13 +218,20 @@ public class OutsideScreen implements Screen, InputProcessor {
 		switch( ElectionGame.GAME_OBJ.state) {
 		
 			case RUNNING:		
-				updateRunning(delta);		
+				renderRunningState(delta);
+				//updateRunning(delta);		
 				break;
 			case PAUSED:
-				updatePaused(delta);
+				renderPausedState(delta);
+				//updatePaused(delta);
 				break;
 			case DIALOG:
-				updateRunning(delta);
+				renderDialogState(delta);
+				//updateRunning(delta);
+				break;
+			case MAP_TRANSITION:
+				renderMapTransitionState(delta);
+				//updateRunning(delta);
 				break;
 			default:
 				break;
@@ -296,23 +239,98 @@ public class OutsideScreen implements Screen, InputProcessor {
 			
 	}
 	
-	private void updateRunning(float delta){
-		
+	public void renderRunningState(float delta){
 		updateMouseRegion();
 		updateCandidate(delta);
 		checkCollisions(delta);		
 		updateCamera(delta);	
 		renderGraphics(delta);
+	}
+	
+	public void renderPausedState(float delta){
+		updatePaused(delta);
+	}
+	
+	public void renderDialogState(float delta){
+		updateMouseRegion();
+		updateCandidate(delta);
+		checkCollisions(delta);		
+		updateCamera(delta);	
+		renderGraphics(delta);
+		updateDialog(delta);
 		
-		renderHud(delta);
+	}
+
+	public void renderMapTransitionState(float delta){
+		elapsedTime += delta;		
+
 		
+		if( elapsedTime < (Constants.MAP_TRANSITION_TIME/2) ){
+			
+			
+			alphaBlend += delta * (1/(Constants.MAP_TRANSITION_TIME/2));
+			if( alphaBlend >= 1){
+				alphaBlend =1;
+			}		
+		}
 		
-		//draw dialog box
-		if( ElectionGame.GAME_OBJ.state == GameState.DIALOG){
-			updateDialog(delta);
+		if( elapsedTime >= (Constants.MAP_TRANSITION_TIME/2) ){
+			
+			alphaBlend -= delta * (1/(Constants.MAP_TRANSITION_TIME/2));
+
+			if( alphaBlend <= 0){
+				alphaBlend = 0;
+			}
+			
+			renderMap(delta);
+			
+		}
+		
+	/*	if( elapsedTime < (Constants.MAP_TRANSITION_TIME/2) ){
+			float inc = elapsedTime/(Constants.MAP_TRANSITION_TIME/2f);
+			
+			Gdx.app.log(this.getClass().getName(), "alphablend increment: " + inc);
+			alphaBlend += inc;			
+			
+			if( alphaBlend >= 1){
+				alphaBlend =1;
+			}		
 		}
 
+		if( elapsedTime >= (Constants.MAP_TRANSITION_TIME/2) && 
+				elapsedTime  < Constants.MAP_TRANSITION_TIME){
+
+			float dec = (Constants.MAP_TRANSITION_TIME - elapsedTime)/(Constants.MAP_TRANSITION_TIME/2f);
+			
+			Gdx.app.log(this.getClass().getName(), "alphablend decrement: " + dec);
+
+			alphaBlend -= dec;
+			if( alphaBlend <= 0){
+				alphaBlend = 0;
+			}
+			
+			renderMap(delta);
+		}*/
+
+		Gdx.gl.glEnable(GL20.GL_BLEND);
+	    Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
+	    ElectionGame.GAME_OBJ.shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
+	    ElectionGame.GAME_OBJ.shapeRenderer.setColor(new Color(0, 0, 0, alphaBlend));
+	    ElectionGame.GAME_OBJ.shapeRenderer.rect(0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+	    ElectionGame.GAME_OBJ.shapeRenderer.end();
+	    Gdx.gl.glDisable(GL20.GL_BLEND);
+		
+
+
+		renderDebugInfo(delta);
+
+		
+		if( elapsedTime >= Constants.MAP_TRANSITION_TIME){
+			ElectionGame.GAME_OBJ.state = GameState.RUNNING;
+			elapsedTime =0f;
+		}
 	}
+	
 
 	private void renderGraphics(float delta) {
 
@@ -325,20 +343,14 @@ public class OutsideScreen implements Screen, InputProcessor {
 		renderMap(delta);
 		renderSprites(delta);
 		
+		
+		renderHud(delta);
 	}
 
 	private void updateMouseRegion() {
 
 		
-		//mouse position is set in pixels - top left is 0,0, bottom right is 1024, 800 (depending on screen width/height)
-		//must convert from screen position to map position
-		
-		
-		
-		//take into account camera position
-		
-		//float regionY = (mousePos.y - worldCam.source.position.y)/Constants.VIRTUAL_HEIGHT;
-		//float regionX =  (mousePos.x - worldCam.source.position.x)/ Constants.VIRTUAL_HEIGHT;
+
 		
 		mouseRegion.y = (int)mousePos.y;
 		mouseRegion.x = (int)mousePos.x;
@@ -355,11 +367,15 @@ public class OutsideScreen implements Screen, InputProcessor {
 	
 	private void renderSprites(float delta) {
 		
-		ElectionGame.GAME_OBJ.batch.begin();
+		spriteBatch.setProjectionMatrix(worldCam.source.combined);
 		
-		candidate.draw();
-				
-		ElectionGame.GAME_OBJ.batch.end();
+		spriteBatch.begin();
+		for (Electorate electorate2 : currentTownMap.electorate) {
+			electorate2.draw(spriteBatch);
+		}
+		candidate.draw(spriteBatch);
+		
+		spriteBatch.end();
 
 		
 	}
@@ -368,12 +384,19 @@ public class OutsideScreen implements Screen, InputProcessor {
 		/*Matrix4 uiMatrix = hudCam.combined.cpy();
 		uiMatrix.setToOrtho2D(0, 0, Constants.WINDOWS_GAME_WIDTH, Constants.WINDOWS_GAME_HEIGHT);
 		*/
-		
-		renderDebugInfo();
+		renderQuestInfo(delta);
+		renderDebugInfo(delta);
 		
 	}
 
-	private void renderDebugInfo() {
+	private void renderQuestInfo(float delta) {
+
+
+		ElectionGame.GAME_OBJ.questHandler.draw(delta);
+		
+	}
+
+	private void renderDebugInfo(float delta) {
 			
 		debugInfo.render(this);
 		
@@ -394,21 +417,25 @@ public class OutsideScreen implements Screen, InputProcessor {
 	
 	private void updateDialog(float delta) {
 		
+		Timer.schedule(new Task() {
+			
+			@Override
+			public void run() {
 
-		//draw dialog box
-		if( interactBtn){
-			//should only call this method once.
-			ElectionGame.GAME_OBJ.dialogHandler.startDialog(interactedElector);
-			interactBtn = false;
-			interactedElector = null;
-		}
-		ElectionGame.GAME_OBJ.dialogHandler.draw(ElectionGame.GAME_OBJ.hudBatch, delta);
+				//draw dialog box
+				if( interactBtn){
+					//should only call this method once.
+					ElectionGame.GAME_OBJ.dialogHandler.startDialog(interactedElector);
+					interactBtn = false;
+					interactedElector = null;
+				}
+				
+				
 		
-		//get the line of dialog for the interacted elector
-		//DialogTree dialogTree = ElectionGame.GAME_OBJ.dialogHandler.getDialogTrees().get(interactedElector.id+"");
-		//TODO: for testing, just get the lines for elector id 0
-		//TODO: this should all be done in dialogObj, not here
-		
+			}
+		}, .3f);
+
+		ElectionGame.GAME_OBJ.dialogHandler.draw(delta);
         
 	}
 
@@ -523,7 +550,7 @@ public class OutsideScreen implements Screen, InputProcessor {
 		
 		//Region region = getRegion((int)candidate.getX(), (int)candidate.getY());
 
-		
+		interactedDoor = Constants.MAP_OBJ_DOOR_NONE;
 		MapObjects mapObjects = tileMap.mapObjs;
  
 		
@@ -556,14 +583,13 @@ public class OutsideScreen implements Screen, InputProcessor {
             				interactedDoor = Constants.MAP_OUTSIDE_WORLD_PREFIX+ (String) mapObj.getProperties().get(Constants.MAP_OBJ_DOOR_ID);
             			}
                 	}else{  //if it is not a door, its a regular collision object - don't let the player pass through
-                		interactedDoor = Constants.MAP_OBJ_DOOR_NONE;
+                		//interactedDoor = Constants.MAP_OBJ_DOOR_NONE;
                 		candidate.setPosition(prevPosition.x, prevPosition.y);
                 		moveCamera= false;
 
                 	}
                 	
-            	}
-            	
+            	}           	
             	
             }
             else if (object instanceof PolygonMapObject) {
@@ -752,6 +778,7 @@ public class OutsideScreen implements Screen, InputProcessor {
 
 			
 			if( !Constants.MAP_OBJ_DOOR_NONE.equals( interactedDoor)){
+				interactBtn = true;
 				loadMap(interactedDoor, 1f/128f);
 				worldCam.setLookAt(candidate.getX(), candidate.getY());
 				return;
@@ -760,6 +787,7 @@ public class OutsideScreen implements Screen, InputProcessor {
 			}
 			
 			if( interactedElector != null){
+				interactBtn = true;
 				ElectionGame.GAME_OBJ.state = GameState.DIALOG;			
 				Gdx.input.setInputProcessor(ElectionGame.GAME_OBJ.dialogHandler);
 			}else{

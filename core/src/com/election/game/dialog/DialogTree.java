@@ -16,6 +16,8 @@ public class DialogTree {
 	//Map<String, String> input;
 	Map<String, String> output;
 	
+	Map<String, String> quest;
+	
 	
 	public int getId() {
 		return id;

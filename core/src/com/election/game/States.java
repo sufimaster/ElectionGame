@@ -8,6 +8,7 @@ public class States {
 		RUNNING, 
 		DIALOG, 
 		PAUSED, 
+		MAP_TRANSITION,
 		GAMEOVER 
 	} 
 	
@@ -28,5 +29,18 @@ public class States {
 		POLL;
 			
 	}
+	
+	public enum WalkingDirection{
+		NONE,
+		UP,
+		DOWN,
+		LEFT,
+		RIGHT;
+	}
+	
+	public enum AnimationState{
+		IDLE, WALKING
+	}
+	
 	
 }

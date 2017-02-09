@@ -9,8 +9,8 @@ import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.election.game.MapSprite;
-import com.election.game.TownMap;
 import com.election.game.camera.OrthographicCameraMovementWrapper;
+import com.election.game.maps.TownMap;
 import com.election.game.render.SpriteAndTiledRenderer;
 
 public class ScaleTest extends ApplicationAdapter {

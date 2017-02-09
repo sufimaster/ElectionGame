@@ -1,0 +1,24 @@
+{
+
+	"0":{
+		"id":0,
+		"sprite":"person1.png",
+		"influence": 10,
+		"houseId":0,
+		"initialMap":"MO1"
+	},
+	"1":{
+		"id":1,
+		"sprite":"person2.png",
+		"influence": 3,
+		"houseId":1,
+		"initialMap":"MO1"	
+	},
+	"2":{
+		"id":2,
+		"sprite":"person3.png",
+		"influence": 5,
+		"houseId":2,
+		"initialMap":"MO1"
+	}
+}

@@ -26,9 +26,9 @@ public class Region {
 	
 	public void addElectors(Electorate elector){
 		
-		
-		electorsInRegion.add(elector);
-		
+		if( !electorsInRegion.contains(elector)){
+			electorsInRegion.add(elector);
+		}
 	}
 	
 

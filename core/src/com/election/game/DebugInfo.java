@@ -40,14 +40,13 @@ public class DebugInfo {
 	
 	public void drawDebugText(OutsideScreen screen){
 		
+		if(!debugText){
+			return;
+		}
 		
 		
 		ElectionGame.GAME_OBJ.hudBatch.setProjectionMatrix(screen.hudCam.combined);
 		ElectionGame.GAME_OBJ.hudBatch.begin();		
-
-		if(!debugText){
-			return;
-		}
 		
 		Region region = screen.getRegion((int) screen.candidate.getX(), (int) screen.candidate.getY());
 		
@@ -58,12 +57,13 @@ public class DebugInfo {
 		ElectionGame.GAME_OBJ.debugFont.draw(ElectionGame.GAME_OBJ.hudBatch, "Camera Position: [" + screen.worldCam.source.position.x + ", " + screen.worldCam.source.position.y + "]", 10, screen.hudCam.viewportHeight - 125 );
 		ElectionGame.GAME_OBJ.debugFont.draw(ElectionGame.GAME_OBJ.hudBatch, "Mouse Position: [" + screen.mousePos.x + ", " + screen.mousePos.y + "]", 10, screen.hudCam.viewportHeight - 141 );
 		ElectionGame.GAME_OBJ.debugFont.draw(ElectionGame.GAME_OBJ.hudBatch, "Mouse Region: [" + screen.mouseRegion.x + ", " + screen.mouseRegion.y + "]", 10, screen.hudCam.viewportHeight - 155 );
+		ElectionGame.GAME_OBJ.debugFont.draw(ElectionGame.GAME_OBJ.hudBatch, "Alpha transition: [" + screen.alphaBlend + "]", 10, screen.hudCam.viewportHeight - 169 );
 
 		ElectionGame.GAME_OBJ.hudBatch.end();		
 		
 	}
 	
-	public void drawRegions(Region[][] regions, OrthographicCameraMovementWrapper worldCam, Vector2 mouseRegion){
+	public void drawRegions(Region[][] regions, OrthographicCameraMovementWrapper worldCam, Vector2 mouseRegion, float scale){
 		
 		if(!debugRegions){
 			return;
@@ -80,19 +80,25 @@ public class DebugInfo {
 				Region region =regions[i][j];
 				
 				if( mouseRegion.x == i && mouseRegion.y == j){
-					shapeRender.setColor(Color.RED);
 					
+					//draw selection rectangle
+					shapeRender.setColor(Color.RED);
+					shapeRender.rect( region.rect.x + .01f, region.rect.y+ .01f, region.rect.width-.03f, region.rect.height-.03f);
+					
+					
+					//draw boundary rects of electors in selected region
 					for (Electorate elector: region.electorsInRegion ) {
 						Rectangle boundRect =elector.sprite.getBoundingRectangle(); 
-						shapeRender.rect( boundRect.x, boundRect.y, boundRect.width, boundRect.height);
+						shapeRender.rect( boundRect.x, boundRect.y, boundRect.width, boundRect.height );
 						
 					}
 					
 					
-				}else{
-					shapeRender.setColor(Color.WHITE);
 				}
-				shapeRender.rect( region.rect.x, region.rect.y, region.rect.width, region.rect.height);								 
+					
+				//just draw region borders
+				shapeRender.setColor(Color.WHITE);
+				shapeRender.rect( region.rect.x, region.rect.y, region.rect.width, region.rect.height);
 				
 			}	
 		}
@@ -216,7 +222,7 @@ public class DebugInfo {
 		drawMapObjects(screen.tileMap.getAllMapObjects(), screen.mapRenderer.getUnitScale(), screen.worldCam);
 		
 		//draw each region
-		drawRegions(screen.regions, screen.worldCam, screen.mouseRegion);
+		drawRegions(screen.currentTownMap.regions, screen.worldCam, screen.mouseRegion, screen.mapRenderer.getUnitScale());
 
 		//draw cnadidate location
 		drawCandidateBounds(screen.candidate, screen.worldCam);

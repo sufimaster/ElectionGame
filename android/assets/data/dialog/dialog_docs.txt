@@ -1,0 +1,92 @@
+Dialogs use two files: dialog_lines.json and dialog_trees.json
+
+dialog_lines.json store each of the text for all lines spoken in the game in the following format:
+
+
+{
+
+		"C0":{
+			"id": "C0",
+			"value": "Meherban, my name is %CAND_NAME%"
+		}
+}
+
+
+Where mutliple lines may be added as "C1", "C2" etc. for each of the Canidate lines (main player)
+Lines are also added as "R1", "R2" etc for each NPC line.  These can belong to any NPC, doesn't have to be the same NPC
+
+The dialog declaration and ID must match. I should figure out how to compact this JSON so I don't have to repeat the id value twice, 
+but I am not sure how to make JSON just take an array of maps, as opposed to one map, having multiple maps in it.
+
+
+dialog_trees.json defines and stores the actual dialog tree the MP and the NPC engage in. Multiple dialog trees are defined by their number: 0, 1, 2, 
+and each tree defines two portions: an input and an output.
+
+The input of a dialog tree contains several sub-dialogs of the MP, and the responses of an NPC corresponding to each input line.
+The output of the dialog tree contains a reference to the sub-dialog in the input section that will be displayed after the NPC responds with a certain line.
+
+For example:
+
+{
+	"0": {
+		"input": [
+			{
+				"C0": "R0",
+				"C1": "R1",
+				"C2": "R1"
+			},
+
+			{
+				"C3": "R2"
+			},
+			
+			{
+				"C4": "R3",
+				"C5": "R3"
+			},
+
+			{
+				"C6": "R3",
+				"C7": "R4"
+			}
+		],
+
+		"output": {
+			"R0": "1",
+			"R1": "2",
+
+			"R2": "3",
+			"R3": "",
+			"R4": ""
+
+		}
+	}
+}
+
+This shows that there is one dialog tree "0" so far which corresponds to NPC with id "0".  The candidate can first choose to say any line from the the 0th sub-dialog: C0, C1 or C2, 
+and the NPC will respond respectively with R0, R1, or R1.
+
+In the output section, if the MP selects C0, and the NPC responds R0, the next sub-dialog to be displayed will be "1".  If the MP selects C1 or C2, the sub-dialog displayed will be 2. 
+The game will then find, for example, sub-dialog 1 which only contains one entry:
+
+{
+	"C3": "R2"
+}
+
+This means that the MP can only choose to say C3, and the NPC will respond with R2.  In the output section, R2 is mapped to sub-dialog 3, 
+so the next set of dialog choices for the MP will be:
+
+{
+	"C6": "R3",
+	"C7": "R4"
+}
+  
+The dialog ends when the MP chooses a dialog line, eg C7, the NPC says R4, and in the output section R4 is mapped to null.  So the dialog ends.
+
+Each of the C1, R1, etc. are mapped to actual text dialog lines in the dialog_lines.json file. 
+  
+  
+  
+
+
+		

@@ -1,0 +1,82 @@
+{
+
+		"C0":{
+			"id": "C0",
+			"value": "Meherban, my name is %CAND_NAME%"
+		},
+		
+		"C1":{
+			"id": "C1",
+			"value": "Hey you there!"
+		},
+		"C2":{
+			"id": "C2",
+			"value": "what's up ma nigga?"
+		},
+
+		"C3":{
+			"id": "C3",
+			"value": "You don't know me, but, how do you feel about the local chicken policy?"
+		},
+		"C4":{
+			"id": "C4",
+			"value": "No. But do you care about local politics, or are you just one of those national voters?"
+		},
+		"C5":{
+			"id": "C5",
+			"value": "Are you smart enough to understand that free trade agreements harm YOU the most?"
+		},
+
+		"C6":{
+			"id": "C6",
+			"value": "Chickens should be free. They're people too! I am a member of CETA and I'll dance naked in your lawn until you get rid of all of them!"
+		},
+
+		"C7":{
+			"id": "C7",
+			"value": "Oh, I wasn't aware of such a restriction. I'll check in with town hall."
+		},
+		
+		
+		"C8":{
+			"id": "C8",
+			"value": "Do you know where town hall is?"
+		},
+		
+		"C9":{
+			"id": "C9",
+			"value": "Yes"
+		},
+
+
+		"R0":{
+			"id": "R0",
+			"value": "Meherban my friend, God grant you tranquility!"
+		},
+
+		"R1":{
+			"id": "R1",
+			"value": "Do I know you?"
+		},
+
+		"R2":{
+			"id": "R2",
+			"value": "You know, i've been trying to add another chick back in the yard, but the chicken inspector-wala keeps taking them! He's got them all locked up in the slammer! And I've got fines on my fines.  Does that seem fair?"
+		},
+
+		"R3":{
+			"id": "R3",
+			"value": "Bhagjaa! I've got somewhere to be."
+		},
+
+		"R4":{
+			"id": "R4",
+			"value": "Well, I appreciate that!"
+		},
+
+		"R5":{
+			"id": "R5",
+			"value": "If you walk around town a bit, you will see a building with the sign \"Town Hall\" right in front of it. Are you even from around here?"		
+		}
+
+}
