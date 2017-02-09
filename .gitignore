@@ -65,7 +65,7 @@ build/
 
 ## ASSETS STAGING
 *.psd
-*.avi
+##*.avi
 
 ##DEVLOG
-DEVLOG/
+##DEVLOG/
