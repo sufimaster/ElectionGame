@@ -9,6 +9,15 @@ public class DialogContainer {
 	
 	private Map<String, DialogModel> dialogs;
 
+	public DialogContainer(Map<String, DialogTree> dialogTree, Map<String, DialogModel> dialogModel) {
+		this.dialogTrees = dialogTree;
+		this.dialogs = dialogModel;
+	}
+
+	public DialogContainer() {
+		// TODO Auto-generated constructor stub
+	}
+
 	public Map<String, DialogTree> getDialogTrees() {
 		return dialogTrees;
 	}

@@ -44,7 +44,7 @@ public class DialogHandler implements InputProcessor {
 	int highlightedDialogOption=0;
 	int selectedDialogOption= Constants.UNSELECTED;
 	float accum = 0f;
-	private boolean dialogEnabled = false;
+	private boolean dialogEnabled = true;
 	
 	public DialogState dialogState=DialogState.DISPLAYING;
 	
@@ -470,8 +470,8 @@ public class DialogHandler implements InputProcessor {
 		Gdx.app.log(this.getClass().getName(), "Candidate key: " + selectedCandidateKey + ", NPC key:" + electorDialogKey);
 		
 		
-		//if the elector has nothing else to say, then end the dialog
-		//else, get the candidate's array of responses available 
+		//if the elector has something else get the candidate's array of responses available 
+		//otherwise, end dialog
 		if( electorDialogKey != null && !electorDialogKey.isEmpty()){
 		
 			//get the index for the candidate dialog tree associated with the elector response

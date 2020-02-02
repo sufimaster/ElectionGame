@@ -143,21 +143,21 @@ public class Candidate {
 		
 			
 			if( prevDirectionState == WalkingDirection.RIGHT){
-				batch.draw(idleAnimationRight.getKeyFrame(elapsedTime, true), sprite.getX(), sprite.getY(), width, height);
+				batch.draw((Texture) idleAnimationRight.getKeyFrame(elapsedTime, true), sprite.getX(), sprite.getY(), width, height);
 			}else if( prevDirectionState == WalkingDirection.LEFT){
-				batch.draw(idleAnimationLeft.getKeyFrame(elapsedTime, true), sprite.getX(), sprite.getY(), width, height);	
+				batch.draw((Texture) idleAnimationLeft.getKeyFrame(elapsedTime, true), sprite.getX(), sprite.getY(), width, height);	
 			}else if( prevDirectionState == WalkingDirection.DOWN){
-				batch.draw(idleAnimationRight.getKeyFrame(elapsedTime, true), sprite.getX(), sprite.getY(), width, height);
+				batch.draw((Texture) idleAnimationRight.getKeyFrame(elapsedTime, true), sprite.getX(), sprite.getY(), width, height);
 			}else if(prevDirectionState == WalkingDirection.LEFT){
-				batch.draw(idleAnimationLeft.getKeyFrame(elapsedTime, true), sprite.getX(), sprite.getY(), width, height);
+				batch.draw((Texture) idleAnimationLeft.getKeyFrame(elapsedTime, true), sprite.getX(), sprite.getY(), width, height);
 			}
 			//sprite.draw(batch);
 			
 		
 		}else if(directionState == WalkingDirection.RIGHT){
-			batch.draw(idleAnimationRight.getKeyFrame(0f), sprite.getX(), sprite.getY(), width, height);
+			batch.draw((Texture) idleAnimationRight.getKeyFrame(0f), sprite.getX(), sprite.getY(), width, height);
 		}else if(directionState == WalkingDirection.LEFT){
-			batch.draw(idleAnimationLeft.getKeyFrame(0f), sprite.getX(), sprite.getY(), width, height);
+			batch.draw((Texture) idleAnimationLeft.getKeyFrame(0f), sprite.getX(), sprite.getY(), width, height);
 		}
 	}
 	 

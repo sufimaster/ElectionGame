@@ -29,7 +29,7 @@ public class JsonParser {
 	
 	public JsonParser(){
 	
-		gson = new GsonBuilder().
+		gson = new GsonBuilder().setPrettyPrinting().
 				registerTypeAdapter(Sprite.class, new SpriteDeserializer()).
 				registerTypeAdapter(TiledMap.class, new MapDeserializer()).
 				create();
@@ -90,7 +90,7 @@ public class JsonParser {
 		
 	}
 	
-	
+
 
 	public Map <String, DialogTree> parseDialogTrees(String dialogTrees) {
 		
@@ -109,11 +109,21 @@ public class JsonParser {
 		return lines;
 	}
 
+	
+	public void serializeDialogLines(Map<String, DialogModel> dialogLines, Writer writer) {
+		gson.toJson(dialogLines, writer);
+		try {
+			writer.close();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
 
-	public void serializeDialog(DialogContainer holder, Writer writer){
+	public void serializeDialogTrees(Map <String, DialogTree> dialogTree , Writer writer){
 		
 		
-		gson.toJson(holder, writer);
+		gson.toJson(dialogTree, writer);
 		
 		try {
 			writer.close();

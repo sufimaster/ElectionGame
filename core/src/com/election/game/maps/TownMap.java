@@ -236,13 +236,15 @@ public String id;
 			float yLoc = 0;
 			
 				
-			//NPC position should be around his house, if he has one. If not, randomize location
+			//NPC position should be random location if homeless, 
+			//otherwise they should be around their house
 			if( elector.houseId == Constants.HOMELESS || type==1){
+				//get a random map object - a bounding box near a random house
 				int randomIdx = ElectionGame.randGen.nextInt(mapObjects.getCount());		
 				MapObject mapObject = mapObjects.get(randomIdx);
 				
-							
-				if( mapObject instanceof RectangleMapObject ){
+				//if its a 			
+				if( mapObject.getName().equalsIgnoreCase(Constants.MAP_OBJ_NPC_LOCATION_LAYER)){
 				
 					RectangleMapObject obj = (RectangleMapObject) mapObject;
 					Rectangle rect = obj.getRectangle();	
