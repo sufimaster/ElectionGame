@@ -3,9 +3,9 @@ package com.election.game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.Screen;
-import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
+import com.election.game.States.GameState;
 
 public class MenuScreen implements Screen, InputProcessor {
 
@@ -57,11 +57,9 @@ public class MenuScreen implements Screen, InputProcessor {
 		gameObj.batch.setProjectionMatrix(camera.combined);
 		gameObj.batch.begin();
 			
-			gameObj.font.setColor(Color.CORAL);
-			gameObj.font.draw(gameObj.batch, "Welcome to " + Constants.GAME_TITLE, 200, 300);
-			gameObj.font.draw(gameObj.batch, "Press any key to get started", 200, 250);
-			
-			
+			gameObj.menuFont.draw(gameObj.batch, "Welcome to " + Constants.GAME_TITLE, 200, 600);
+			gameObj.menuFont.draw(gameObj.batch, "Press any key to get started", 200, 550);
+		
 		gameObj.batch.end();
 		
 		
@@ -111,7 +109,10 @@ public class MenuScreen implements Screen, InputProcessor {
 	@Override
 	public boolean keyUp(int keycode) {
 		
-		gameObj.setScreen(new OutsideScreen(gameObj));
+		OutsideScreen screen = new OutsideScreen(gameObj);
+		
+		gameObj.setScreen(screen);
+		gameObj.state = GameState.RUNNING;
 		dispose();
 	
 		return false;

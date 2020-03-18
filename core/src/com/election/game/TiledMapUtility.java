@@ -11,6 +11,8 @@ import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.maps.tiled.TiledMapTile;
 import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
 import com.badlogic.gdx.maps.tiled.TiledMapTileLayer.Cell;
+import com.election.game.maps.TownMap;
+import com.election.game.render.SpriteAndTiledRenderer;
 
 public class TiledMapUtility {
 
@@ -56,10 +58,10 @@ public class TiledMapUtility {
 		
 	}
 
-	public static boolean isElectorateSpace(TiledMap townMap, float x, float y) {
+	public static boolean isElectorateSpace(SpriteAndTiledRenderer renderer, TownMap townMap, int electorX, int electorY) {
 
 
-		MapLayer layer  = townMap.getLayers().get(Constants.NPC_LOCATION_LAYER);
+		MapLayer layer  = townMap.tiledMap.getLayers().get(Constants.MAP_OBJ_NPC_LOCATION_LAYER);
 		
 		if( layer == null )		
 			return false;
@@ -74,9 +76,15 @@ public class TiledMapUtility {
 		//for (MapObject mapObject : mapObjects) {
 		
 		if( mapObject instanceof EllipseMapObject){
-			
+			//TODO: these map objects coordinates need to be changed into unit coordinates
 			EllipseMapObject ellipseObj = (EllipseMapObject) mapObject;
-			return ellipseObj.getEllipse().contains(x, y);
+			
+			float convertedX = electorX/renderer.getUnitScale();
+			float convertedY = electorY/renderer.getUnitScale();
+			Gdx.app.log(Class.class.getCanonicalName(), "Elector location: [" + convertedX + ", " + convertedY + ")");
+			Gdx.app.log(Class.class.getCanonicalName(), "Ellipse location: [" + ellipseObj.getEllipse().x + ", " + ellipseObj.getEllipse().y + ")");
+			
+			return ellipseObj.getEllipse().contains((float)electorX/renderer.getUnitScale(), (float)electorY/renderer.getUnitScale());
 			
 		}
 		

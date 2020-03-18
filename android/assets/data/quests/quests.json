@@ -1,0 +1,47 @@
+{
+	"quests": {
+
+		"0": {
+			"id": "0",
+			"name": "Fowl Dealings",
+			"description": "Get to the bottom of this man's Poultry Problems ",
+			"reward": 4.5,
+			"required": true,
+			"npcs": [1, 5, 12],
+			"subquests": [{
+					"id": "0.1",
+					"name": "Examine Backyard",
+					"description": "Take a look at the person's backyard and see if they are being reasonable in their request.",
+					"reward": 1,
+					"required": true
+				}, {
+					"id": "0.5",
+					"name": "Talk to Office of Rules Enforcement",
+					"description": "Talk to the clerk to find out more about the restrictions on chickens and find out why they exist.",
+					"reward": 1,
+					"required": true
+				}
+
+			],
+			"dialogtree": {
+				"1": "10",
+				"5": "11"
+			}
+
+
+
+
+		},
+
+		"1": {
+			"id": "1",
+			"name": "Rally the Troops",
+			"description": "Gather ten signatures so you can enter your name into the race for Mayor of the town.",
+			"reward": 4.5,
+			"required": true,
+			"npcs": [],
+			"dependencies": ["0"]
+		}
+
+	}
+}

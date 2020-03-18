@@ -1,0 +1,72 @@
+{
+
+	"MO1":{
+		"id":"MO1",
+		"name":"Town",
+		"description":"Quaint village going through a massive beet scandal.",
+		"type":0,
+		"tiledMap": ["data/maps/town2.tmx", true],
+		"npcs":{
+			"0":{
+				"id":0,
+				"sprite":"person1.png",
+				"influence": 10,
+				"houseId":0,
+				"initialMap":"MO1"
+			},
+			"1":{
+				"id":1,
+				"sprite":"person2.png",
+				"influence": 3,
+				"houseId":1,
+				"initialMap":"MO1"	
+			},
+			"2":{
+				"id":2,
+				"sprite":"person3.png",
+				"influence": 5,
+				"houseId":2,
+				"initialMap":"MO1"
+			}
+				
+		}
+	
+	},
+	
+	"0":{
+		"id":"0",
+		"name":"House 0",
+		"description":"An old man's house.",
+		"type":1,
+		"tiledMap": ["data/maps/house1.tmx", true],
+		"npcs":{
+				"5":{
+					"id":5,
+					"sprite":"person2.png",
+					"influence": 10,
+					"houseId":0,
+					"initialMap":"MO1"
+				}
+		}
+			
+	},
+	
+	"1":{
+		"id":"1",
+		"name":"House 1",
+		"description":"This house doesn't smell so good.",
+		"type":1,
+		"tiledMap": ["data/maps/house1.tmx", true],		
+		"npcs":{
+				"6":{
+					"id":6,
+					"sprite":"person1.png",
+					"influence": 10,
+					"houseId":1,
+					"initialMap":"MO1"
+				}
+		}
+				
+	
+	}
+}

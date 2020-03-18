@@ -48,7 +48,7 @@ public class InsideScreen implements Screen, InputProcessor {
 			
 		gameObj.batch.begin();
 					
-			candidate.draw();
+			candidate.draw(gameObj.batch);
 		gameObj.batch.end();
 		
 	}
