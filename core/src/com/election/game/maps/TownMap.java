@@ -16,11 +16,13 @@ import com.badlogic.gdx.maps.objects.RectangleMapObject;
 import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.maps.tiled.TmxMapLoader;
 import com.badlogic.gdx.maps.tiled.TmxMapLoader.Parameters;
+import com.badlogic.gdx.math.Polygon;
 import com.badlogic.gdx.math.Rectangle;
 import com.election.game.Constants;
 import com.election.game.ElectionGame;
 import com.election.game.Electorate;
 import com.election.game.Region;
+import com.election.game.Utilities;
 
 
 public class TownMap {
@@ -57,6 +59,8 @@ public String id;
 
 	public boolean activated = false;
 
+	public MapObjects mapCollisionObjs;
+
 	public TownMap( String mapFile, boolean scaleToTile ){
 		
 		Parameters params = new Parameters();
@@ -92,9 +96,14 @@ public String id;
 		mapPixelHeight = mapHeight * tilePixelHeight;
 		
 		mapObjs = tiledMap.getLayers().get(Constants.MAP_OBJ_PHYSICS_LAYER).getObjects();
+		
+		mapCollisionObjs = getAllMapCollisionObjects();
 	}
 	
-	
+	/*
+	 * TODO: This should only be done once, unless the maps are dynamic
+	 * which they aren't at the moment.
+	 */
 	public MapObjects getAllMapObjects(){
 		
 		MapObjects allLayerObjects = new MapObjects();
@@ -114,6 +123,10 @@ public String id;
 		return allLayerObjects;
 	}
 	
+	/*
+	 * TODO: This should only be done once, unless the maps are dynamic
+	 * which they aren't at the moment.
+	 */
 	public MapObjects getAllRectMapObjects(){
 		
 		MapObjects allLayerObjects = new MapObjects();
@@ -133,7 +146,11 @@ public String id;
 		return allLayerObjects;
 	}
 	
-	public MapObjects getAllMapCollisionObjects(){
+	/*
+	 * TODO: This should only be done once, unless the maps are dynamic
+	 * which they aren't at the moment.
+	 */
+	private MapObjects getAllMapCollisionObjects(){
 		
 		MapObjects allLayerObjects = new MapObjects();
 		MapLayers layers = tiledMap.getLayers();
@@ -144,7 +161,10 @@ public String id;
 				
 				String type = (String) mapObject.getProperties().get(Constants.MAP_OBJ_OBJECT_TYPE);
 				
-				if( type != null && type.toLowerCase().equals(Constants.MAP_OBJ_OBJECT_TYPE_COLLIDE.toLowerCase())){
+				if( type != null && 
+						(type.toLowerCase().equals(Constants.MAP_OBJ_OBJECT_TYPE_COLLIDE.toLowerCase())
+						|| 		type.toLowerCase().equals(Constants.MAP_OBJ_DOOR.toLowerCase()
+					))){
 					allLayerObjects.add(mapObject);
 				}
 			}
@@ -196,8 +216,37 @@ public String id;
 
 			for (int j = 0; j < numTilesY; j++) {
 				
+				Region region = new Region(i, j);
 				
-				regions[i][j] = new Region(i, j);
+				//regions are drawn on 1/128 scale, so need to be scaled up to do proper collisino checking
+				Rectangle scaledRect = Utilities.scaleRectangle(region.rect, Constants.TILE_SIZE);
+				
+				for(int k=0; k < mapCollisionObjs.getCount(); k++) {
+					
+					MapObject mapObj = mapCollisionObjs.get(k);
+					
+					if (mapObj instanceof RectangleMapObject) {
+						Rectangle rect = ((RectangleMapObject)mapObj).getRectangle();
+						//TODO: need to write method that checks if a bouding polygon or bouding rect 
+						//hits a particular region
+						
+						if( scaledRect.overlaps(rect) ) {
+							region.addCollisionObject(mapObj);
+						}
+					}else if(mapObj instanceof PolygonMapObject) {
+						Polygon poly = ((PolygonMapObject)mapObj).getPolygon();
+						//TODO: need to write method that checks if a bouding polygon or bouding rect 
+						//hits a particular region
+						
+						if( Utilities.isCollision( poly, region.rect)) {
+							region.addCollisionObject(mapObj);
+						}						
+						
+					}
+
+				}
+				
+				regions[i][j] = region;
 				
 				
 			}
@@ -263,6 +312,14 @@ public String id;
 					
 					PolygonMapObject polyobj = (PolygonMapObject) mapObject;
 					Rectangle rect = polyobj.getPolygon().getBoundingRectangle();
+					
+					xLoc = rect.x + (ElectionGame.randGen.nextFloat() *  rect.width);
+					yLoc = rect.y + (ElectionGame.randGen.nextFloat() * rect.height);
+					
+					elector.sprite.setPosition( xLoc, yLoc);
+				}else if(mapObject instanceof RectangleMapObject) {
+					RectangleMapObject rectObj = (RectangleMapObject) mapObject;
+					Rectangle rect = rectObj.getRectangle();
 					
 					xLoc = rect.x + (ElectionGame.randGen.nextFloat() *  rect.width);
 					yLoc = rect.y + (ElectionGame.randGen.nextFloat() * rect.height);

@@ -32,7 +32,8 @@
 		}
 	
 	},
-	
+
+
 	"0":{
 		"id":"0",
 		"name":"House 0",
@@ -67,6 +68,26 @@
 				}
 		}
 				
+	
+	},
+
+	"5":{
+		"id":"5",
+		"name":"Mothers House",
+		"description":"Your Mother's House",
+		"type":0,
+		"tiledMap": ["data/maps/mom_house.tmx", true],
+		"npcs":{
+			"3":{
+				"id":3,
+				"sprite":"mother_npc.png",
+				"name":"Muhtar",
+				"influence": 6,
+				"houseId":5,
+				"initialMap":5
+			}
+				
+		}
 	
 	}
 }

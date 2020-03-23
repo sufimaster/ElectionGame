@@ -9,8 +9,7 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.election.game.Constants;
-import com.election.game.States;
-import com.election.game.States.AnimationState;
+
 import com.election.game.States.WalkingDirection;
 
 
@@ -29,16 +28,16 @@ public class Candidate {
 	
 	private Vector2 prevPosition;
 	
-	private WalkingDirection directionState;
-	private WalkingDirection prevDirectionState;
+	private WalkingDirection directionState = WalkingDirection.NONE;
+	private WalkingDirection prevDirectionState = WalkingDirection.RIGHT;
 	
 	public Sprite sprite;
 
 	//public TextureRegion[] animationFramesLeft;
-	Animation idleAnimationLeft;
+	Animation <TextureRegion> idleAnimationLeft;
 	
 	//public TextureRegion[] animationFramesRight;
-	Animation idleAnimationRight;
+	Animation <TextureRegion> idleAnimationRight;
 	
 	
 	float elapsedTime=0;
@@ -72,7 +71,10 @@ public class Candidate {
 		
 		initRightAnimations(texture);
 		
-			
+		initUpAnimations(texture);	
+		
+		initDownAnimations(texture);	
+
 	}
 
 
@@ -94,7 +96,7 @@ public class Candidate {
 		}
 				
 		
-		idleAnimationRight = new Animation(1f/4f, animationFramesRight);			
+		idleAnimationRight = new Animation<TextureRegion>(1f/4f, animationFramesRight);			
 	}
 	
 	private void initLeftAnimations(Texture texture) {
@@ -114,12 +116,22 @@ public class Candidate {
 		}
 				
 		
-		idleAnimationLeft = new Animation(1f/4f, animationFramesLeft);		
+		idleAnimationLeft = new Animation<TextureRegion>(1f/4f, animationFramesLeft);		
 		
 
 	}
 	
 
+	private void initDownAnimations(Texture texture) {
+
+	}
+
+	private void initUpAnimations(Texture texture) {
+		// TODO Auto-generated method stub
+		
+	}	
+	
+	
 	public Candidate(Texture texture, float width, float height) {
 
 		texture.setFilter(TextureFilter.Linear, TextureFilter.Linear);
@@ -143,21 +155,23 @@ public class Candidate {
 		
 			
 			if( prevDirectionState == WalkingDirection.RIGHT){
-				batch.draw((Texture) idleAnimationRight.getKeyFrame(elapsedTime, true), sprite.getX(), sprite.getY(), width, height);
+				batch.draw( idleAnimationRight.getKeyFrame(elapsedTime, true), sprite.getX(), sprite.getY(), width, height);
 			}else if( prevDirectionState == WalkingDirection.LEFT){
-				batch.draw((Texture) idleAnimationLeft.getKeyFrame(elapsedTime, true), sprite.getX(), sprite.getY(), width, height);	
+				batch.draw( idleAnimationLeft.getKeyFrame(elapsedTime, true), sprite.getX(), sprite.getY(), width, height);	
 			}else if( prevDirectionState == WalkingDirection.DOWN){
-				batch.draw((Texture) idleAnimationRight.getKeyFrame(elapsedTime, true), sprite.getX(), sprite.getY(), width, height);
-			}else if(prevDirectionState == WalkingDirection.LEFT){
-				batch.draw((Texture) idleAnimationLeft.getKeyFrame(elapsedTime, true), sprite.getX(), sprite.getY(), width, height);
+				batch.draw( idleAnimationRight.getKeyFrame(elapsedTime, true), sprite.getX(), sprite.getY(), width, height);
+			}else if(prevDirectionState == WalkingDirection.UP){
+				batch.draw( idleAnimationLeft.getKeyFrame(elapsedTime, true), sprite.getX(), sprite.getY(), width, height);
 			}
-			//sprite.draw(batch);
-			
 		
 		}else if(directionState == WalkingDirection.RIGHT){
-			batch.draw((Texture) idleAnimationRight.getKeyFrame(0f), sprite.getX(), sprite.getY(), width, height);
+			batch.draw( idleAnimationRight.getKeyFrame(0f), sprite.getX(), sprite.getY(), width, height);
 		}else if(directionState == WalkingDirection.LEFT){
-			batch.draw((Texture) idleAnimationLeft.getKeyFrame(0f), sprite.getX(), sprite.getY(), width, height);
+			batch.draw( idleAnimationLeft.getKeyFrame(0f), sprite.getX(), sprite.getY(), width, height);
+		}else if(directionState == WalkingDirection.DOWN){
+			batch.draw( idleAnimationRight.getKeyFrame(0f), sprite.getX(), sprite.getY(), width, height);
+		}else if(directionState == WalkingDirection.UP){
+			batch.draw( idleAnimationLeft.getKeyFrame(0f), sprite.getX(), sprite.getY(), width, height);
 		}
 	}
 	 

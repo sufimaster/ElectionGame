@@ -3,6 +3,7 @@
 	"0":{
 		"id":0,
 		"sprite":"person1.png",
+		"name":"Zulfikr"
 		"influence": 10,
 		"houseId":0,
 		"initialMap":"MO1"
@@ -10,6 +11,7 @@
 	"1":{
 		"id":1,
 		"sprite":"person2.png",
+		"name":"Riza",
 		"influence": 3,
 		"houseId":1,
 		"initialMap":"MO1"	
@@ -17,8 +19,18 @@
 	"2":{
 		"id":2,
 		"sprite":"person3.png",
+		"name":"Muhtar",
 		"influence": 5,
 		"houseId":2,
 		"initialMap":"MO1"
+	},
+	"3":{
+		"id":3,
+		"sprite":"mother_npc.png",
+		"name":"Muhtar",
+		"influence": 6,
+		"houseId":"",
+		"initialMap":"SO1"
 	}
+
 }

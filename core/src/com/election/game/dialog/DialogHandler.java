@@ -86,7 +86,10 @@ public class DialogHandler implements InputProcessor {
 		
 		
 		//dialogDisplay.setDebug(true);
-		dialogDisplay.setPosition(0,0 );
+		
+		float width = (float)Gdx.graphics.getWidth();
+
+		dialogDisplay.setPosition( width*.01f,width*.01f );
 		
 		stage.addActor(dialogDisplay);
 				
@@ -152,7 +155,10 @@ public class DialogHandler implements InputProcessor {
 		dialogSelection = new Window("Choices", skin);
 		dialogSelection.setSize(Gdx.graphics.getWidth()/3, dialogDisplay.getHeight());
 		dialogSelection.setDebug(false);
-		dialogSelection.setPosition( 20 + dialogDisplay.getX() + dialogDisplay.getWidth(), 0);
+		//dialogSelection.setPosition( 20 + dialogDisplay.getX() + dialogDisplay.getWidth(), 0);
+		float width = (float)Gdx.graphics.getWidth();
+		dialogSelection.setPosition( Gdx.graphics.getWidth() - dialogSelection.getWidth() - (0.01f)*width, (0.01f)*width);
+		
 		
 		stage.addActor(dialogSelection);
 				
@@ -457,10 +463,12 @@ public class DialogHandler implements InputProcessor {
 		
 		
 		//check if the candidate's selected dialog line adds a quest to his Task List
-		String questID = candidateDialogTree.quest.get(selectedCandidateKey);
-		if( questID != null && !questID.trim().isEmpty()){
-			//add quest to task list
-			ElectionGame.GAME_OBJ.questHandler.activateQuest(questID);
+		if( candidateDialogTree.quest != null) {
+			String questID = candidateDialogTree.quest.get(selectedCandidateKey);
+			if( questID != null && !questID.trim().isEmpty()){
+				//add quest to task list
+				ElectionGame.GAME_OBJ.questHandler.activateQuest(questID);
+			}			
 		}
 		
 		

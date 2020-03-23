@@ -8,9 +8,10 @@ import com.badlogic.gdx.math.Rectangle;
 public class Region {
 	
 	List<Electorate> electorsInRegion;
+	List<Object> objectsInRegion;
 	
-	int xLoc,yLoc;
-	Rectangle rect;
+	public int xLoc,yLoc;
+	public Rectangle rect;
 	
 	
 	
@@ -22,6 +23,7 @@ public class Region {
 		rect = new Rectangle(xLoc, yLoc, 1, 1);
 		
 		electorsInRegion = new ArrayList<Electorate>();
+		objectsInRegion = new ArrayList<Object>();
 	}
 	
 	public void addElectors(Electorate elector){
@@ -31,5 +33,7 @@ public class Region {
 		}
 	}
 	
-
+	public void addCollisionObject(Object object) {
+		objectsInRegion.add(object);
+	}
 }

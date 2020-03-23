@@ -21,8 +21,9 @@ public class HudComponent {
 	public Vector2  position;
 	public Vector2  size;
 	public boolean debug = false;
+	public boolean visible = false;
 	
-	public HudComponent(String title, BitmapFont font, Skin skin, Vector2 windowPosition, Vector2 size, boolean debug){
+	public HudComponent(String title, BitmapFont font, Skin skin, Vector2 windowPosition, Vector2 size, boolean debug, boolean visible){
 		
 		this.title = title;
 		this.font = font;
@@ -33,7 +34,7 @@ public class HudComponent {
 		this.position = windowPosition;
 		this.size = size;
 		this.debug = debug;
-		
+		this.visible = visible;
 		createHud();
 		
 	}
@@ -65,11 +66,13 @@ public class HudComponent {
 	}
 	
 	
-	public void draw(float delta){
-		
-			
+	public void draw(float delta){			
 		
 		stage.act(Gdx.graphics.getDeltaTime());
+		
+		if(!visible) return;
+
+		
 		stage.draw();
 		
 		

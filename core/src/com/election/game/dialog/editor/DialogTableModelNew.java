@@ -8,7 +8,7 @@ import javax.swing.table.DefaultTableModel;
 
 import com.election.game.dialog.DialogModel;
 
-public class DialogTableModel extends DefaultTableModel {
+public class DialogTableModelNew extends AbstractTableModel {
 
 	/**
 	 * 
@@ -24,7 +24,7 @@ public class DialogTableModel extends DefaultTableModel {
         String.class, String.class
     };
 	
-    public DialogTableModel(Map<String, DialogModel> dialogLines) {
+    public DialogTableModelNew(Map<String, DialogModel> dialogLines) {
     	super();
     	this.dialogLines = dialogLines;
     }
@@ -71,6 +71,21 @@ public class DialogTableModel extends DefaultTableModel {
     	return null;
     }
     
+    private int getRowNumber(String dialogKey) {
+    	Iterator<String> itr = dialogLines.keySet().iterator();
+    	int idx=0;
+    	
+    	while(itr.hasNext()) {
+    		String key = itr.next();
+    		if(dialogKey.equals(key)) {
+    			return idx;
+    		}
+    		idx++;
+    	}
+    	
+    	return -1;
+    }
+    
     @Override
     public Object getValueAt(int rowIndex, int columnIndex)
     {
@@ -114,5 +129,22 @@ public class DialogTableModel extends DefaultTableModel {
     		row.setValue((String)aValue);
     	}
     	
+    }
+    
+    public void addDialog(DialogModel model) {
+    	insertPerson(getRowCount(), model);
+    }
+    
+    public void insertPerson(int row, DialogModel model) {
+    	
+    	String key = model.getId();
+    	dialogLines.put(key, model);
+        fireTableRowsInserted(row, row);
+    }
+    
+    public void removePerson(	String key) {
+    	dialogLines.remove(key);
+    	int row = getRowNumber(key);
+    	fireTableRowsDeleted(row, row);
     }
 }

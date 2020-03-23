@@ -29,7 +29,7 @@ public class JsonParser {
 	
 	public JsonParser(){
 	
-		gson = new GsonBuilder().setPrettyPrinting().
+		gson = new GsonBuilder().disableHtmlEscaping().setPrettyPrinting().
 				registerTypeAdapter(Sprite.class, new SpriteDeserializer()).
 				registerTypeAdapter(TiledMap.class, new MapDeserializer()).
 				create();

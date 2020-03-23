@@ -12,24 +12,31 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Writer;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.swing.*;
+import javax.swing.event.TreeModelEvent;
+import javax.swing.event.TreeModelListener;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableModel;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
+import com.badlogic.gdx.utils.Array;
 import com.election.game.Utilities;
 import com.election.game.dialog.DialogContainer;
 import com.election.game.dialog.DialogModel;
 import com.election.game.dialog.DialogTree;
 import com.election.game.dialog.editor.DialogTableModel;
+import com.election.game.dialog.editor.DialogTableModelNew;
 import com.election.game.json.JsonParser;
 import com.google.gson.Gson;
 
@@ -40,13 +47,13 @@ public class DialogEditorSwingGui {
 	private JFrame frame;
 	private JPanel content;
 	private JsonParser parser;
-	private DefaultTreeModel masterTreeModel;
+	private List<DefaultTreeModel> masterModelList;
 
 	public DialogEditorSwingGui(){
 	
 				
 		parser = new JsonParser();
-		
+		masterModelList = new ArrayList<DefaultTreeModel>();
 
 		String dialogTreesContent = Utilities.fileToString (	Paths.get("C:/Users/ayan_/Documents/Programming/libGDX/ElectionGame/android/assets/data/dialog", "dialog_trees.json")  );
 		
@@ -56,6 +63,7 @@ public class DialogEditorSwingGui {
 		Map <String, DialogTree> dialogTree = parser.parseDialogTrees(dialogTreesContent);
 		//this is a map of a dialog id to the actual string content of the dialog line
 		Map<String, DialogModel>  dialogModel = parser.parseDialogs(dialogLinesContent);
+		
 		container = new DialogContainer(dialogTree, dialogModel);
 
 
@@ -87,9 +95,6 @@ public class DialogEditorSwingGui {
 	
 	public void createDialogPane() {
 		createMenu();
-		
-		
-		
 	}
 	
 	private void createMenu() {
@@ -97,7 +102,6 @@ public class DialogEditorSwingGui {
 		JMenu menu = new JMenu("Sprite Dialogs");
 		menuBar.add(menu);
 
-		
 		//add menu for raw dialog lines
 		JMenuItem dialogLinesMenuItem = new JMenuItem("Dialog Lines");
 		dialogLinesMenuItem.addActionListener(new ActionListener() {
@@ -114,48 +118,19 @@ public class DialogEditorSwingGui {
 		menu.add(dialogLinesMenuItem);
 		
 		//add sub-menu for sprite dialog trees
-		JMenu dialogTreesMenu = new JMenu("Sprite Dialog Trees");
-		menu.add(dialogTreesMenu);
+		JMenuItem dialogTreesMenu = new JMenuItem("Sprite Dialog Trees");
 		
-		for ( String spriteId : container.getDialogTrees().keySet()) {
-			JMenuItem menuItem = new JMenuItem("Sprite ID " + spriteId);
+		dialogTreesMenu.addActionListener(new ActionListener() {
 			
-			//set custom property for each menu item, so listener can dynamically generate content
-			menuItem.putClientProperty("spriteId", spriteId);
-			
-			menuItem.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
 
-				@Override
-				public void actionPerformed(ActionEvent e) {
-					String spriteId = (String) ((JMenuItem)e.getSource()).getClientProperty("spriteId");
-					System.out.println("event: " + e.getActionCommand());
-					System.out.println("Selected menu for spriteId " + spriteId);
-				    
-					
-					content.removeAll();
-				  					
-					//update content pane when menu item selection is done 
-					//add label for selected sprite 
-					JLabel spriteLabel =  new JLabel("Dialog Trees for Sprite Id " + spriteId);
-					  
-					content.add(spriteLabel); 
-					
-					//DOESNT WORK properly YET
-					generateSpriteDialogTrees(spriteId);
-					  
-					//display dialog trees for selected Sprite
-					//generateSpriteInputTreesPane(spriteId);
-					  
-					//create seperate table for viewing the sprite responses, //and how they map
-					//to character dialog trees 
-					//generateSpriteOutputTreesPane(spriteId); 
-					
-				}
-				 
-			});
-			dialogTreesMenu.add(menuItem);
-		}
-		
+				generateSpriteDialogTrees();
+			}
+		});
+
+		menu.add(dialogTreesMenu);
+
 		frame.setJMenuBar(menuBar);
 	}
 
@@ -166,17 +141,45 @@ public class DialogEditorSwingGui {
 		JLabel dialogLabel =  new JLabel("Dialog Lines for Game");
 		  
 		content.add(dialogLabel); 
-				
-		JTable dialogTable = new JTable(new DialogTableModel(container.getDialogs()));
+		
+		final DialogTableModelNew tableModel = new DialogTableModelNew(container.getDialogs());
+		JTable dialogTable = new JTable(tableModel);
 		
 		content.add(new JScrollPane(dialogTable));
+		JLabel dialogKey = new JLabel("Dialog Key");
+		final JTextField dialogKeyField = new JTextField();
+		
+		JLabel dialogVal = new JLabel("Dialog Val");
+		final JTextField dialogValField = new JTextField();
+		
+		content.add(dialogKey);
+		content.add(dialogKeyField);
+		
+		content.add(dialogVal);
+		content.add(dialogValField);
+		
+		JButton addRowButton = new JButton("Add Dialog Line");
+		addRowButton.addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				
+				String key = dialogKeyField.getText();
+				String val = dialogValField.getText();
+				DialogModel dialogLine = new DialogModel();
+				dialogLine.setId(key);
+				dialogLine.setValue(val);
+				tableModel.addDialog(dialogLine);
+			}
+		});
 		
 		JButton saveButton = new JButton("Save Dialog");
 		saveButton.addActionListener(new ActionListener() {
 			
 			@Override
 			public void actionPerformed(ActionEvent e) {
-
+				
+				((JButton) e.getSource()).setEnabled(false);
 				Writer writer = null;
 				try {
 					writer = new FileWriter(new File("C:/Users/ayan_/Documents/Programming/libGDX/ElectionGame/android/assets/data/dialog/test.json"));
@@ -185,42 +188,76 @@ public class DialogEditorSwingGui {
 					e1.printStackTrace();
 				}
 				parser.serializeDialogLines(container.getDialogs(), writer );
+				((JButton) e.getSource()).setEnabled(true);
 			}
 		});
 		
+		content.add(addRowButton);
 		content.add(saveButton);
 		frame.pack();
 		
 		
 	}
+
 	
-	protected void deconstructDMTToDialogObject(DefaultMutableTreeNode topNode) {
+	protected void generateSpriteDialogTrees() {
+		content.removeAll();
 		
-		Enumeration<DefaultMutableTreeNode> children = topNode.children();
-		DefaultMutableTreeNode inputNode = children.nextElement();
-		DefaultMutableTreeNode outputNode = children.nextElement();
+		Map<String, DialogTree> dialogTrees = container.getDialogTrees();
 		
-		DialogTree dialogTree = new DialogTree();
-		dialogTree.setInput((List<Map<String, String>>) inputNode);
-		dialogTree.setOutput((Map<String, String>) outputNode);	
+		Set<String> keys = dialogTrees.keySet();
+		Iterator<String> itr = keys.iterator();
 		
+		while(itr.hasNext()) {
+			
+			//generate dialog trees for this sprite:
+			generateSpriteDialogTreePanels(itr.next());
+			//create a seperate scroll pane for the dialog trees for each sprite id
+
+		}
+		
+		
+		//add save button to save Dialog Trees to file.
+		JButton saveButton = new JButton("Save Dialog Trees");
+		saveButton.addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				
+				//convert the tree data model back to the java representation - a Map of sprite IDs to dialog trees
+				Map<String, DialogTree> dialogTrees = treeToDialogTreeMap(masterModelList);				
+				
+				
+				//open a file
+				Writer writer = null;
+				try {
+					writer = new FileWriter(new File("C:/Users/ayan_/Documents/Programming/libGDX/ElectionGame/android/assets/data/dialog/test_DialogTree.json"));
+				} catch (IOException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+				//then write the MAP as json to a file
+				parser.serializeDialogTrees(dialogTrees, writer);
+				
+			}
+
+		});
+		
+		content.add(saveButton); 
+		frame.pack();
 	}
 	
-	
-	protected void generateSpriteDialogTrees(String spriteId) {
-		content.removeAll();
-
+	protected void generateSpriteDialogTreePanels(String spriteId) {
 		
 		DialogTree dialogTrees = container.getDialogTrees().get(spriteId);
 		List<Map<String, String>> inputList = dialogTrees.getInput();
 
 		DefaultMutableTreeNode topNode = new DefaultMutableTreeNode("Sprite Id: " + spriteId + " Dialog Trees");
 		
-		if( masterTreeModel== null) {
-			masterTreeModel = new DefaultTreeModel(topNode);	
-		}else {
-			masterTreeModel.setRoot(topNode);
-		}
+		
+		DefaultTreeModel masterTreeModel = new DefaultTreeModel(topNode);	
+		masterModelList.add(masterTreeModel);
+		
 		
 		JTree tree = new JTree(masterTreeModel);
 		
@@ -235,161 +272,186 @@ public class DialogEditorSwingGui {
 			for (String charDialogKey : dialogResponseMap.keySet()) {
 				String respKey = dialogResponseMap.get(charDialogKey);
 				
+				//create node for character dialog line key
 				DefaultMutableTreeNode charkeyDialogNode = new DefaultMutableTreeNode(charDialogKey);
+				//create new child node for the char dialog value
 				DefaultMutableTreeNode charValueDialogNode = new DefaultMutableTreeNode(container.getDialogs().get(charDialogKey).getValue());
-				DefaultMutableTreeNode respDialogNode = new DefaultMutableTreeNode(respKey+ ":" + container.getDialogs().get(respKey).getValue());
-				
+				//add value node to key node
 				charkeyDialogNode.add(charValueDialogNode);
+
+				//create child node for response dialog key
+				DefaultMutableTreeNode respDialogNode = new DefaultMutableTreeNode(respKey);
+				//create child node of response dialog value 
+				DefaultMutableTreeNode respValueNode = new DefaultMutableTreeNode(container.getDialogs().get(respKey).getValue());
+				//add response value node to response key node
+				respDialogNode.add(respValueNode);
+				
+				//add response node to character node
 				charkeyDialogNode.add(respDialogNode);
+				
+				//add character node to main input tree
 				treeNode.add(charkeyDialogNode);
 			}
 			inputNode.add(treeNode);			
 			idx++;
 		}
 		
+		
+		//create tree node for the characters dialog options from a particular NPC response
 		Map<String, String> outputMap = dialogTrees.getOutput(); 
 		DefaultMutableTreeNode outputNode = new DefaultMutableTreeNode("Output");
 
 		for (String charKey : outputMap.keySet() ) {
-			String respKey = outputMap.get(charKey);
+			String dialogTreeId = outputMap.get(charKey);
 
 			DefaultMutableTreeNode charKeyNode = new DefaultMutableTreeNode(charKey);
 			DefaultMutableTreeNode charValueNode = new DefaultMutableTreeNode(container.getDialogs().get(charKey).getValue());
-			DefaultMutableTreeNode respDialogNode = new DefaultMutableTreeNode(respKey);
+			DefaultMutableTreeNode respDialogNode = new DefaultMutableTreeNode(dialogTreeId);
 
 			charKeyNode.add(charValueNode);
 			charKeyNode.add(respDialogNode);
 			outputNode.add(charKeyNode);
 		}
 
+		//create tree node for the characters dialog options from a particular NPC response
+		Map<String, String> questMap = dialogTrees.getQuest(); 
+		DefaultMutableTreeNode questNode = new DefaultMutableTreeNode("Quest");
+		if( questMap==null) {
+			questMap = new HashMap<String, String>();
+		}
+		for (String charKey : questMap.keySet() ) {
+			String questId = questMap.get(charKey);
 
+			DefaultMutableTreeNode charKeyNode = new DefaultMutableTreeNode(charKey);
+			DefaultMutableTreeNode charValueNode = new DefaultMutableTreeNode(container.getDialogs().get(charKey).getValue());
+			DefaultMutableTreeNode questValueNode = new DefaultMutableTreeNode(questId);
+
+			charKeyNode.add(charValueNode);
+			charKeyNode.add(questValueNode);
+			questNode.add(charKeyNode);
+		}
+		
+		
+		//input node and output node to main tree
 		topNode.add(inputNode);
 		topNode.add(outputNode);
-		content.add(treeView);
-		
-		JButton saveButton = new JButton("Save Dialog Tree ");
-		saveButton.addActionListener(new ActionListener() {
-			
-			@Override
-			public void actionPerformed(ActionEvent e) {
-
-				DefaultMutableTreeNode rootNode = (DefaultMutableTreeNode) masterTreeModel.getRoot();
-				
-				//convert treeNode into Map<String, DialogTree>
-				//
-				//
-				Map<String, DialogTree> dialogTree = (Map<String, DialogTree>) rootNode.getUserObject();
-				
-				
-				
-				Writer writer = null;
-				try {
-					writer = new FileWriter(new File("C:/Users/ayan_/Documents/Programming/libGDX/ElectionGame/android/assets/data/dialog/test_DialogTree.json"));
-				} catch (IOException e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
-				}
-				parser.serializeDialogTrees(dialogTree, writer);
-				
-			}
-		});
-		
-		content.add(saveButton);
-		
-		
-		frame.pack();
-
-	}
-
-	protected void generateSpriteInputTreesPane(String spriteId) {
-
-		//create a structure to hold the dialog options
-		//the root structure is the frame content pane.
-		//After that, a JPanel content is added to the content pane
-		//Then I add a  Jpanel for each dialog tree . Ecah JPanel contains a JTable
-		//that includes the mapping from each dialog a character can select 
-		//to a corresponding sprite response. 
-		
-		DialogTree dialogTrees = container.getDialogTrees().get(spriteId);
-		List<Map<String, String>> inputList = dialogTrees.getInput();
-		
-		JLabel lbl = new JLabel("Input List:");
-		content.add(lbl);
-		
-		//JPanel inputPanel = new JPanel();
-		
-		int charTreeId = 0;
-		for (Map<String, String> map : inputList) {
-			// create object of table and table model
-			JTable inputListHolder = new JTable();
-			DefaultTableModel dtm = new DefaultTableModel(0, 0);
-			 
-			//Create col headers
-			String headers[] = new String [] {"Character Input", "Sprite Response"};
-			
-			//add header in model
-			dtm.setColumnIdentifiers(headers);
-			
-			//set model into table object
-			inputListHolder.setModel(dtm);
-			
-			JPanel treePanel = new JPanel();
-		    treePanel.setLayout(new BoxLayout(treePanel, BoxLayout.PAGE_AXIS));
-		    
-		    JLabel label = new JLabel("Tree: " + charTreeId);
-		    treePanel.add(label);
-			treePanel.add(inputListHolder);
-			content.add(treePanel);
-			
-			for (String key : map.keySet()) {	
-				
-				//the key is the key to the character dialog line
-				//the restpKey is the key to the npc response dialog line
-				String respKey = map.get(key);
-				
-				//inputTextFields.put(key, container.getDialogs().get(key).getValue());
-				
-				Object[] rowObject = new Object[] { key + ":" + container.getDialogs().get(key).getValue(), respKey + ":" + container.getDialogs().get(respKey).getValue() };
-				
-				dtm.addRow(rowObject);
-			}
-			
-			charTreeId++;
+		if(!questMap.isEmpty()) {
+			topNode.add(questNode);
 		}
 		
+		//create a new panel, add input/output tree to it, and return
+		JPanel panel = new JPanel();
+		panel.add(treeView);
+	
+		content.add(new JScrollPane(panel));
+		frame.pack();
+		
 	}
 
-	protected void generateSpriteOutputTreesPane(String spriteId) {
-
-		DialogTree dialogTrees = container.getDialogTrees().get(spriteId);
-
-		Map<String, String> outputList = dialogTrees.getOutput();
+	
+	private Map<String, DialogTree> treeToDialogTreeMap(List<DefaultTreeModel> masterModelList) {
+		//loop through each scroll pane each represnting dialog trees for one sprite, to build a
+		//Map <String, DialogTree> of all the dialogTrees for each sprite
 		
-		JLabel lbl2 = new JLabel("Output List:");
-		content.add(lbl2);
+		Map <String, DialogTree> dialogTreeMap = new LinkedHashMap<String, DialogTree>();
+		int spriteId =0;
+		for (DefaultTreeModel defaultTreeModel : masterModelList) {
+			DefaultMutableTreeNode topNode = (DefaultMutableTreeNode) defaultTreeModel.getRoot();
+			DialogTree dialogTree  = deconstructDMTToDialogObject(topNode);
+			//map from sprite id to dialog tree object
+			//how to get sprite id?
+			dialogTreeMap.put(Integer.toString(spriteId), dialogTree);
+			spriteId++;
+		}
+
 		
-		 // create object of table and table model
-		JTable outputListHolder = new JTable();
-		DefaultTableModel dtm2 = new DefaultTableModel(0, 0);
+		return dialogTreeMap;
+	}
+	
+	
+	//not fully implemented yet
+	@SuppressWarnings({ "unchecked" })
+	protected DialogTree deconstructDMTToDialogObject(DefaultMutableTreeNode topNode) {
+		
+		Enumeration<DefaultMutableTreeNode> children =  topNode.children();
+		DefaultMutableTreeNode inputNode = children.nextElement();
+		DefaultMutableTreeNode outputNode = children.nextElement();
+		DefaultMutableTreeNode questNode = null;
+		if( children.hasMoreElements()) {
+			questNode = children.nextElement();
+		}else {
+			questNode= new DefaultMutableTreeNode("Quest");
+		}
+		DialogTree dialogTree = new DialogTree();
+		
+		//enumerate through input trees (each character input has a set of responses from the NPC) 
+		//these are maps of String:String values that indicate a character statement, then a single npc response
+		Enumeration<DefaultMutableTreeNode> inputChildren = inputNode.children();
+
+		List<Map<String,String>> treeList = new ArrayList<Map<String,String>>();
+		while(inputChildren.hasMoreElements()) {
+			//loop through the dialogs in each tree
+			DefaultMutableTreeNode dialogTreeNode = inputChildren.nextElement();
+			
+			Enumeration <DefaultMutableTreeNode> dialogTreeChildNodes = dialogTreeNode.children();
+			Map<String, String> charValueRespMap = new HashMap<String, String>();
+			while(dialogTreeChildNodes.hasMoreElements()) {
+				
+				DefaultMutableTreeNode child = dialogTreeChildNodes.nextElement();
+								
+				//the second child is response key
+				DefaultMutableTreeNode respNode = (DefaultMutableTreeNode) child.getChildAt(1);
+				
+				String charKey = (String) child.getUserObject();
+				String respValue = (String) respNode.getUserObject();
+				
+				charValueRespMap.put(charKey, respValue);
+				
+			}
+			treeList.add(charValueRespMap);
+		}
 		 
-		//Create col headers
-		String headers2[] = new String [] {"Sprite Response", "Character Response Choices Set"};
-		
-		//add header in model
-		dtm2.setColumnIdentifiers(headers2);
-		
-		//set model into table object
-		outputListHolder.setModel(dtm2);
-		content.add(outputListHolder);
+		//enumerate through output trees
+		//each output houses a response dialog key, that maps to a particular dialog tree. 
+		//
+		Enumeration<DefaultMutableTreeNode> outputChildren = outputNode.children();
 
-		for( String key: outputList.keySet()) {
+		Map<String,String> responseMap = new HashMap<String,String>();
+		while(outputChildren.hasMoreElements()) {
+			//loop through the dialogs in each tree
+			DefaultMutableTreeNode dialogTreeNode = outputChildren.nextElement();
+			DefaultMutableTreeNode childNode = (DefaultMutableTreeNode) dialogTreeNode.getChildAt(1);
 			
-			String charRespSetKey = outputList.get(key);
-			dtm2.addRow(new Object[] {key +":" + container.getDialogs().get(key).getValue(), "response tree: "+ charRespSetKey});
+			String respKey = (String) dialogTreeNode.getUserObject();
+			String dialogTreeKey = (String) childNode.getUserObject();
+			
+			responseMap.put(respKey, dialogTreeKey);
 		}
-
-		frame.pack();
+		
+		Enumeration<DefaultMutableTreeNode> questChildren =  questNode.children();
+		
+		//enumerate through associated quests
+		Map<String,String> questMap = new HashMap<String,String>();
+		while(questChildren.hasMoreElements()) {
+			//loop through the dialogs in each tree
+			DefaultMutableTreeNode charValueNode = questChildren.nextElement();
+			DefaultMutableTreeNode childNode = (DefaultMutableTreeNode) charValueNode.getChildAt(1);
+			
+			String charKey = (String) charValueNode.getUserObject();
+			String questId = (String) childNode.getUserObject();
+			
+			questMap.put(charKey, questId);
+		}
+		
+		
+		dialogTree.setInput( treeList );
+		dialogTree.setOutput( responseMap );	
+		dialogTree.setQuest(questMap);
+		return dialogTree;
+		
 	}
+
+
 
 
 	public static void main(String[] args) {

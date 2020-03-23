@@ -52,7 +52,7 @@ public class OutsideScreen implements Screen, InputProcessor {
 	
 	
 		
-	private boolean userOutside = true;
+	private boolean userOutside = false;
 	//boolean for switching between camera and character movement
 	private boolean moveCamera = false;
 	private boolean cameraAtMapEdge = false;
@@ -69,7 +69,7 @@ public class OutsideScreen implements Screen, InputProcessor {
 	
 	
 	//giggle
-	Region [][] regions;
+	//Region [][] regions;
 	
 	private Vector2 prevPosition;
 	
@@ -91,6 +91,7 @@ public class OutsideScreen implements Screen, InputProcessor {
 	
 	private float elapsedTime;	
 	float alphaBlend =0f;
+	private String exitedHouseId;
 	
 	
 	public OutsideScreen(final ElectionGame gameObj) {
@@ -103,16 +104,16 @@ public class OutsideScreen implements Screen, InputProcessor {
 		mouseRegion = new Vector2();
 		
 		//create main character and position in middle of map
-		candidate = new Candidate( new Texture(Gdx.files.internal("MC.png")));
+		//TODO: this needs to change so that the guy is in the map 
+		candidate = new Candidate( new Texture(Gdx.files.internal(Constants.PC_IMG_SRC)));
 		candidate.setPosition(5,5);
 		candidate.setSize(.75f, 1f);		
 		
 		prevPosition = new Vector2(Constants.VIRTUAL_HEIGHT/2, Constants.VIRTUAL_HEIGHT/2);
 		
 		//Create new orthographic camera and look at candidate location
-		worldCam = new OrthographicCameraMovementWrapper();
-		//camera = new OrthographicCameraMovementWrapper(false, w/2, h/2);
-		//camera.source.position.set(candidate.getX(), candidate.getY(),0);
+		//worldCam = new OrthographicCameraMovementWrapper();
+		worldCam = new OrthographicCameraMovementWrapper(true, Constants.RES_1024_800[0], Constants.RES_1024_800[1]);
 		
 		hudCam = new OrthographicCamera();
 		
@@ -120,17 +121,18 @@ public class OutsideScreen implements Screen, InputProcessor {
 		currentMap = Constants.MAP_OUTSIDE_WORLD_PREFIX + "1";
 		//create new town map by loading map of town from static file
 		//add the sprite to the map so it is rendered with it
+		
 		//TODO: should be 1/128f since my tile size will be 128f and I want one unit in my game to equal 1 tile size		
 		//right now tile size is 32pixels for town map. Need to fix that.
 		float unitScale = 1f / 32f;
-		
-		tileMap = ElectionGame.GAME_OBJ.mapHandler.getMap(Constants.MAP_OUTSIDE_WORLD_PREFIX + 1);
+			
+		tileMap = ElectionGame.GAME_OBJ.mapHandler.getMap(Constants.MAP_MOMS_HOUSE);
 		tileMap.activate();
 		currentTownMap =tileMap;
 		//tileMap = 	Constants.tiledMaps.get(currentMap);
 		
 		//create a new map renderer
-		mapRenderer = new SpriteAndTiledRenderer(tileMap, worldCam, unitScale);
+		mapRenderer = new SpriteAndTiledRenderer(tileMap, worldCam, Constants.UNIT_SCALE);
 	
 		//rectangle for the entire game space
 		gameSpace = new Rectangle(0,0, tileMap.mapWidth, tileMap.mapHeight);
@@ -138,15 +140,13 @@ public class OutsideScreen implements Screen, InputProcessor {
 		//blocks of the world space, so we can easily calculate intersections
 		//initRegions(tileMap.mapWidth, tileMap.mapHeight);
 
-		//people that candidate can convince to vote for him
-		//initElectorate();
-		//tileMap.addSprites(electorate);
 		
 		//render these using the mapRenderer
 		//mapRenderer.setSprites(electorate);
 		mapRenderer.setCandidate(candidate);
 
 		debugInfo = new DebugInfo();
+		worldCam.setLookAt(candidate.getX(), candidate.getY());
 	}
 	
 	@Override
@@ -157,9 +157,16 @@ public class OutsideScreen implements Screen, InputProcessor {
 	}
 	
 	private void loadMap(String mapId, float unitScale){
-		currentMap = mapId;
 		
-		tileMap = ElectionGame.GAME_OBJ.mapHandler.getMap(mapId);
+		//this should not be null. If there's a mapId, a map should be associated, I think
+		TownMap newMap = ElectionGame.GAME_OBJ.mapHandler.getMap(mapId);
+
+		if( newMap==null)
+			return;
+		
+		currentMap = mapId;
+		tileMap = newMap;
+		
 		tileMap.activate();
 		currentTownMap = tileMap;
 		//tileMap = Constants.tiledMaps.get(mapId);
@@ -170,7 +177,19 @@ public class OutsideScreen implements Screen, InputProcessor {
 		
 			mapRenderer.resetMap(tileMap, 1f/32f);
 
-			candidate.setPosition(prevDoor.getX(), prevDoor.getY());
+			//this means that you've started out in a house, so there is no prevdoor
+			if ( prevDoor== null) {
+				RectangleMapObject mapObj = (RectangleMapObject) currentTownMap.getMapObjects(Constants.MAP_OBJ_PHYSICS_LAYER).get(Constants.MAP_OBJ_EXIT_AREA + exitedHouseId);
+				prevDoor = mapObj.getRectangle();
+			}
+			
+			Region region = getRegion(prevDoor.getX(), prevDoor.getY());
+			
+			candidate.setPosition(region.xLoc, region.yLoc);
+			
+			
+			//candidate.setPosition(prevDoor.getX(), prevDoor.getY());
+
 			userOutside = true;
 			
 		}else{
@@ -186,7 +205,17 @@ public class OutsideScreen implements Screen, InputProcessor {
 		
 	}
 	
+
 	
+	Region getRegion(float xLoc, float yLoc) {
+		int xIdx= (int)xLoc; 
+		int yIdx= (int)yLoc; 
+		
+		
+		Region region = currentTownMap.regions[xIdx][yIdx];
+		
+		return region;
+	}
 	
 	Region getRegion(int xLoc, int yLoc){
 		
@@ -200,8 +229,6 @@ public class OutsideScreen implements Screen, InputProcessor {
 		
 		
 	}
-
-	
 
 	
 	@Override
@@ -285,32 +312,6 @@ public class OutsideScreen implements Screen, InputProcessor {
 			renderMap(delta);
 			
 		}
-		
-	/*	if( elapsedTime < (Constants.MAP_TRANSITION_TIME/2) ){
-			float inc = elapsedTime/(Constants.MAP_TRANSITION_TIME/2f);
-			
-			Gdx.app.log(this.getClass().getName(), "alphablend increment: " + inc);
-			alphaBlend += inc;			
-			
-			if( alphaBlend >= 1){
-				alphaBlend =1;
-			}		
-		}
-
-		if( elapsedTime >= (Constants.MAP_TRANSITION_TIME/2) && 
-				elapsedTime  < Constants.MAP_TRANSITION_TIME){
-
-			float dec = (Constants.MAP_TRANSITION_TIME - elapsedTime)/(Constants.MAP_TRANSITION_TIME/2f);
-			
-			Gdx.app.log(this.getClass().getName(), "alphablend decrement: " + dec);
-
-			alphaBlend -= dec;
-			if( alphaBlend <= 0){
-				alphaBlend = 0;
-			}
-			
-			renderMap(delta);
-		}*/
 
 		Gdx.gl.glEnable(GL20.GL_BLEND);
 	    Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
@@ -455,7 +456,7 @@ public class OutsideScreen implements Screen, InputProcessor {
 	//see if candidate is intersecting any of the electors
 	private void checkElectorCollisions(float delta) {
 
-		Region region = getRegion((int)candidate.getX(), (int)candidate.getY());
+		Region region = getRegion(candidate.getX(), candidate.getY());
 		
 		if( region.electorsInRegion.size() == 0){
 			interactedElector = null;
@@ -551,8 +552,12 @@ public class OutsideScreen implements Screen, InputProcessor {
 		//Region region = getRegion((int)candidate.getX(), (int)candidate.getY());
 
 		interactedDoor = Constants.MAP_OBJ_DOOR_NONE;
-		MapObjects mapObjects = tileMap.mapObjs;
- 
+		
+		if( tileMap == null)
+			return;
+		
+		//MapObjects mapObjects = tileMap.mapObjs;
+		MapObjects mapObjects = tileMap.mapCollisionObjs;
 		
 		for (MapObject object : mapObjects){
 		//for (MapObject object : townMap.mapObjs) {
@@ -572,14 +577,15 @@ public class OutsideScreen implements Screen, InputProcessor {
 
             	
             	if( rect.overlaps(candidate.getBoundingRectangle())){
-            		
+            		 	
             		//If its a door, and you are overlapping, let candidate move through, and set the ID for the interactedDoor
             		if( type.equals(Constants.MAP_OBJ_DOOR)){
             			if(userOutside){
+            				
             				prevDoor = rect;
             				interactedDoor = (String) mapObj.getProperties().get(Constants.MAP_OBJ_DOOR_ID);
             			}else{
-            				
+            				exitedHouseId = tileMap.id;
             				interactedDoor = Constants.MAP_OUTSIDE_WORLD_PREFIX+ (String) mapObj.getProperties().get(Constants.MAP_OBJ_DOOR_ID);
             			}
                 	}else{  //if it is not a door, its a regular collision object - don't let the player pass through

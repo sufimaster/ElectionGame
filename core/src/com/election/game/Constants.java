@@ -1,21 +1,24 @@
 package com.election.game;
 
-import java.util.TreeMap;
 
 import com.badlogic.gdx.Input.Keys;
-import com.election.game.maps.TownMap;
 
 public class Constants {
 
 	
 	public static final float VIRTUAL_HEIGHT = 10f; //40 meters height
 	
+	public static final int RES_1024_800 [] = {1024,800};
+	public static final int RES_1920_1080 [] = {1920,1080};
+	public static final int RES_1440_900 [] = {1440,900};
+	public static final int RES_3840_2160 [] = {3840,2160};
 	
 	
-	
-	public static final int WINDOWS_GAME_WIDTH = 1024;
-	public static final int WINDOWS_GAME_HEIGHT = 800;
+	public static final int WINDOWS_GAME_WIDTH = RES_1920_1080[0];//1024;
+	public static final int WINDOWS_GAME_HEIGHT = RES_1920_1080[1];//800;
 
+	public static final float UNIT_SCALE = 1f/128f;
+	
 	public static final int ELECTORATE_COUNT_MAX = 5;
 	
 	public static final String GAME_TITLE = "ELection Game";
@@ -28,12 +31,12 @@ public class Constants {
 	public static final float CAM_MOVE_SCREEN_PERCENTAGE = .04f;
 	
 	public static final int TILE_NUMBER = 32;
-	public static final int TILE_SIZE = WINDOWS_GAME_WIDTH/TILE_NUMBER;
+	public static final float TILE_SIZE = 128f;//WINDOWS_GAME_WIDTH/TILE_NUMBER;
 	public static final int CANDIDATE_INTERACT_KEY = Keys.E;
 	
 	//NPC CONSTANTS
 	public static final String NPC_DEF_PATH = "data/npcdata/npcdata.json";
-	
+	public static final String PC_IMG_SRC = "MC.png";
 	
 	//Quest Constants
 	public static final String QUEST_DEF_PATH = "data/quests/quests.json";
@@ -57,6 +60,7 @@ public class Constants {
 	public static final String MAP_OBJ_OBJECT_TYPE = "type";
 	public static final String MAP_OBJ_OBJECT_TYPE_COLLIDE = "collide";
 	public static final String MAP_OBJ_DOOR = "door";
+	public static final String MAP_OBJ_EXIT_AREA = "exit_area";
 	public static final String MAP_OBJ_DOOR_ID = "id";	
 	public static final String MAP_OBJ_DOOR_NONE = "-1";
 	public static final String MAP_OBJ_OBJECT_LAYER = "objects";
@@ -71,6 +75,9 @@ public class Constants {
 
 
 	public static final float MAP_TRANSITION_TIME = 2f; //2 second transition between maps
+
+	public static final String MAP_MOMS_HOUSE = "5";
+
 	
 	
 	

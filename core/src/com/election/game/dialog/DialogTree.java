@@ -6,7 +6,7 @@ import java.util.Map;
 public class DialogTree {
 
 	
-	int id;
+	//int id;
 	
 
 	List< Map<String, String>> input;
@@ -19,15 +19,21 @@ public class DialogTree {
 	Map<String, String> quest;
 	
 	
-	public int getId() {
-		return id;
+	/*
+	 * public int getId() { return id; }
+	 * 
+	 * 
+	 * public void setId(int id) { this.id = id; }
+	 */
+	
+	public Map<String, String> getQuest() {
+		return quest;
 	}
-	
-	
-	public void setId(int id) {
-		this.id = id;
+
+	public void setQuest(Map<String, String> quest) {
+		this.quest = quest;
 	}
-	
+
 	public List< Map<String, String>> getInput() {
 		return input;
 	}

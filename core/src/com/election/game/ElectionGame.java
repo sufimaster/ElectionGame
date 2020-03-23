@@ -1,11 +1,11 @@
 package com.election.game;
 
-import java.util.Map;
 import java.util.Random;
-
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Graphics;
 import com.badlogic.gdx.Graphics.DisplayMode;
+import com.badlogic.gdx.Graphics.Monitor;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
@@ -17,7 +17,6 @@ import com.election.game.States.GameState;
 import com.election.game.dialog.DialogHandler;
 import com.election.game.json.JsonParser;
 import com.election.game.maps.MapHandler;
-import com.election.game.maps.TownMap;
 import com.election.game.quests.QuestHandler;
 
 public class ElectionGame extends Game {
@@ -53,7 +52,13 @@ public class ElectionGame extends Game {
 		GAME_OBJ = this;
 		
 		Gdx.graphics.setWindowedMode(Constants.WINDOWS_GAME_WIDTH, Constants.WINDOWS_GAME_HEIGHT);
-		
+
+		if( isFullScreen) { 
+
+			Gdx.graphics.setFullscreenMode(Gdx.graphics.getDisplayMode());
+		}
+		 
+			
 		createBatches();
 		createSkins();
 		createFonts();
@@ -68,19 +73,10 @@ public class ElectionGame extends Game {
 		
 	}
 	
-	
-
-	
-	
 
 	private void createRenderers() {
 		shapeRenderer = new ShapeRenderer();		
 	}
-
-
-
-
-
 
 	private void createBatches() {
 		hudBatch = new SpriteBatch();
@@ -102,7 +98,7 @@ public class ElectionGame extends Game {
 		FreeTypeFontGenerator generator = new FreeTypeFontGenerator(Gdx.files.internal(Constants.UI_FONT_PATH));
 		FreeTypeFontParameter param = new FreeTypeFontParameter();
 		
-		param.size=16;
+		param.size=20;
 		param.color= Color.BLACK;
 		param.shadowColor = Color.GRAY;
 		param.shadowOffsetX = 1;		

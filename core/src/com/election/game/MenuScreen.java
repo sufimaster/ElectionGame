@@ -18,7 +18,7 @@ public class MenuScreen implements Screen, InputProcessor {
 		Gdx.app.log(getClass().getName(), "Creating Menu Screen");
 		this.gameObj = gameObj;
 		camera = new OrthographicCamera();
-		camera.setToOrtho(false, 1024, 800);		
+		camera.setToOrtho(false, Constants.RES_1024_800[0], Constants.RES_1024_800[1]);		
 	} 
 	
 	

@@ -6,7 +6,6 @@ import java.util.Map;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
-import com.badlogic.gdx.utils.Align;
 import com.election.game.ElectionGame;
 import com.election.game.hud.HudComponent;
 import com.election.game.sprites.Candidate;
@@ -19,11 +18,10 @@ public class QuestHandler {
 	
 	public Vector2 windowPosition;
 	
-	
 	public QuestHandler(){
 		windowPosition = new Vector2(Gdx.graphics.getWidth() *4/5, Gdx.graphics.getHeight() *4/5 );
 		quests = new HashMap<String, Quest>();
-		hud = new HudComponent("Quests", ElectionGame.GAME_OBJ.dialogFont, ElectionGame.GAME_OBJ.dialogSkin, windowPosition, new Vector2(200,200), false);
+		hud = new HudComponent("Quests", ElectionGame.GAME_OBJ.dialogFont, ElectionGame.GAME_OBJ.dialogSkin, windowPosition, new Vector2(200,200), false, false);
 	}
 	
 

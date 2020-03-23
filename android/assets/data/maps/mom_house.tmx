@@ -56,14 +56,14 @@
   <object id="11" name="side" type="collide" x="392" y="5.33333" width="629.333" height="18.6667"/>
   <object id="16" name="door" type="door" x="256" y="1200" width="140" height="72">
    <properties>
-    <property name="id" value="0"/>
+    <property name="id" value="1"/>
    </properties>
   </object>
  </objectgroup>
  <objectgroup id="5" name="objects"/>
  <objectgroup id="6" name="npc_locations">
-  <object id="17" name="0" x="56" y="504" width="1668" height="674"/>
-  <object id="18" name="0" x="452" y="98" width="512" height="372"/>
-  <object id="19" name="0" x="1366" y="226" width="464" height="372"/>
+  <object id="17" name="5" x="56" y="504" width="1668" height="674"/>
+  <object id="18" name="5" x="452" y="98" width="512" height="372"/>
+  <object id="19" name="5" x="1366" y="226" width="464" height="372"/>
  </objectgroup>
 </map>
