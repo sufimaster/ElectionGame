@@ -48,7 +48,7 @@ public class DebugInfo {
 		ElectionGame.GAME_OBJ.hudBatch.setProjectionMatrix(screen.hudCam.combined);
 		ElectionGame.GAME_OBJ.hudBatch.begin();		
 		
-		Region region = screen.getRegion( screen.candidate.getX(),  screen.candidate.getY());
+		Region region = screen.getRegion( (int)screen.candidate.getX(), (int) screen.candidate.getY());
 		
 		ElectionGame.GAME_OBJ.debugFont.draw(ElectionGame.GAME_OBJ.hudBatch, "FPS:" + Gdx.graphics.getFramesPerSecond(), 10, screen.hudCam.viewportHeight - 60 );
 		ElectionGame.GAME_OBJ.debugFont.draw(ElectionGame.GAME_OBJ.hudBatch, "STATE:" + ElectionGame.GAME_OBJ.state, 10, screen.hudCam.viewportHeight - 76 );

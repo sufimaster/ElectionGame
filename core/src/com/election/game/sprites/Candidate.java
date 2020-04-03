@@ -1,5 +1,6 @@
 package com.election.game.sprites;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.Texture.TextureFilter;
 import com.badlogic.gdx.graphics.g2d.Animation;
@@ -199,7 +200,8 @@ public class Candidate {
 		}
 
 		elapsedTime += delta;
-			
+		//Gdx.app.log(this.getClass().getName(), "cand pos changed to: (" +this.getX() +" ,"+ this.getY() +")");
+	
 	}
 	
 	public void resetPosition(){

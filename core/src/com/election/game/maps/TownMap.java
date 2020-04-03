@@ -216,37 +216,37 @@ public String id;
 
 			for (int j = 0; j < numTilesY; j++) {
 				
-				Region region = new Region(i, j);
-				
-				//regions are drawn on 1/128 scale, so need to be scaled up to do proper collisino checking
-				Rectangle scaledRect = Utilities.scaleRectangle(region.rect, Constants.TILE_SIZE);
-				
-				for(int k=0; k < mapCollisionObjs.getCount(); k++) {
-					
-					MapObject mapObj = mapCollisionObjs.get(k);
-					
-					if (mapObj instanceof RectangleMapObject) {
-						Rectangle rect = ((RectangleMapObject)mapObj).getRectangle();
-						//TODO: need to write method that checks if a bouding polygon or bouding rect 
-						//hits a particular region
-						
-						if( scaledRect.overlaps(rect) ) {
-							region.addCollisionObject(mapObj);
-						}
-					}else if(mapObj instanceof PolygonMapObject) {
-						Polygon poly = ((PolygonMapObject)mapObj).getPolygon();
-						//TODO: need to write method that checks if a bouding polygon or bouding rect 
-						//hits a particular region
-						
-						if( Utilities.isCollision( poly, region.rect)) {
-							region.addCollisionObject(mapObj);
-						}						
-						
-					}
+				regions[i][j] = new Region(i, j);
 
-				}
-				
-				regions[i][j] = region;
+				/*
+				 * Region region = new Region(i, j);
+				 * 
+				 * //regions are drawn on 1/128 scale, so need to be scaled up to do proper
+				 * collisino checking Rectangle scaledRect =
+				 * Utilities.scaleRectangle(region.rect, Constants.TILE_SIZE);
+				 * 
+				 * for(int k=0; k < mapCollisionObjs.getCount(); k++) {
+				 * 
+				 * MapObject mapObj = mapCollisionObjs.get(k);
+				 * 
+				 * if (mapObj instanceof RectangleMapObject) { Rectangle rect =
+				 * ((RectangleMapObject)mapObj).getRectangle(); //TODO: need to write method
+				 * that checks if a bouding polygon or bouding rect //hits a particular region
+				 * 
+				 * if( scaledRect.overlaps(rect) ) { region.addCollisionObject(mapObj); } }else
+				 * if(mapObj instanceof PolygonMapObject) { Polygon poly =
+				 * ((PolygonMapObject)mapObj).getPolygon(); //TODO: need to write method that
+				 * checks if a bouding polygon or bouding rect //hits a particular region
+				 * 
+				 * if( Utilities.isCollision( poly, region.rect)) {
+				 * region.addCollisionObject(mapObj); }
+				 * 
+				 * }
+				 * 
+				 * }
+				 * 
+				 * regions[i][j] = region;
+				 */
 				
 				
 			}

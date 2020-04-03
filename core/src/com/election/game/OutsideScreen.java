@@ -1,9 +1,5 @@
 package com.election.game;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.Map;
-
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.InputProcessor;
@@ -13,9 +9,7 @@ import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
-import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
-import com.badlogic.gdx.maps.MapLayer;
 import com.badlogic.gdx.maps.MapObject;
 import com.badlogic.gdx.maps.MapObjects;
 import com.badlogic.gdx.maps.objects.CircleMapObject;
@@ -32,19 +26,12 @@ import com.badlogic.gdx.utils.Timer;
 import com.badlogic.gdx.utils.Timer.Task;
 import com.election.game.States.GameState;
 import com.election.game.camera.OrthographicCameraMovementWrapper;
-import com.election.game.json.JsonParser;
 import com.election.game.maps.TownMap;
-import com.election.game.render.DebugRenderer;
 import com.election.game.render.SpriteAndTiledRenderer;
 import com.election.game.sprites.Candidate;
 
 public class OutsideScreen implements Screen, InputProcessor {
 
-	private static final int CANDIDATE_MOVE_W_KEY = Keys.W;
-	private static final int CANDIDATE_MOVE_S_KEY = Keys.S;
-	private static final int CANDIDATE_MOVE_A_KEY = Keys.A;
-	private static final int CANDIDATE_MOVE_D_KEY = Keys.D;
-	private static final int NUM_TYPES_PEOPLE = 3;
 
 	public Candidate candidate;
 	BitmapFont font = new BitmapFont();
@@ -64,12 +51,6 @@ public class OutsideScreen implements Screen, InputProcessor {
 	
 	public TownMap tileMap;
 	
-	//private int mapPixelWidth;
-	//private int mapPixelHeight;
-	
-	
-	//giggle
-	//Region [][] regions;
 	
 	private Vector2 prevPosition;
 	
@@ -85,7 +66,6 @@ public class OutsideScreen implements Screen, InputProcessor {
 	public Vector3 mousePos;
 	Vector2  mouseRegion;
 	
-	private SpriteBatch spriteBatch;
 	private String currentMap;
 	public TownMap currentTownMap;
 	
@@ -96,7 +76,6 @@ public class OutsideScreen implements Screen, InputProcessor {
 	
 	public OutsideScreen(final ElectionGame gameObj) {
 
-		spriteBatch = new SpriteBatch();
 				
 		
 				
@@ -122,9 +101,6 @@ public class OutsideScreen implements Screen, InputProcessor {
 		//create new town map by loading map of town from static file
 		//add the sprite to the map so it is rendered with it
 		
-		//TODO: should be 1/128f since my tile size will be 128f and I want one unit in my game to equal 1 tile size		
-		//right now tile size is 32pixels for town map. Need to fix that.
-		float unitScale = 1f / 32f;
 			
 		tileMap = ElectionGame.GAME_OBJ.mapHandler.getMap(Constants.MAP_MOMS_HOUSE);
 		tileMap.activate();
@@ -136,10 +112,6 @@ public class OutsideScreen implements Screen, InputProcessor {
 	
 		//rectangle for the entire game space
 		gameSpace = new Rectangle(0,0, tileMap.mapWidth, tileMap.mapHeight);
-		
-		//blocks of the world space, so we can easily calculate intersections
-		//initRegions(tileMap.mapWidth, tileMap.mapHeight);
-
 		
 		//render these using the mapRenderer
 		//mapRenderer.setSprites(electorate);
@@ -182,13 +154,11 @@ public class OutsideScreen implements Screen, InputProcessor {
 				RectangleMapObject mapObj = (RectangleMapObject) currentTownMap.getMapObjects(Constants.MAP_OBJ_PHYSICS_LAYER).get(Constants.MAP_OBJ_EXIT_AREA + exitedHouseId);
 				prevDoor = mapObj.getRectangle();
 			}
+			/*
+			Region region = getRegion((int)prevDoor.getX(), (int)prevDoor.getY());
+			*/
 			
-			Region region = getRegion(prevDoor.getX(), prevDoor.getY());
-			
-			candidate.setPosition(region.xLoc, region.yLoc);
-			
-			
-			//candidate.setPosition(prevDoor.getX(), prevDoor.getY());
+			candidate.setPosition(prevDoor.getX(), prevDoor.getY());
 
 			userOutside = true;
 			
@@ -200,22 +170,12 @@ public class OutsideScreen implements Screen, InputProcessor {
 			userOutside = false;
 			
 		}
-		 
+		gameSpace.set(0, 0, currentTownMap.mapWidth, currentTownMap.mapHeight);
 		ElectionGame.GAME_OBJ.state = GameState.MAP_TRANSITION;
 		
 	}
 	
 
-	
-	Region getRegion(float xLoc, float yLoc) {
-		int xIdx= (int)xLoc; 
-		int yIdx= (int)yLoc; 
-		
-		
-		Region region = currentTownMap.regions[xIdx][yIdx];
-		
-		return region;
-	}
 	
 	Region getRegion(int xLoc, int yLoc){
 		
@@ -229,7 +189,6 @@ public class OutsideScreen implements Screen, InputProcessor {
 		
 		
 	}
-
 	
 	@Override
 	public void show() {
@@ -238,9 +197,6 @@ public class OutsideScreen implements Screen, InputProcessor {
 
 	@Override
 	public void render(float delta) {
-		
-		
-		
 		
 		switch( ElectionGame.GAME_OBJ.state) {
 		
@@ -350,19 +306,16 @@ public class OutsideScreen implements Screen, InputProcessor {
 
 	private void updateMouseRegion() {
 
-		
-
-		
 		mouseRegion.y = (int)mousePos.y;
 		mouseRegion.x = (int)mousePos.x;
 		
 	}
 
 	private void renderMap(float delta){
+
 		worldCam.source.update();
 		mapRenderer.setView(worldCam.source);		
 		mapRenderer.render();
-
 
 	}
 	
@@ -374,6 +327,7 @@ public class OutsideScreen implements Screen, InputProcessor {
 		for (Electorate electorate2 : currentTownMap.electorate) {
 			electorate2.draw(ElectionGame.GAME_OBJ.batch);
 		}
+		
 		candidate.draw(ElectionGame.GAME_OBJ.batch);
 		
 		ElectionGame.GAME_OBJ.batch.end();
@@ -411,8 +365,6 @@ public class OutsideScreen implements Screen, InputProcessor {
 
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 		 
-
-		
 		//camera.source.update();
 	}
 	
@@ -430,8 +382,6 @@ public class OutsideScreen implements Screen, InputProcessor {
 					interactBtn = false;
 					interactedElector = null;
 				}
-				
-				
 		
 			}
 		}, .3f);
@@ -456,7 +406,7 @@ public class OutsideScreen implements Screen, InputProcessor {
 	//see if candidate is intersecting any of the electors
 	private void checkElectorCollisions(float delta) {
 
-		Region region = getRegion(candidate.getX(), candidate.getY());
+		Region region = getRegion((int)candidate.getX(), (int)candidate.getY()); //need to get sale of tilemap);
 		
 		if( region.electorsInRegion.size() == 0){
 			interactedElector = null;
@@ -559,8 +509,16 @@ public class OutsideScreen implements Screen, InputProcessor {
 		//MapObjects mapObjects = tileMap.mapObjs;
 		MapObjects mapObjects = tileMap.mapCollisionObjs;
 		
+		MapObject intersectedObj = null;
+		
+		
 		for (MapObject object : mapObjects){
 		//for (MapObject object : townMap.mapObjs) {
+			
+			String type =(String) object.getProperties().get(Constants.MAP_OBJ_OBJECT_TYPE);
+			if( type == null || type.isEmpty() ) {
+				continue;
+			}
 			
 			if (object instanceof TextureMapObject) {
                 continue;
@@ -571,13 +529,13 @@ public class OutsideScreen implements Screen, InputProcessor {
             	
             	RectangleMapObject mapObj = (RectangleMapObject)object;
             	
-            	String type = (String) mapObj.getProperties().get(Constants.MAP_OBJ_OBJECT_TYPE);
+            	//String type = (String) mapObj.getProperties().get(Constants.MAP_OBJ_OBJECT_TYPE);
             	        	
             	Rectangle rect = mapObj.getRectangle();//Utilities.scaleRectangle(mapObj.getRectangle(), mapRenderer.getUnitScale());
 
             	
             	if( rect.overlaps(candidate.getBoundingRectangle())){
-            		 	
+            		intersectedObj = object; 	
             		//If its a door, and you are overlapping, let candidate move through, and set the ID for the interactedDoor
             		if( type.equals(Constants.MAP_OBJ_DOOR)){
             			if(userOutside){
@@ -613,6 +571,9 @@ public class OutsideScreen implements Screen, InputProcessor {
             		
             		candidate.setPosition(prevPosition.x, prevPosition.y);
             		moveCamera= false;
+            		
+            		intersectedObj = object; 	
+
             	}
             	
             	
@@ -627,6 +588,9 @@ public class OutsideScreen implements Screen, InputProcessor {
             		moveCamera= false;
             		/*String type = (String) object.getProperties().get("type");
         			System.out.println("Object type: " + type);	*/
+            		
+            		intersectedObj = object; 	
+
             	}
             	
             	
@@ -644,8 +608,10 @@ public class OutsideScreen implements Screen, InputProcessor {
 		}
 		
 		prevPosition.set( candidate.getX(), candidate.getY());
-	
-		
+		/*
+		 * if(intersectedObj!=null) { Gdx.app.log(getClass().getName(),
+		 * intersectedObj.getName()); }
+		 */		
 	}
 
 	
@@ -693,27 +659,27 @@ public class OutsideScreen implements Screen, InputProcessor {
 
 		
 		switch (keycode) {
-			case CANDIDATE_MOVE_W_KEY:
+			case Constants.CANDIDATE_MOVE_UP_KEY:
 				//candidate.moveY(-Gdx.graphics.getDeltaTime() );				
 				candidate.setMoveUp(true);
 				break;
 				
 				
-			case CANDIDATE_MOVE_S_KEY:
+			case Constants.CANDIDATE_MOVE_DOWN_KEY:
 				//candidate.moveX(-Gdx.graphics.getDeltaTime() );
 				candidate.setMoveDown(true);
 				break;
 			
-			case CANDIDATE_MOVE_A_KEY:
+			case Constants.CANDIDATE_MOVE_LEFT_KEY:
 				//candidate.moveX(Gdx.graphics.getDeltaTime() );
 				candidate.setMoveLeft(true);
 				break;	
 			
-			case CANDIDATE_MOVE_D_KEY:
+			case Constants.CANDIDATE_MOVE_RIGHT_KEY:
 				//candidate.moveX(-Gdx.graphics.getDeltaTime() );
 				candidate.setMoveRight(true);
 				break;	
-			case Keys.NUM_0:
+			case Constants.KEY_DEBUG:
 				//candidate.moveX(-Gdx.graphics.getDeltaTime() );
 				ElectionGame.GAME_OBJ.isdebug = !ElectionGame.GAME_OBJ.isdebug;
 				break;		
@@ -733,20 +699,20 @@ public class OutsideScreen implements Screen, InputProcessor {
 
 
 		switch (keycode) {
-			case CANDIDATE_MOVE_W_KEY:
+			case Constants.CANDIDATE_MOVE_UP_KEY:
 				candidate.setMoveUp(false);
 				break;
 				
 				
-			case CANDIDATE_MOVE_S_KEY:
+			case Constants.CANDIDATE_MOVE_DOWN_KEY:
 				candidate.setMoveDown(false);
 				break;
 			
-			case CANDIDATE_MOVE_A_KEY:
+			case Constants.CANDIDATE_MOVE_LEFT_KEY:
 				candidate.setMoveLeft(false);
 				break;	
 			
-			case CANDIDATE_MOVE_D_KEY:
+			case Constants.CANDIDATE_MOVE_RIGHT_KEY:
 				candidate.setMoveRight(false);
 				break;	
 			case Constants.CANDIDATE_INTERACT_KEY:
@@ -775,10 +741,6 @@ public class OutsideScreen implements Screen, InputProcessor {
 		
 		//interactBtn = !interactBtn;
 		interactBtn = true;
-		
-		
-		
-		
 		
 		if(interactBtn ){
 

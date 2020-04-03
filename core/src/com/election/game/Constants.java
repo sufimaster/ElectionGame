@@ -31,8 +31,14 @@ public class Constants {
 	public static final float CAM_MOVE_SCREEN_PERCENTAGE = .04f;
 	
 	public static final int TILE_NUMBER = 32;
-	public static final float TILE_SIZE = 128f;//WINDOWS_GAME_WIDTH/TILE_NUMBER;
+	public static final int TILE_SIZE = 128;//WINDOWS_GAME_WIDTH/TILE_NUMBER;
 	public static final int CANDIDATE_INTERACT_KEY = Keys.E;
+	
+	//input constants
+	public static final int CANDIDATE_MOVE_UP_KEY = Keys.W;
+	public static final int CANDIDATE_MOVE_DOWN_KEY = Keys.S;
+	public static final int CANDIDATE_MOVE_LEFT_KEY = Keys.A;
+	public static final int CANDIDATE_MOVE_RIGHT_KEY = Keys.D;
 	
 	//NPC CONSTANTS
 	public static final String NPC_DEF_PATH = "data/npcdata/npcdata.json";
@@ -47,8 +53,8 @@ public class Constants {
 	
 	//DIALOG CONSTANTS
 	public static final int CAND_NAME =0;
-	public static final String DIALOG_TREES_PATH="data/dialog/dialog_trees.json";
-	public static final String DIALOG_LINES_PATH="data/dialog/dialog_lines.json";
+	public static final String DIALOG_TREES_PATH="data/dialog/test_dialogtrees.json"; //"data/dialog/dialog_trees.json";
+	public static final String DIALOG_LINES_PATH="data/dialog/test_dialoglines.json"; //"data/dialog/dialog_lines.json";
 	public static final int UNSELECTED = -128929;
 	public static final int NO_MORE_DIALOG = -12123;
 	
@@ -77,6 +83,9 @@ public class Constants {
 	public static final float MAP_TRANSITION_TIME = 2f; //2 second transition between maps
 
 	public static final String MAP_MOMS_HOUSE = "5";
+
+	public static final int KEY_DEBUG = Keys.NUM_0;
+
 
 	
 	

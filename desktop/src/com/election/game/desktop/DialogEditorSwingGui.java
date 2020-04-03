@@ -213,7 +213,7 @@ public class DialogEditorSwingGui {
 			//generate dialog trees for this sprite:
 			generateSpriteDialogTreePanels(itr.next());
 			//create a seperate scroll pane for the dialog trees for each sprite id
-
+			
 		}
 		
 		

@@ -56,7 +56,7 @@
   <object id="11" name="side" type="collide" x="392" y="5.33333" width="629.333" height="18.6667"/>
   <object id="16" name="door" type="door" x="256" y="1200" width="140" height="72">
    <properties>
-    <property name="id" value="0"/>
+    <property name="id" value="1"/>
    </properties>
   </object>
  </objectgroup>
