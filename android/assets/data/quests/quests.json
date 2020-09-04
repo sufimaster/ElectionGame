@@ -41,6 +41,16 @@
 			"required": true,
 			"npcs": [],
 			"dependencies": ["0"]
+		},
+
+		"10": {
+			"id": "10",
+			"name": "Rally the Troops",
+			"description": "Gather ten signatures so you can enter your name into the race for Mayor of the town.",
+			"reward": 4.5,
+			"required": true,
+			"npcs": [],
+			"dependencies": ["0"]
 		}
 
 	}

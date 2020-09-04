@@ -84,6 +84,7 @@ public class OrthographicCameraMovementWrapper {
 		source.translate((int)camSpeed.x*delta, (int)camSpeed.y*delta);
 		
 		//source.translate((camSpeed.x*delta),(camSpeed.y*delta));
+		//synchronize the camera viewport and the bounding viewport
 		syncRects();
 	}
 	

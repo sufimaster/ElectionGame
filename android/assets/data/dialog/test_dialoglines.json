@@ -39,6 +39,22 @@
     "id": "C9",
     "value": "Yes"
   },
+  "C10": {
+    "id": "C10",
+    "value": "Salam Ama."
+  },
+  "C11": {
+    "id": "C11",
+    "value": "Fine, but my throat feels itchy."
+  },
+  "C12": {
+    "id": "C12",
+    "value": "Oh Mom, its not a big deal. I shouldn't have brought it up."
+  },
+  "C13": {
+    "id": "C12",
+    "value": "Ok. I'll stop by and get some at the store. Wait, did you say \"Town hall\", why?"
+  },
   "R0": {
     "id": "R0",
     "value": "Meherban my friend, God grant you tranquility!"
@@ -66,5 +82,26 @@
   "R6": {
     "id": "R6",
     "value": "I don't have time for this, leave me alone."
+  },
+  "R7": {
+    "id": "R7",
+    "value": "Mehrban son, how are you?"
+  },
+  "R8": {
+    "id": "R8",
+    "value": "Oh no. Did you take something for it? I have ciderberry tincture and some lemons. I can mix that and it'll flush that tickle right out. Miss Sarah send me the recipe just a few days ago, she said it fixed her cousin's friend's landlord's mother right up."
+  },
+  "R9": {
+    "id": "R9",
+    "value": "Oh, I forgot, actually I think we used the last cinderberry. Pick some up on your way to Town Hall. Also, get some garlic loaves and pickled corn peppers."
+  },
+  "R10": {
+    "id": "R10",
+    "value": "I want you to look into selling these new electrophones I've been hearing about. What do you need, a permission slip? No go!"
+  },
+  "R11": {
+    "id": "R11",
+    "value": "Meherban."
   }
+
 }

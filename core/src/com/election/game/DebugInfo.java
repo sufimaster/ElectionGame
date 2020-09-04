@@ -25,7 +25,7 @@ public class DebugInfo {
 	boolean debugCollisions=false;
 	boolean debugText=true;
 	boolean debugRegions=true;
-	boolean debugCamera=false;
+	boolean debugCamera=true;
 	boolean debugCandidate=true;
 	
 

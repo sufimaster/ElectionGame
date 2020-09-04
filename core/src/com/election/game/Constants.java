@@ -17,7 +17,7 @@ public class Constants {
 	public static final int WINDOWS_GAME_WIDTH = RES_1920_1080[0];//1024;
 	public static final int WINDOWS_GAME_HEIGHT = RES_1920_1080[1];//800;
 
-	public static final float UNIT_SCALE = 1f/128f;
+	public static final float UNIT_SCALE = 1f/16f;
 	
 	public static final int ELECTORATE_COUNT_MAX = 5;
 	
@@ -28,7 +28,8 @@ public class Constants {
 	public static final float CAM_YSPEED = 100;
 	public static final float CAM_XSPEED = 100;
 	
-	public static final float CAM_MOVE_SCREEN_PERCENTAGE = .04f;
+	//public static final float CAM_MOVE_SCREEN_PERCENTAGE = .04f;
+	public static final float CAM_MOVE_SCREEN_PERCENTAGE = .4f;
 	
 	public static final int TILE_NUMBER = 32;
 	public static final int TILE_SIZE = 128;//WINDOWS_GAME_WIDTH/TILE_NUMBER;
@@ -42,7 +43,10 @@ public class Constants {
 	
 	//NPC CONSTANTS
 	public static final String NPC_DEF_PATH = "data/npcdata/npcdata.json";
-	public static final String PC_IMG_SRC = "MC.png";
+	//public static final String PC_IMG_SRC = "MC.png";
+	public static final String PC_IMG_SRC = "character_64x96.png";
+	public static final String BATTLE_BG = "battle/battle_bg.png";
+
 	
 	//Quest Constants
 	public static final String QUEST_DEF_PATH = "data/quests/quests.json";
@@ -85,6 +89,7 @@ public class Constants {
 	public static final String MAP_MOMS_HOUSE = "5";
 
 	public static final int KEY_DEBUG = Keys.NUM_0;
+
 
 
 	

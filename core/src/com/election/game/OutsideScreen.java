@@ -10,6 +10,7 @@ import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
 import com.badlogic.gdx.maps.MapObject;
 import com.badlogic.gdx.maps.MapObjects;
 import com.badlogic.gdx.maps.objects.CircleMapObject;
@@ -72,12 +73,10 @@ public class OutsideScreen implements Screen, InputProcessor {
 	private float elapsedTime;	
 	float alphaBlend =0f;
 	private String exitedHouseId;
+	private Texture battleBackground;
 	
 	
 	public OutsideScreen(final ElectionGame gameObj) {
-
-				
-		
 				
 		mousePos = new Vector3();
 		mouseRegion = new Vector2();
@@ -85,10 +84,13 @@ public class OutsideScreen implements Screen, InputProcessor {
 		//create main character and position in middle of map
 		//TODO: this needs to change so that the guy is in the map 
 		candidate = new Candidate( new Texture(Gdx.files.internal(Constants.PC_IMG_SRC)));
-		candidate.setPosition(5,5);
-		candidate.setSize(.75f, 1f);		
+		//candidate.setPosition(5,5);
+		candidate.setSize(1f, 2f);		
 		
-		prevPosition = new Vector2(Constants.VIRTUAL_HEIGHT/2, Constants.VIRTUAL_HEIGHT/2);
+		//battle screen init
+		battleBackground = new Texture(Gdx.files.internal(Constants.BATTLE_BG));
+		
+		//prevPosition = new Vector2(Constants.VIRTUAL_HEIGHT/2, Constants.VIRTUAL_HEIGHT/2);
 		
 		//Create new orthographic camera and look at candidate location
 		//worldCam = new OrthographicCameraMovementWrapper();
@@ -105,7 +107,9 @@ public class OutsideScreen implements Screen, InputProcessor {
 		tileMap = ElectionGame.GAME_OBJ.mapHandler.getMap(Constants.MAP_MOMS_HOUSE);
 		tileMap.activate();
 		currentTownMap =tileMap;
-		//tileMap = 	Constants.tiledMaps.get(currentMap);
+		initCandidatePosition();
+
+		//tileMap = Constants.tiledMaps.get(currentMap);
 		
 		//create a new map renderer
 		mapRenderer = new SpriteAndTiledRenderer(tileMap, worldCam, Constants.UNIT_SCALE);
@@ -128,6 +132,15 @@ public class OutsideScreen implements Screen, InputProcessor {
 		hudCam.setToOrtho(false, width, height);
 	}
 	
+	private void initCandidatePosition() {
+		RectangleMapObject obj =  (RectangleMapObject) tileMap.getMapObjects(Constants.MAP_OBJ_PHYSICS_LAYER).get("door");		
+		candidate.setPosition(obj.getRectangle().x, obj.getRectangle().y+obj.getRectangle().height);
+		
+		//need to set this so camera doesn't pan to candidate inside the house
+		prevPosition = new Vector2(candidate.getX(), candidate.getY());
+		userOutside = false;
+	}
+	
 	private void loadMap(String mapId, float unitScale){
 		
 		//this should not be null. If there's a mapId, a map should be associated, I think
@@ -144,7 +157,7 @@ public class OutsideScreen implements Screen, InputProcessor {
 		//tileMap = Constants.tiledMaps.get(mapId);
 		//tileMap.addSprite(candidate);
 		
-		
+		//switching map from indoor to outdoor
 		if( mapId.startsWith(Constants.MAP_OUTSIDE_WORLD_PREFIX)){
 		
 			mapRenderer.resetMap(tileMap, 1f/32f);
@@ -158,20 +171,24 @@ public class OutsideScreen implements Screen, InputProcessor {
 			Region region = getRegion((int)prevDoor.getX(), (int)prevDoor.getY());
 			*/
 			
+			//set the candidates position to the previous position he was before he went in the house, 
+			//or the default position set when the game starts out in a house
 			candidate.setPosition(prevDoor.getX(), prevDoor.getY());
 
 			userOutside = true;
 			
-		}else{
-			mapRenderer.resetMap(tileMap, 1f/128f);
+		}else{ //switching from outdoor map to indoor. The scale of indoor render should match the scale of the indoor map
+			mapRenderer.resetMap(tileMap, 1/16f);
 			
-			RectangleMapObject obj =  (RectangleMapObject) tileMap.getMapObjects(Constants.MAP_OBJ_PHYSICS_LAYER).get("door");		
-			candidate.setPosition(obj.getRectangle().x, obj.getRectangle().y+obj.getRectangle().height);
-			userOutside = false;
+			initCandidatePosition();
 			
 		}
+		
+		//worldCam.setLookAt(candidate.getX(), candidate.getY());
+
 		gameSpace.set(0, 0, currentTownMap.mapWidth, currentTownMap.mapHeight);
 		ElectionGame.GAME_OBJ.state = GameState.MAP_TRANSITION;
+
 		
 	}
 	
@@ -212,6 +229,10 @@ public class OutsideScreen implements Screen, InputProcessor {
 				renderDialogState(delta);
 				//updateRunning(delta);
 				break;
+			case BATTLE:
+				renderBattleState(delta);
+				//updateRunning(delta);
+				break;				
 			case MAP_TRANSITION:
 				renderMapTransitionState(delta);
 				//updateRunning(delta);
@@ -222,6 +243,13 @@ public class OutsideScreen implements Screen, InputProcessor {
 			
 	}
 	
+	private void renderBattleState(float delta) {
+
+		checkCollisions(delta);		
+		updateCamera(delta);
+		renderBattleView(delta);
+	}
+
 	public void renderRunningState(float delta){
 		updateMouseRegion();
 		updateCandidate(delta);
@@ -304,6 +332,22 @@ public class OutsideScreen implements Screen, InputProcessor {
 		renderHud(delta);
 	}
 
+	private void renderBattleView(float delta) {
+
+		Gdx.gl.glClearColor(0, 0, 0, 1);
+        Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
+
+		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
+		
+		 
+		//renderMap(delta);
+		renderBattleGraphics(delta);
+		
+		
+		renderHud(delta);
+	}
+	
+	
 	private void updateMouseRegion() {
 
 		mouseRegion.y = (int)mousePos.y;
@@ -334,6 +378,29 @@ public class OutsideScreen implements Screen, InputProcessor {
 
 		
 	}
+	
+	private void renderBattleGraphics(float delta) {
+		
+		ElectionGame.GAME_OBJ.batch.setProjectionMatrix(worldCam.source.combined);
+		
+		ElectionGame.GAME_OBJ.batch.begin();
+		//draw battlefield
+		ElectionGame.GAME_OBJ.batch.draw(battleBackground, 200, 200);//, Gdx.graphics.getWidth()- battleBackground.getWidth()/2, Gdx.graphics.getHeight() - battleBackground.getHeight()/2);
+		
+		
+		//draw character sprite
+		candidate.setSize(3, 3);
+		candidate.draw(ElectionGame.GAME_OBJ.batch);
+		
+		//draw opponent sprite
+		
+		//draw battle data
+
+		ElectionGame.GAME_OBJ.batch.end();
+
+		
+	}
+	
 	
 	private void renderHud(float delta) {
 		/*Matrix4 uiMatrix = hudCam.combined.cpy();
@@ -575,9 +642,7 @@ public class OutsideScreen implements Screen, InputProcessor {
             		intersectedObj = object; 	
 
             	}
-            	
-            	
-            	
+      	
             }
             else if (object instanceof PolylineMapObject) {
             	
@@ -592,9 +657,7 @@ public class OutsideScreen implements Screen, InputProcessor {
             		intersectedObj = object; 	
 
             	}
-            	
-            	
-            	
+         	
             }
             else if (object instanceof CircleMapObject) {
 
@@ -602,8 +665,6 @@ public class OutsideScreen implements Screen, InputProcessor {
             else {
                 continue;
             }
-
-			
 			
 		}
 		
@@ -613,8 +674,6 @@ public class OutsideScreen implements Screen, InputProcessor {
 		 * intersectedObj.getName()); }
 		 */		
 	}
-
-	
 
 	@Override
 	public void pause() {
@@ -656,14 +715,12 @@ public class OutsideScreen implements Screen, InputProcessor {
 		
 		//Gdx.app.log(this.getClass().getCanonicalName(), "keycode is " + Keys.toString(keycode));
 		//Gdx.app.log(this.getClass().getCanonicalName(), "Delta time is " + Gdx.graphics.getDeltaTime());
-
 		
 		switch (keycode) {
 			case Constants.CANDIDATE_MOVE_UP_KEY:
 				//candidate.moveY(-Gdx.graphics.getDeltaTime() );				
 				candidate.setMoveUp(true);
 				break;
-				
 				
 			case Constants.CANDIDATE_MOVE_DOWN_KEY:
 				//candidate.moveX(-Gdx.graphics.getDeltaTime() );
@@ -683,10 +740,10 @@ public class OutsideScreen implements Screen, InputProcessor {
 				//candidate.moveX(-Gdx.graphics.getDeltaTime() );
 				ElectionGame.GAME_OBJ.isdebug = !ElectionGame.GAME_OBJ.isdebug;
 				break;		
+			
+				
 		}
-		
-		
-		
+	
 		return true;
 	}
 
@@ -737,9 +794,6 @@ public class OutsideScreen implements Screen, InputProcessor {
 	
 	private void toggleInteract() {
 		
-
-		
-		//interactBtn = !interactBtn;
 		interactBtn = true;
 		
 		if(interactBtn ){
@@ -747,6 +801,11 @@ public class OutsideScreen implements Screen, InputProcessor {
 			
 			if( !Constants.MAP_OBJ_DOOR_NONE.equals( interactedDoor)){
 				interactBtn = true;
+				
+				if( ElectionGame.GAME_OBJ.mapHandler.getMap(interactedDoor) == null) {
+					return;
+				}
+				
 				loadMap(interactedDoor, 1f/128f);
 				worldCam.setLookAt(candidate.getX(), candidate.getY());
 				return;
@@ -756,8 +815,16 @@ public class OutsideScreen implements Screen, InputProcessor {
 			
 			if( interactedElector != null){
 				interactBtn = true;
+				//TODO: later check if the person has no dialog, or has some metadata indicating they 
+				//are battleable, and then engage in battle, otherwise engage in dialog
+				ElectionGame.GAME_OBJ.state = GameState.BATTLE;	
+				
+				/*
+				 * TODO: uncomment this after testing battle screen is done, so you can engage in dialog.
+				
 				ElectionGame.GAME_OBJ.state = GameState.DIALOG;			
 				Gdx.input.setInputProcessor(ElectionGame.GAME_OBJ.dialogHandler);
+				*/
 			}else{
 				interactBtn = false;
 			}

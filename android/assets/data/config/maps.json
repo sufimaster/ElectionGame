@@ -76,7 +76,7 @@
 		"name":"Mothers House",
 		"description":"Your Mother's House",
 		"type":0,
-		"tiledMap": ["data/maps/mom_house.tmx", true],
+		"tiledMap": ["data/maps/houst_test.tmx", true],
 		"npcs":{
 			"3":{
 				"id":3,

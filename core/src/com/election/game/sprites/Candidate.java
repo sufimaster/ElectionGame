@@ -1,5 +1,9 @@
 package com.election.game.sprites;
 
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.Texture.TextureFilter;
@@ -30,16 +34,20 @@ public class Candidate {
 	private Vector2 prevPosition;
 	
 	private WalkingDirection directionState = WalkingDirection.NONE;
-	private WalkingDirection prevDirectionState = WalkingDirection.RIGHT;
+	private WalkingDirection prevDirectionState = WalkingDirection.DOWN;
 	
 	public Sprite sprite;
 
-	//public TextureRegion[] animationFramesLeft;
 	Animation <TextureRegion> idleAnimationLeft;
-	
-	//public TextureRegion[] animationFramesRight;
 	Animation <TextureRegion> idleAnimationRight;
+	Animation <TextureRegion> idleAnimationDown;
+	Animation <TextureRegion> idleAnimationUp;
 	
+	Animation <TextureRegion> leftAnimations;
+	Animation <TextureRegion> rightAnimations;
+	Animation<TextureRegion> downAnimations;
+	Animation<TextureRegion> upAnimations;
+
 	
 	float elapsedTime=0;
 
@@ -47,90 +55,121 @@ public class Candidate {
 
 	private float height;
 
+	
+
 	//private AnimationState state = AnimationState.IDLE;
 	
 
 
 	public Candidate(Texture texture) {
 		
-		texture.setFilter(TextureFilter.Linear, TextureFilter.Linear);
+		texture.setFilter(TextureFilter.Linear, TextureFilter.Nearest);
 
 
 		sprite = new Sprite(texture);
 		prevPosition = new Vector2();
 		
-		initAnimations(texture);
+		initDirectionAnimations(texture);
 		
 		
 		
 	}
 	
-	private void initAnimations(Texture texture) {
-		//idle animation
-		
-		initLeftAnimations(texture);
-		
-		initRightAnimations(texture);
-		
-		initUpAnimations(texture);	
-		
-		initDownAnimations(texture);	
 
-	}
-
-
-
-	private void initRightAnimations(Texture texture) {
-		TextureRegion[][] tmpFrames = TextureRegion.split(texture, 128, 256);
-		TextureRegion [] animationFramesRight = new TextureRegion[8];
+	private void initDirectionAnimations(Texture texture) {
+		
+		//split the texture up into each individual frame
+		//a row is one directional animation
+		//each element is one image in an animation
+		TextureRegion[][] tmpFrames = TextureRegion.split(texture, 16, 32);
 		int index=0;
 		
+		//iterate through each row
 		for(int i=0; i<tmpFrames.length; i++){
-			for(int j=0; j<tmpFrames[i].length; j++){
-				TextureRegion region =tmpFrames[i][j]; 
-				region.flip(true, false);
+			
+			//if its the first row, its the idle animation
+			if(i==0) {
+				//4 frames currently for each walking animation
+				TextureRegion [] idleFrames = new TextureRegion[4];
 				
-				animationFramesRight[index] = region;
-				animationFramesRight[animationFramesRight.length-1-index] = tmpFrames[i][j];
-				index++;
+				//iterate through each column (each image)
+				//add them to an array
+				for(int j=0; j<tmpFrames[i].length; j++){
+					TextureRegion region =tmpFrames[i][j]; 
+					
+					idleFrames[index] = region;
+					index++;
+				}
+				
+				//create the idle animation. TODO: for now, just set Idle upAnimation to same as Idle downAnimation
+				idleAnimationDown = new Animation<TextureRegion>(1f, idleFrames);			
+				idleAnimationUp = idleAnimationDown;
 			}
+			
+			//second row - down animation
+			if(i==1) {
+				index=0;
+
+				TextureRegion [] downFrames = new TextureRegion[4];
+
+				for(int j=0; j<tmpFrames[i].length; j++){
+					TextureRegion region =tmpFrames[i][j]; 
+					
+					downFrames[index] = region;
+					index++;
+				}
+				
+				//create the animation for when the sprite walks downward. 
+				//TODO: For now, set down animation to same as up Animation
+				downAnimations = new Animation<TextureRegion>(1f, downFrames);
+				upAnimations = downAnimations;
+			}
+			
+			//row 3 - right animation/left animations
+			if(i==2) {
+				index=0;
+
+				TextureRegion [] rightFrames = new TextureRegion[4];
+				TextureRegion [] leftFrames = new TextureRegion[4];
+
+				for(int j=0; j<tmpFrames[i].length; j++){
+					TextureRegion region = tmpFrames[i][j]; 
+					
+					/*
+					//if you create the right walking animation using the original texture, and then u flip the object, 
+					//and create the left animation object using it, the right animation references the flipped object
+					//so, to avoid this, I create a copy of the texture region, then flip it. And only use that flipped 
+					//texture for the left animations 
+					*/
+					TextureRegion leftRegion = new TextureRegion(region);
+					rightFrames[index] = region;
+					
+					leftRegion.flip(true, false);
+					leftFrames[index] = leftRegion;
+					index++;
+
+				}
+				
+				rightAnimations = new Animation<TextureRegion>(1f, rightFrames);		
+				leftAnimations = new Animation<TextureRegion>(1f, leftFrames);			
+				
+				idleAnimationRight = rightAnimations;
+				idleAnimationLeft = leftAnimations;
+				
+				/*
+				 * TODO: add rows for idle left/idle right/idle up animations
+				 */
+
+			
+			}
+			
+			
 		}
 				
 		
-		idleAnimationRight = new Animation<TextureRegion>(1f/4f, animationFramesRight);			
-	}
-	
-	private void initLeftAnimations(Texture texture) {
-
-		TextureRegion[][] tmpFrames = TextureRegion.split(texture, 128, 256);
-		TextureRegion [] animationFramesLeft = new TextureRegion[8];
-		int index=0;
-		
-		for(int i=0; i<tmpFrames.length; i++){
-			for(int j=0; j<tmpFrames[i].length; j++){
-				
-				
-				animationFramesLeft[index] = tmpFrames[i][j];
-				animationFramesLeft[animationFramesLeft.length-1-index] = tmpFrames[i][j];
-				index++;
-			}
-		}
-				
-		
-		idleAnimationLeft = new Animation<TextureRegion>(1f/4f, animationFramesLeft);		
-		
-
-	}
-	
-
-	private void initDownAnimations(Texture texture) {
-
+			
 	}
 
-	private void initUpAnimations(Texture texture) {
-		// TODO Auto-generated method stub
-		
-	}	
 	
 	
 	public Candidate(Texture texture, float width, float height) {
@@ -144,7 +183,7 @@ public class Candidate {
 		this.width = width;
 		this.height = height;
 		
-		initAnimations(texture);
+		initDirectionAnimations(texture);
 		
 		
 	}
@@ -160,19 +199,19 @@ public class Candidate {
 			}else if( prevDirectionState == WalkingDirection.LEFT){
 				batch.draw( idleAnimationLeft.getKeyFrame(elapsedTime, true), sprite.getX(), sprite.getY(), width, height);	
 			}else if( prevDirectionState == WalkingDirection.DOWN){
-				batch.draw( idleAnimationRight.getKeyFrame(elapsedTime, true), sprite.getX(), sprite.getY(), width, height);
+				batch.draw( idleAnimationDown.getKeyFrame(elapsedTime, true), sprite.getX(), sprite.getY(), width, height);
 			}else if(prevDirectionState == WalkingDirection.UP){
-				batch.draw( idleAnimationLeft.getKeyFrame(elapsedTime, true), sprite.getX(), sprite.getY(), width, height);
+				batch.draw( idleAnimationUp.getKeyFrame(elapsedTime, true), sprite.getX(), sprite.getY(), width, height);
 			}
 		
 		}else if(directionState == WalkingDirection.RIGHT){
-			batch.draw( idleAnimationRight.getKeyFrame(0f), sprite.getX(), sprite.getY(), width, height);
+			batch.draw( rightAnimations.getKeyFrame(elapsedTime,true), sprite.getX(), sprite.getY(), width, height);
 		}else if(directionState == WalkingDirection.LEFT){
-			batch.draw( idleAnimationLeft.getKeyFrame(0f), sprite.getX(), sprite.getY(), width, height);
+			batch.draw( leftAnimations.getKeyFrame(elapsedTime, true), sprite.getX(), sprite.getY(), width, height);
 		}else if(directionState == WalkingDirection.DOWN){
-			batch.draw( idleAnimationRight.getKeyFrame(0f), sprite.getX(), sprite.getY(), width, height);
+			batch.draw( downAnimations.getKeyFrame(elapsedTime, true), sprite.getX(), sprite.getY(), width, height);
 		}else if(directionState == WalkingDirection.UP){
-			batch.draw( idleAnimationLeft.getKeyFrame(0f), sprite.getX(), sprite.getY(), width, height);
+			batch.draw( upAnimations.getKeyFrame(elapsedTime, true), sprite.getX(), sprite.getY(), width, height);
 		}
 	}
 	 

@@ -9,7 +9,8 @@ public class States {
 		DIALOG, 
 		PAUSED, 
 		MAP_TRANSITION,
-		GAMEOVER 
+		GAMEOVER, 
+		BATTLE 
 	} 
 	
 	public enum DialogState{	
