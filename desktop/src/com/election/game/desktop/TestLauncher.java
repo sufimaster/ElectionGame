@@ -4,6 +4,7 @@ import com.badlogic.gdx.backends.lwjgl.LwjglApplication;
 import com.badlogic.gdx.backends.lwjgl.LwjglApplicationConfiguration;
 import com.election.game.dialog.DialogHandlerScene2dUI;
 import com.election.game.test.ScaleTest;
+import com.election.game.test.TestGame;
 
 public class TestLauncher {
 	public static void main (String[] arg) {
@@ -13,6 +14,6 @@ public class TestLauncher {
 		config.width = 800;
 		config.height = 600;
 		//new LwjglApplication(new DialogHandlerScene2dUI(), config);
-		new LwjglApplication(new ScaleTest(), config);
+		new LwjglApplication(new TestGame(), config);
 	}
 }

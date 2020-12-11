@@ -173,7 +173,7 @@ public class OutsideScreen implements Screen, InputProcessor {
 			
 			//set the candidates position to the previous position he was before he went in the house, 
 			//or the default position set when the game starts out in a house
-			candidate.setPosition(prevDoor.getX(), prevDoor.getY());
+			candidate.setPosition(prevDoor.getX(), prevDoor.getY()-1.5f*prevDoor.getHeight());
 
 			userOutside = true;
 			
@@ -245,8 +245,8 @@ public class OutsideScreen implements Screen, InputProcessor {
 	
 	private void renderBattleState(float delta) {
 
-		checkCollisions(delta);		
 		updateCamera(delta);
+		//renderGraphics(delta);
 		renderBattleView(delta);
 	}
 
@@ -334,14 +334,15 @@ public class OutsideScreen implements Screen, InputProcessor {
 
 	private void renderBattleView(float delta) {
 
-		Gdx.gl.glClearColor(0, 0, 0, 1);
-        Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
-
-		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 		
+		  Gdx.gl.glClearColor(0f, 0f, 0f, 1); 
+		  Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
+		  
+		  Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 		 
+		
 		//renderMap(delta);
-		renderBattleGraphics(delta);
+		updateBattle(delta);
 		
 		
 		renderHud(delta);
@@ -380,12 +381,13 @@ public class OutsideScreen implements Screen, InputProcessor {
 	}
 	
 	private void renderBattleGraphics(float delta) {
-		
+		worldCam.source.update();
+
 		ElectionGame.GAME_OBJ.batch.setProjectionMatrix(worldCam.source.combined);
 		
 		ElectionGame.GAME_OBJ.batch.begin();
 		//draw battlefield
-		ElectionGame.GAME_OBJ.batch.draw(battleBackground, 200, 200);//, Gdx.graphics.getWidth()- battleBackground.getWidth()/2, Gdx.graphics.getHeight() - battleBackground.getHeight()/2);
+		ElectionGame.GAME_OBJ.batch.draw(battleBackground, 0, battleBackground.getHeight());//, Gdx.graphics.getWidth()- battleBackground.getWidth()/2, Gdx.graphics.getHeight() - battleBackground.getHeight()/2);
 		
 		
 		//draw character sprite
@@ -428,11 +430,32 @@ public class OutsideScreen implements Screen, InputProcessor {
 
 	private void updatePaused(float delta){
 		Gdx.gl.glClearColor(.3f, .2f, .4f, 1);
-        Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
+        //Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
 
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 		 
 		//camera.source.update();
+	}
+	
+	public void updateBattle(float delta) {
+		Timer.schedule(new Task() {
+			
+			@Override
+			public void run() {
+
+				//draw battle screen
+				if( interactBtn){
+					//should only call this method once.
+					ElectionGame.GAME_OBJ.battleHandler.startBattle(candidate, interactedElector);
+					interactBtn = false;
+					interactedElector = null;
+				}
+		
+			}
+		}, .3f);
+
+		ElectionGame.GAME_OBJ.battleHandler.draw(delta);
+		
 	}
 	
 	private void updateDialog(float delta) {
@@ -815,16 +838,18 @@ public class OutsideScreen implements Screen, InputProcessor {
 			
 			if( interactedElector != null){
 				interactBtn = true;
-				//TODO: later check if the person has no dialog, or has some metadata indicating they 
-				//are battleable, and then engage in battle, otherwise engage in dialog
-				ElectionGame.GAME_OBJ.state = GameState.BATTLE;	
 				
-				/*
-				 * TODO: uncomment this after testing battle screen is done, so you can engage in dialog.
+				if( interactedElector.isDebater) {
+					
+					ElectionGame.GAME_OBJ.state = GameState.BATTLE;	
+					Gdx.input.setInputProcessor(ElectionGame.GAME_OBJ.battleHandler);
+				} else {
 				
-				ElectionGame.GAME_OBJ.state = GameState.DIALOG;			
-				Gdx.input.setInputProcessor(ElectionGame.GAME_OBJ.dialogHandler);
-				*/
+					ElectionGame.GAME_OBJ.state = GameState.DIALOG;			
+					Gdx.input.setInputProcessor(ElectionGame.GAME_OBJ.dialogHandler);
+					
+				}
+				
 			}else{
 				interactBtn = false;
 			}

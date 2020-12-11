@@ -10,23 +10,34 @@
 			"0":{
 				"id":0,
 				"sprite":"person1.png",
+				"isDebater":false,
+				"debate_img":"battle/char_btl_sheet_person2.png",
 				"influence": 10,
 				"houseId":0,
-				"initialMap":"MO1"
+				"initialMap":"MO1",
+				"intellect": 3,
+				"persuasion": 4
 			},
 			"1":{
 				"id":1,
 				"sprite":"person2.png",
+				"isDebater":true,
+				"debate_img":"battle/char_btl_sheet_person2.png",
 				"influence": 3,
 				"houseId":1,
-				"initialMap":"MO1"	
+				"initialMap":"MO1",
+				"intellect": 3,
+				"persuasion": 4
 			},
 			"2":{
 				"id":2,
 				"sprite":"person3.png",
 				"influence": 5,
 				"houseId":2,
-				"initialMap":"MO1"
+				"initialMap":"MO1",
+				"intellect": 3,
+				"persuasion": 4
+
 			}
 				
 		}
@@ -82,7 +93,7 @@
 				"id":3,
 				"sprite":"mother_npc.png",
 				"name":"Muhtar",
-				"influence": 6,
+				"attributes": {"influence":2, "intellect":4, "persuasion":4},
 				"houseId":5,
 				"initialMap":5
 			}

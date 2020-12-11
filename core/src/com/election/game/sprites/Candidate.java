@@ -13,6 +13,7 @@ import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
+import com.election.game.BattleAttributes;
 import com.election.game.Constants;
 
 import com.election.game.States.WalkingDirection;
@@ -55,10 +56,8 @@ public class Candidate {
 
 	private float height;
 
-	
 
-	//private AnimationState state = AnimationState.IDLE;
-	
+	public BattleAttributes attributes;	
 
 
 	public Candidate(Texture texture) {
@@ -68,6 +67,8 @@ public class Candidate {
 
 		sprite = new Sprite(texture);
 		prevPosition = new Vector2();
+		attributes= new BattleAttributes();
+
 		
 		initDirectionAnimations(texture);
 		

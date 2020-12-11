@@ -313,8 +313,12 @@ public String id;
 					PolygonMapObject polyobj = (PolygonMapObject) mapObject;
 					Rectangle rect = polyobj.getPolygon().getBoundingRectangle();
 					
-					xLoc = rect.x + (ElectionGame.randGen.nextFloat() *  rect.width);
-					yLoc = rect.y + (ElectionGame.randGen.nextFloat() * rect.height);
+					
+					while( !polyobj.getPolygon().contains(xLoc, yLoc)) {
+						xLoc = rect.x + (ElectionGame.randGen.nextFloat() *  rect.width);
+						yLoc = rect.y + (ElectionGame.randGen.nextFloat() * rect.height);
+					}
+					
 					
 					elector.sprite.setPosition( xLoc, yLoc);
 				}else if(mapObject instanceof RectangleMapObject) {

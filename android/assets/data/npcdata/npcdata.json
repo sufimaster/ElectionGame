@@ -3,7 +3,7 @@
 	"0":{
 		"id":0,
 		"sprite":"person1.png",
-		"name":"Zulfikr"
+		"name":"Zulfikr",
 		"influence": 10,
 		"houseId":0,
 		"initialMap":"MO1"

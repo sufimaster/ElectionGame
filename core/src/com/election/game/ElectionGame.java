@@ -1,19 +1,21 @@
 package com.election.game;
 
 import java.util.Random;
+
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.Graphics;
 import com.badlogic.gdx.Graphics.DisplayMode;
-import com.badlogic.gdx.Graphics.Monitor;
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator.FreeTypeFontParameter;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.election.game.States.GameState;
+import com.election.game.battle.BattleHandler;
 import com.election.game.dialog.DialogHandler;
 import com.election.game.json.JsonParser;
 import com.election.game.maps.MapHandler;
@@ -30,7 +32,7 @@ public class ElectionGame extends Game {
 	public ShapeRenderer shapeRenderer;
 	public DialogHandler dialogHandler;
 	
-	public boolean isdebug = true;
+	public boolean isdebug = false;
 	public static boolean isFullScreen = false;
 	
 	
@@ -46,6 +48,7 @@ public class ElectionGame extends Game {
 	
 	public QuestHandler questHandler;
 	public MapHandler mapHandler;
+	protected BattleHandler battleHandler;
 	
 
 	public void create () {
@@ -58,13 +61,14 @@ public class ElectionGame extends Game {
 			Gdx.graphics.setFullscreenMode(Gdx.graphics.getDisplayMode());
 		}
 		 
-			
 		createBatches();
 		createSkins();
 		createFonts();
 		createQuests();
 		createDialogObjects();
 		createRenderers();
+		createBattleHandler();
+
 		loadMaps();
 		//createNPCs();
 		
@@ -73,6 +77,11 @@ public class ElectionGame extends Game {
 		
 	}
 	
+
+	private void createBattleHandler() {
+		battleHandler = new BattleHandler(new TextureRegion( new Texture(Gdx.files.internal(Constants.BATTLE_BG))));
+	}
+
 
 	private void createRenderers() {
 		shapeRenderer = new ShapeRenderer();		

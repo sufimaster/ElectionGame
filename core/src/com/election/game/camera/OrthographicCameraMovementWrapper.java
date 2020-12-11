@@ -1,11 +1,9 @@
 package com.election.game.camera;
 
 import com.badlogic.gdx.graphics.OrthographicCamera;
-import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.election.game.Constants;
-import com.election.game.ElectionGame;
 import com.election.game.MapSprite;
 import com.election.game.sprites.Candidate;
 
@@ -34,10 +32,7 @@ public class OrthographicCameraMovementWrapper {
 		
 		this.source = new OrthographicCamera();
 		setToOrtho(yDown,viewportWidth, viewportHeight);
-		
-		
-		
-		
+
 		//w and h are the center location
 		//w*2 and h*2
 		
