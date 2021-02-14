@@ -27,6 +27,8 @@ public class Candidate {
 	//negative points from quest
 	public float questNegativeReward=0;
 	
+	public int argPower = Constants.DEFAULT_INITIAL_AP;
+	
 	private boolean moveUp= false;
 	private boolean moveDown= false;
 	private boolean moveLeft= false;
@@ -203,6 +205,8 @@ public class Candidate {
 				batch.draw( idleAnimationDown.getKeyFrame(elapsedTime, true), sprite.getX(), sprite.getY(), width, height);
 			}else if(prevDirectionState == WalkingDirection.UP){
 				batch.draw( idleAnimationUp.getKeyFrame(elapsedTime, true), sprite.getX(), sprite.getY(), width, height);
+			}else {
+				batch.draw( idleAnimationUp.getKeyFrame(elapsedTime, true), sprite.getX(), sprite.getY(), width, height);
 			}
 		
 		}else if(directionState == WalkingDirection.RIGHT){
@@ -222,20 +226,39 @@ public class Candidate {
 		
 		prevPosition.set(sprite.getX(), sprite.getY());
 		
-		if( directionState == WalkingDirection.UP && !(directionState == WalkingDirection.LEFT || directionState == WalkingDirection.RIGHT)){
+		/* 
+		 * if( directionState == WalkingDirection.UP && !(directionState ==
+		 * WalkingDirection.LEFT || directionState == WalkingDirection.RIGHT)){
+		 * moveY(delta); }
+		 * 
+		 * 
+		 * if( directionState == WalkingDirection.DOWN && !(directionState ==
+		 * WalkingDirection.LEFT || directionState == WalkingDirection.RIGHT)){
+		 * moveY(-delta); }
+		 * 
+		 * if( directionState == WalkingDirection.RIGHT && !(directionState ==
+		 * WalkingDirection.UP || directionState == WalkingDirection.DOWN)){
+		 * moveX(delta); }
+		 * 
+		 * if( directionState == WalkingDirection.LEFT && !(directionState ==
+		 * WalkingDirection.UP || directionState == WalkingDirection.DOWN)){
+		 * moveX(-delta); }
+		 */
+		
+		if( directionState == WalkingDirection.UP ){
 			moveY(delta);
 		}
 		
 		
-		if( directionState == WalkingDirection.DOWN && !(directionState == WalkingDirection.LEFT || directionState == WalkingDirection.RIGHT)){
+		if( directionState == WalkingDirection.DOWN ){
 			moveY(-delta);
 		}
 		
-		if( directionState == WalkingDirection.RIGHT && !(directionState == WalkingDirection.UP || directionState == WalkingDirection.DOWN)){
+		if( directionState == WalkingDirection.RIGHT ){
 			moveX(delta);
 		}
 		
-		if( directionState == WalkingDirection.LEFT && !(directionState == WalkingDirection.UP || directionState == WalkingDirection.DOWN)){
+		if( directionState == WalkingDirection.LEFT ){
 			moveX(-delta);
 		}
 
@@ -263,73 +286,76 @@ public class Candidate {
 	}
 
 
-	public void setMoveUp(boolean b) {
+	public void setMoveUp(boolean movingUp) {
 		
 		prevDirectionState = directionState;
 		
-		if(b){
+		if(movingUp){
 			directionState = WalkingDirection.UP;	
 		}else{
+			/*TODO: these lines all cause problems.
+			specifically, if you are pressing up, and then before letting go of UP, 
+			and press another direction then the sprite stops moving. Solution? Thinking need to hold
+			multiple direction movements at the same time, instead of just a state from one to the next.
+			*/
+			
 			directionState = WalkingDirection.NONE;
 		}
 		
-		
-		if( moveDown && b) moveDown = false;
-		
-		moveUp = b;
+		//dont understand why I added this.	
+		//if( moveDown && movingUp) moveDown = false;
+		//moveUp = movingUp;
 		
 	}
 
-	public void setMoveDown(boolean b) {
+	public void setMoveDown(boolean movingDown) {
 		
 		prevDirectionState = directionState;
 		
-		if(b){
+		if(movingDown){
 			directionState = WalkingDirection.DOWN;
 
 		}else{
 			directionState = WalkingDirection.NONE;
 		}
 		
-		
-
-		
-		
-		if( moveUp && b) moveUp = false;
-		moveDown = b;
+		//dont understand why I added this.
+		//if( moveUp && movingDown) moveUp = false;
+		//moveDown = movingDown;
 		
 		
 	}
 
-	public void setMoveRight(boolean b) {
+	public void setMoveRight(boolean movingRight) {
 		
 		prevDirectionState = directionState;
 		
-		if(b){
+		if(movingRight){
 			directionState = WalkingDirection.RIGHT;
 		}else{
 			directionState = WalkingDirection.NONE;
 		}
 		
-		
-		if( moveLeft && b) moveLeft = false;
-		moveRight = b;
+		//dont understand why I added this.
+		//if( moveLeft && movingRight) moveLeft = false;
+		//moveRight = movingRight;
 		
 		
 	}
 
-	public void setMoveLeft(boolean b) {
+	public void setMoveLeft(boolean movingLeft) {
 		
 		prevDirectionState = directionState;
 		
-		if(b){
+		if(movingLeft){
 			directionState = WalkingDirection.LEFT;
 		}else{
 			directionState = WalkingDirection.NONE;
 		}
 		
-		if( moveRight && b) moveRight = false;
-		moveLeft = b;
+		//dont understand why I added this.
+		//if( moveRight && movingLeft) moveRight = false;
+		//moveLeft = movingLeft;
 				
 	}
 	

@@ -159,7 +159,8 @@ public class OutsideScreen implements Screen, InputProcessor {
 		
 		//switching map from indoor to outdoor
 		if( mapId.startsWith(Constants.MAP_OUTSIDE_WORLD_PREFIX)){
-		
+			candidate.setSize(.5f, 1f);		
+
 			mapRenderer.resetMap(tileMap, 1f/32f);
 
 			//this means that you've started out in a house, so there is no prevdoor
@@ -178,6 +179,8 @@ public class OutsideScreen implements Screen, InputProcessor {
 			userOutside = true;
 			
 		}else{ //switching from outdoor map to indoor. The scale of indoor render should match the scale of the indoor map
+			candidate.setSize(1f, 2f);		
+
 			mapRenderer.resetMap(tileMap, 1/16f);
 			
 			initCandidatePosition();
@@ -210,6 +213,7 @@ public class OutsideScreen implements Screen, InputProcessor {
 	@Override
 	public void show() {
 		Gdx.input.setInputProcessor(this);
+		Gdx.app.log(this.getClass().getName(), "Setting InputProcessor to " + this.getClass().getName());
 	}
 
 	@Override
@@ -217,7 +221,12 @@ public class OutsideScreen implements Screen, InputProcessor {
 		
 		switch( ElectionGame.GAME_OBJ.state) {
 		
-			case RUNNING:		
+			case RUNNING:	
+				//this is done here, but for battle handler/dialog handler, 
+				//do it in start method
+				//Gdx.input.setInputProcessor(this);
+				//Gdx.app.log(this.getClass().getName(), "Seeting InputProcessor to" + this.getClass().getName());
+
 				renderRunningState(delta);
 				//updateRunning(delta);		
 				break;
@@ -842,11 +851,11 @@ public class OutsideScreen implements Screen, InputProcessor {
 				if( interactedElector.isDebater) {
 					
 					ElectionGame.GAME_OBJ.state = GameState.BATTLE;	
-					Gdx.input.setInputProcessor(ElectionGame.GAME_OBJ.battleHandler);
+					//Gdx.input.setInputProcessor(ElectionGame.GAME_OBJ.battleHandler);
 				} else {
 				
 					ElectionGame.GAME_OBJ.state = GameState.DIALOG;			
-					Gdx.input.setInputProcessor(ElectionGame.GAME_OBJ.dialogHandler);
+					//Gdx.input.setInputProcessor(ElectionGame.GAME_OBJ.dialogHandler);
 					
 				}
 				

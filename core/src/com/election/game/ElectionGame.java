@@ -35,9 +35,6 @@ public class ElectionGame extends Game {
 	public boolean isdebug = false;
 	public static boolean isFullScreen = false;
 	
-	
-	
-	
 	public GameState state = GameState.READY;
 	
 	public BitmapFont dialogFont;
@@ -153,8 +150,6 @@ public class ElectionGame extends Game {
 	}
 	
 	private void createDialogObjects() {
-
-		
 		
 		JsonParser jsonParser = new JsonParser();				
 		dialogHandler = new DialogHandler (jsonParser.parseDialog(Constants.DIALOG_TREES_PATH, Constants.DIALOG_LINES_PATH), dialogFont, selectedDialogFont);

@@ -94,11 +94,8 @@ public class Constants {
 	public static final Object YES = "y";
 	public static final Object NO = "n";
 
+	public static final int DEFAULT_INITIAL_AP = 10;
 
+	public static final Object DIALOG_SEP = "--------------------\n";
 
-
-	
-	
-	
-	
 }

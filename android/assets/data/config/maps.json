@@ -92,6 +92,7 @@
 			"3":{
 				"id":3,
 				"sprite":"mother_npc.png",
+				"isDebater":true,
 				"name":"Muhtar",
 				"attributes": {"influence":2, "intellect":4, "persuasion":4},
 				"houseId":5,
